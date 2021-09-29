@@ -252,8 +252,8 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
                 bat_id = single_bat['BATTERY_ID'])
             
     #CSV_PATH
-    file_name = '{}.csv'.format(today_filename(datetime.now()))
-    full_path_file_name = path.join(t4.workdir, file_name)
+    #file_name = '{}.csv'.format(today_filename(datetime.now()))
+    #full_path_file_name = path.join(t4.workdir, file_name)
     create_dir(t4.workdir)
 
     #LOOP
@@ -281,6 +281,8 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
             print(r)
 
         #CSV
+        file_name = '{}.csv'.format(today_filename(datetime.now()))
+        full_path_file_name = path.join(t4.workdir, file_name)
         write_file(full_path_file_name, record_list)
 
         #ONCE or FOREVER
