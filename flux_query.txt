@@ -1,0 +1,63 @@
+###########
+#12V goowei
+
+from(bucket: "bat_test")
+|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+
+|> filter(fn: (r) => r["_measurement"] == "rpi")
+
+//
+|> filter(fn: (r) => r["_field"] == "BatDecimal")
+//|> filter(fn: (r) => r["_field"] == "BatAddress")
+
+//
+|> filter(fn: (r) => r["_value"] > 5.5)
+//|> filter(fn: (r) => r["_value"] < 3)
+
+//|> group(columns: ["Machine"])
+//|> group(columns: ["BatId"])
+
+//|> drop(columns: ["_start", "_stop", "BatCarrier", "BatValid", "_measurement", "_field", "host", "BatSenKey"])
+
+//DROP host to JOIN curve
+//|> drop(columns: ["_start", "_stop", "_measurement", "host", "BatValid"])
+
+//PER host curve
+//
+|> drop(columns: ["_start", "_stop", "_measurement", "BatValid"])
+
+|> sort(columns: ["_time"], desc:true)
+
+|> yield(name: "min")
+
+
+###########
+#3.7V 18650
+
+from(bucket: "bat_test")
+|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+
+|> filter(fn: (r) => r["_measurement"] == "rpi")
+
+|> filter(fn: (r) => r["_field"] == "BatDecimal")
+//|> filter(fn: (r) => r["_field"] == "BatAddress")
+
+//
+|> filter(fn: (r) => r["_value"] < 5.5)
+//
+|> filter(fn: (r) => r["_value"] > 3)
+
+//|> group(columns: ["Machine"])
+
+//|> drop(columns: ["_start", "_stop", "BatCarrier", "BatValid", "_measurement", "_field", "host", "BatSenKey"])
+
+//DROP host to JOIN curve
+//|> drop(columns: ["_start", "_stop", "_measurement", "host", "BatValid"])
+
+//PER host curve
+//
+|> drop(columns: ["_start", "_stop", "_measurement", "BatValid"])
+
+|> sort(columns: ["_time"], desc:true)
+
+|> yield(name: "min")
