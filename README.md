@@ -1,6 +1,15 @@
 # labjack_switch_board
 labjack
 
+machine:
+ - https://labjack.com/support/software/installers/ljm
+ - $tar -zvxf labjack_ljm_software_2019_07_16_x86_64.tar.gz
+ - $whereis labjack_kipling >>> labjack_kipling: /usr/local/bin/labjack_kipling
+ - https://labjack.com/support/software/examples/ljm/python
+ - #./labjack_ljm_installer.run
+ - #pip3 install labjack-ljm
+ - #pip3 show labjack-ljm
+
 TODO:
  - async mereni ruznych portu
  - otestovat influx schema na rpi_zero fotopastech
