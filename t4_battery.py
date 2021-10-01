@@ -1,8 +1,8 @@
 from labjack import ljm
-import t4_battery_config as t4_conf
 from time import sleep
 from datetime import datetime
-from os import system, path, makedirs
+from os import system, path, makedirs, getcwd, listdir
+import sys
 
 
 #LABJACK
@@ -12,14 +12,27 @@ class T4():
     """
 
     def __init__(self):
-        """connect and open handler"""
+        """
+        connect and open handler
+
+        self.handler = ljm.open(4, 2, "ANY") # dtT4 / ctTCP / id
+        self.handler = ljm.open(4, 2, "192.168.0.101:502") # device_type / connection_type / ip_address:port
+        self.handler = ljm.open(4, 2, "440010664") # serial_number as id
+
+        self.handler = ljm.openS("T4", "UDP", "ANY") #CONNECTIONLESS #recommended way to share a device among multiple processes
+
+        #DEMO when device not available
+        >>>handler = ljm.open(4, 2, -2)
+        >>> ljm.getHandleInfo(handler)
+        (-4, 1, -2, 0, 0, 56)
+        >>> ljm.eReadAddress(handler, 2, ljm.constants.FLOAT32)
+        0.0
+        """
 
         self.handler = ljm.openS(t4_conf.LABJACK_MODEL,
                                  t4_conf.LABJACK_PROTOCOL,
                                  t4_conf.LABJACK_NAME)
-
-        #self.handler = ljm.open(4, 2, "ANY") # dtT4 / ctTCP
-
+        
         self.origin = t4_conf.ORIGIN
         self.workdir = t4_conf.WORKDIR
         
@@ -281,7 +294,9 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
             print(r)
 
         #CSV
-        file_name = '{}.csv'.format(today_filename(datetime.now()))
+        #file_name = '{}.csv'.format(today_filename(datetime.now()))
+        file_name = '{}_{}.csv'.format(today_filename(datetime.now()),
+                                       t4_conf.CONFIG_NAME)
         full_path_file_name = path.join(t4.workdir, file_name)
         write_file(full_path_file_name, record_list)
 
@@ -314,7 +329,7 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
 def write_file(g, data):
     """write data by lines to file"""
 
-    #print('\ndata write to: {}'.format(g))
+    print('\ndata write to: {}'.format(g))
     ggg = open(g, 'a')
 
     for line in data:
@@ -337,13 +352,52 @@ def create_dir(d):
         makedirs(d)
     except OSError as error:
         pass
+
+
+def verify_config():
+    opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
+    args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
+
+    if "-c" in opts or "--config" in opts:
+        config_file = args[0].lower()
+        work_dir = getcwd()
+
+        if '/' in config_file:
+            print('FULL PATH ARGUMENT: {}'.format(config_file))
+            work_dir = path.dirname(config_file)
+            config_file = path.basename(config_file)
+
+        list_dir = listdir(work_dir)
+
+        if config_file in list_dir:
+            print('CONFIG_FILE: {}'.format(config_file))
+        else:
+            raise SystemExit('NOT VALID CONFIG_FILE: {}\nACTUAL WORKDIR: {}\nLIST_DIR:{}'.format(
+                config_file,
+                work_dir,
+                list_dir))
+    else:
+        raise SystemExit('USAGE: {} (-c | --config) <argument>'.format(sys.argv[0]))
+
+    return config_file    
     
 
 if __name__ == "__main__":
-    #LABJACK CONNECTION
-    t4=T4()
+    config_result = verify_config()
 
-    #infinite loop / CRON or SERVICE later + ASYNC
-    run_all_batteries(seconds = t4_conf.DELAY_SECONDS,
-                      minutes = t4_conf.DELAY_MINUTES,
-                      origin = t4.origin)
+    if config_result:
+        config_extension = '.py'
+
+        if config_extension in config_result:
+            module_name = config_result.strip(config_extension)
+
+            #CONFIG
+            t4_conf = __import__(module_name)
+
+            #LABJACK CONNECTION
+            t4=T4()
+
+            #CRON once or TERMINAL/SERVICE loop / test ASYNC
+            run_all_batteries(seconds = t4_conf.DELAY_SECONDS,
+                              minutes = t4_conf.DELAY_MINUTES,
+                              origin = t4.origin)
