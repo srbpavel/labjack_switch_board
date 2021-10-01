@@ -57,8 +57,8 @@ ALL_BATTERIES = [
  'FLAG_INFLUX':True, #False
  'FLAG_DEBUG_INFLUX':True, #False
  'ADDRESS':2, #AIN1:2
- 'RATIO':6.8, #R1 / R2 ~ 6k8 / 10k = 6.8 #https://labjack.com/support/app-notes/signal-voltages-out-range
- 'OFFSET':1.63,
+ 'RATIO':7.8, #R1 / R2 ~ 68k / 10k = 6.8 + 1 = 7.8 #https://labjack.com/support/app-notes/signal-voltages-out-range
+ 'OFFSET':0.0,
  'MEASUREMENT':'rpi', 
  'MACHINE':'rpi_zero_008',
  'BATTERY_ID':'003_20Ah',
@@ -70,8 +70,8 @@ ALL_BATTERIES = [
  'FLAG_INFLUX':True, #False
  'FLAG_DEBUG_INFLUX':True, #False
  'ADDRESS':4, #AIN2:4
- 'RATIO':6.8,
- 'OFFSET':1.77,
+ 'RATIO':7.8,
+ 'OFFSET':0.0,
  'MEASUREMENT':'rpi', 
  'MACHINE':'rpi_zero_007',
  'BATTERY_ID':'002_45Ah',
@@ -83,50 +83,10 @@ ALL_BATTERIES = [
  'FLAG_INFLUX':True, #False
  'FLAG_DEBUG_INFLUX':True, #False
  'ADDRESS':6, #AIN3:6
- 'RATIO':6.8,
- 'OFFSET':1.64,
+ 'RATIO':7.8,
+ 'OFFSET':0.0,
  'MEASUREMENT':'rpi', 
  'MACHINE':'rpi_zero_006',
  'BATTERY_ID':'004_20Ah',
  }
 ]
-
-
-"""
-from(bucket: "bat_test")
-|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
-
-|> filter(fn: (r) => r["_measurement"] == "rpi")
-
-|> filter(fn: (r) => r["_field"] == "BatDecimal")
-//|> filter(fn: (r) => r["_field"] == "BatAddress")
-
-//|> filter(fn: (r) => r["_value"] > 8)
-//|> filter(fn: (r) => r["_value"] < 3)
-
-//|> group(columns: ["Machine"])
-
-//|> drop(columns: ["_start", "_stop", "BatCarrier", "BatValid", "_measurement", "_field", "host", "BatSenKey"])
-|> drop(columns: ["_start", "_stop", "_measurement", "host", "BatValid"])
-
-|> sort(columns: ["_time"], desc:true)
-
-|> yield(name: "min")
-"""
-
-
-"""
-from(bucket: "bat_test")
-|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
-|> filter(fn: (r) => r["_measurement"] == "rpi")
-
-//|> filter(fn: (r) => r["_field"] == "BatDecimal")
-//
-|> filter(fn: (r) => r["_field"] == "BatAddress")
-
-//|> drop(columns: ["_start", "_stop", "BatCarrier", "BatValid", "_measurement", "_field", "host", "BatSenKey"])
-|> drop(columns: ["_start", "_stop"])
-
-|> sort(columns: ["_time"], desc:true)
-|> yield(name: "min")
-"""

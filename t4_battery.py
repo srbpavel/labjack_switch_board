@@ -290,11 +290,11 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
         loop_msg = '\norigin: {} / {}'
         
         if origin == 'CRON': #zjistit jestli je lepsi cron po 5-ti minutach nebo stale pripojeni a sleep/delay?
-            flag_loop = False #nebo jako SERVICE
+            flag_loop = False
             origin_msg = 'once'
             print(loop_msg.format(origin, origin_msg))
             t4.close_handler()
-        elif origin == 'TERMINAL':
+        elif origin in ('TERMINAL', 'SERVICE'):
             origin_msg = 'sleeping'
             print(loop_msg.format(origin, origin_msg))
             #SLEEP

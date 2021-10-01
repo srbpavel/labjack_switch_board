@@ -1,5 +1,5 @@
 ###########
-#12V goowei
+###12V goowei
 
 from(bucket: "bat_test")
 |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
@@ -32,7 +32,7 @@ from(bucket: "bat_test")
 
 
 ###########
-#3.7V 18650
+###3.7V 18650
 
 from(bucket: "bat_test")
 |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
@@ -61,3 +61,99 @@ from(bucket: "bat_test")
 |> sort(columns: ["_time"], desc:true)
 
 |> yield(name: "min")
+
+
+###########
+###EXPLORE DATE RANGE star + stop
+
+from(bucket:"bat_test") 
+
+//
+|> range(start: -6h) 
+//|> range(start: 2021-10-01T06:26:21Z, stop: 2021-10-01T06:26:22Z)
+//
+|> range(start: 2021-10-01T06:34:07Z, stop: 2021-10-01T06:34:08Z)
+
+|> filter(fn: (r) => r["_measurement"] == "rpi")
+//|> filter(fn: (r) => r["Machine"] == "rpi_zero_008")
+|> filter(fn: (r) => r["Machine"] == "rpi_zero_006")
+
+//|> filter(fn: (r) => r["_field"] == "BatDecimal")
+//
+|> filter(fn: (r) => r["_value"] > 13.2)
+
+//|> filter(fn: (r) => "_time" != "2021-10-01T06:26:21.845Z") 
+
+|> drop (columns: ["host"]) 
+|> sort(columns: ["_time"], desc:true)
+
+
+###########
+###DELETE
+
+#pip3 install influxdb-client
+#pip3 show influxdb-client
+
+  Name: influxdb-client
+  Version: 1.21.0
+  Summary: InfluxDB 2.0 Python client library
+  Home-page: https://github.com/influxdata/influxdb-client-python
+  Author: None
+  Author-email: None
+  License: UNKNOWN
+  Location: /usr/local/lib/python3.9/dist-packages
+  Requires: urllib3, setuptools, six, rx, certifi, python-dateutil, pytz
+  Required-by:
+
+$python3 -i import_influx.py
+
+>>> i_bucket="bat_test"
+>>> i_org="foookin_paavel"
+>>> i_measurement='rpi'
+>>> tag_1='Machine'
+>>> value_1='rpi_zero_006'
+>>> del_start='2021-10-01T06:34:07Z'
+>>> del_stop='2021-10-01T06:34:08Z'
+
+
+>>> i_bucket
+'bat_test'
+>>> del_start
+'2021-10-01T06:34:07Z'
+>>> del_stop
+'2021-10-01T06:34:08Z'
+>>> i_measurement
+'rpi'
+>>> tag_1
+'Machine'
+>>> value_1
+'rpi_zero_006'
+
+
+>>> s = 'from(bucket:"{}") |> range(start: {}, stop: {}) |> filter(fn: (r) => r["_measurement"] == "{}") |> filter(fn: (r) => r["{}"] == "{}") |> drop (columns: ["host"]) |> sort(columns: ["_time"], desc:true)'.format(i_bucket, del_start, del_stop, i_measurement, tag_1, value_1)
+>>> s
+'from(bucket:"bat_test") |> range(start: 2021-10-01T06:35:54Z, stop: 2021-10-01T06:35:55Z) |> filter(fn: (r) => r["_measurement"] == "rpi") |> filter(fn: (r) => r["Machine"] == "rpi_zero_006") |> drop (columns: ["host"]) |> sort(columns: ["_time"], desc:true)'
+>>> sss = query_api.query(s)
+>>> sss[0].records[0].values
+{'result': '_result', 'table': 0, '_start': datetime.datetime(2021, 10, 1, 6, 35, 54, tzinfo=tzutc()), '_stop': datetime.datetime(2021, 10, 1, 6, 35, 55, tzinfo=tzutc()), '_time': datetime.datetime(2021, 10, 1, 6, 35, 54, 730000, tzinfo=tzutc()), '_value': 13.9467, 'BatAddress': '6', 'BatCarrier': 'labjack', 'BatId': '004_20Ah', 'BatValid': 'true', 'Machine': 'rpi_zero_006', '_field': 'BatDecimal', '_measurement': 'rpi'}
+
+
+>>> predicate='_measurement="{}" AND {}="{}"'.format(i_measurement, tag_1, value_1)
+>>> predicate
+'_measurement="rpi" AND Machine="rpi_zero_006"'
+
+
+>>> del_start='2021-10-01T06:34:07Z'
+>>> del_stop='2021-10-01T06:34:08Z'
+>>> s = 'from(bucket:"{}") |> range(start: {}, stop: {}) |> filter(fn: (r) => r["_measurement"] == "{}") |> filter(fn: (r) => r["{}"] == "{}") |> drop (columns: ["host"]) |> sort(columns: ["_time"], desc:true)'.format(i_bucket, del_start, del_stop, i_measurement, tag_1, value_1)
+>>> sss = query_api.query(s)
+>>> sss[0].records[0].values
+{'result': '_result', 'table': 0, '_start': datetime.datetime(2021, 10, 1, 6, 34, 7, tzinfo=tzutc()), '_stop': datetime.datetime(2021, 10, 1, 6, 34, 8, tzinfo=tzutc()), '_time': datetime.datetime(2021, 10, 1, 6, 34, 7, 628000, tzinfo=tzutc()), '_value': 13.5467, 'BatAddress': '6', 'BatCarrier': 'labjack', 'BatId': '004_20Ah', 'BatValid': 'true', 'Machine': 'rpi_zero_006', '_field': 'BatDecimal', '_measurement': 'rpi'}
+>>> 
+>>> delete_api.delete(del_start, del_stop, predicate, bucket=i_bucket, org=i_org)
+>>> 
+>>> sss = query_api.query(s)
+>>> sss[0].records[0].values
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+IndexError: list index out of range
