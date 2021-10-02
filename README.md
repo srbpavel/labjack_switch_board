@@ -19,8 +19,10 @@ TODO:
  - zjistit proc me nejede CLI po docker restartu
 
 DONE:
- - git / config / csv + influx 
+ - demo config to test code with no hw available$python3 t4_battery.py --config t4_battery_config_demo.py
  - various config for multi read
+ - git / config / csv + influx 
+ 
 
 
 CRON:
