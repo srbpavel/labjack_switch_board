@@ -22,11 +22,13 @@ class T4():
         self.handler = ljm.openS("T4", "UDP", "ANY") #CONNECTIONLESS #recommended way to share a device among multiple processes
 
         #DEMO when device not available
-        >>>handler = ljm.open(4, 2, -2) #handler = ljm.openS("T4", "UDP", "-2")
-        >>> ljm.getHandleInfo(handler)
+        >>>handler = ljm.openS("T4", "UDP", "-2")
+        >>>handler = ljm.open(4, 6, -2) #https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/constants.py
+        >>>ljm.getHandleInfo(handler)
         (-4, 1, -2, 0, 0, 56)
         >>> ljm.eReadAddress(handler, 2, ljm.constants.FLOAT32)
         0.0
+        >>>ljm.close(handler)
         """
 
         self.handler = ljm.openS(t4_conf.LABJACK_MODEL,
@@ -76,7 +78,7 @@ class Battery():
     def __init__(self,
                  address = None,
                  handler = None,
-                 delay = 1,
+                 delay = 10,
                  ratio = 1,
                  offset = 0,
                  flag_csv = True,

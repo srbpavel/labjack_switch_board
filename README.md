@@ -1,7 +1,7 @@
 # labjack_switch_board
 labjack
 
-machine:
+MACHINE:
  - https://labjack.com/support/software/installers/ljm
  - $tar -zvxf labjack_ljm_software_2019_07_16_x86_64.tar.gz
  - $whereis labjack_kipling >>> labjack_kipling: /usr/local/bin/labjack_kipling
@@ -19,6 +19,7 @@ TODO:
  - zjistit proc me nejede CLI po docker restartu
 
 DONE:
+ - terminal: sleep [forever] / cron: open|close [once]
  - demo config to test code with no hw available$python3 t4_battery.py --config t4_battery_config_demo.py
  - various config for multi read
  - git / config / csv + influx 

@@ -5,8 +5,8 @@ WORKDIR = ''
 ORIGIN = 'TERMINAL' #CRON / TERMINAL / SERVICE / python APP
 
 LABJACK_MODEL = 'T4' # T4 / T7 / ANY
-LABJACK_PROTOCOL = 'TCP' #USB / ANY
-LABJACK_NAME = 'ANY' #ANY
+LABJACK_PROTOCOL = 'TCP' #UDP / USB / ANY
+LABJACK_NAME = 'ANY' #ANY / -2 for DEMO
 
 #SAMPLING
 DELAY_SAMPLE = 0.01
@@ -41,10 +41,10 @@ TEMPLATE_CURL = 'curl -k --request POST "https://{server}:{port}/api/v2/write?or
 #LIST OF DICTS
 ALL_BATTERIES = [
 #FIRST
-{'FLAG':True, #False
- 'FLAG_CSV': True, #False
- 'FLAG_INFLUX':True, #False
- 'FLAG_DEBUG_INFLUX':True, #False
+{'FLAG':True, #False,
+ 'FLAG_CSV': True, #False,
+ 'FLAG_INFLUX':True, #False,
+ 'FLAG_DEBUG_INFLUX':True, #False,
  'ADDRESS':0, #AIN0:0
  'RATIO':1,  #1 ~ no voltage divider
  'OFFSET':0,
@@ -55,9 +55,9 @@ ALL_BATTERIES = [
 
 #SECOND
 {'FLAG':True, #False,
- 'FLAG_CSV': True, #False
- 'FLAG_INFLUX':True, #False
- 'FLAG_DEBUG_INFLUX':True, #False
+ 'FLAG_CSV': True, #False,
+ 'FLAG_INFLUX':True, #False,
+ 'FLAG_DEBUG_INFLUX':True, #False,
  'ADDRESS':2, #AIN1:2
  'RATIO':7.8, #R1 / R2 ~ 68k / 10k = 6.8 + 1 = 7.8 #https://labjack.com/support/app-notes/signal-voltages-out-range
  'OFFSET':0.0,
@@ -68,9 +68,9 @@ ALL_BATTERIES = [
 
 #THIRD
 {'FLAG':True, #False,
- 'FLAG_CSV': True, #False
- 'FLAG_INFLUX':True, #False
- 'FLAG_DEBUG_INFLUX':True, #False
+ 'FLAG_CSV': True, #False,
+ 'FLAG_INFLUX':True, #False,
+ 'FLAG_DEBUG_INFLUX':True, #False,
  'ADDRESS':4, #AIN2:4
  'RATIO':7.8,
  'OFFSET':0.0,
@@ -81,9 +81,9 @@ ALL_BATTERIES = [
 
 #FOURTH
 {'FLAG':True, #False,
- 'FLAG_CSV': True, #False
- 'FLAG_INFLUX':True, #False
- 'FLAG_DEBUG_INFLUX':True, #False
+ 'FLAG_CSV': True, #False,
+ 'FLAG_INFLUX':True, #False,
+ 'FLAG_DEBUG_INFLUX':True, #False,
  'ADDRESS':6, #AIN3:6
  'RATIO':7.8,
  'OFFSET':0.0,
