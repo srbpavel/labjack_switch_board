@@ -19,7 +19,11 @@ class T4():
         self.handler = ljm.open(4, 2, "192.168.0.101:502") # device_type / connection_type / ip_address:port
         self.handler = ljm.open(4, 2, "440010664") # serial_number as id
 
+        >>>ljm.getHandleInfo(self.handler)
+        (4, 3, 440010664, -1062731675, 502, 1040)
+
         self.handler = ljm.openS("T4", "UDP", "ANY") #CONNECTIONLESS #recommended way to share a device among multiple processes
+
 
         #DEMO when device not available
         >>>handler = ljm.openS("T4", "UDP", "-2")
@@ -40,7 +44,9 @@ class T4():
         
         self.info = ljm.getHandleInfo(self.handler)
         self.ip = ljm.numberToIP(self.info[3])
-                    
+
+        self.const_kelvin = 273.15
+        
         print('origin: {} \ninfo: {}\nip:{}\n'.format(self.origin,
                                                       self.info,
                                                       self.ip))
@@ -241,7 +247,7 @@ class Battery():
             ts = self.ts())
 
         if self.flag_debug_influx:
-            print('{}'.format(cmd))
+            print('\n{}'.format(cmd.replace(self.influx_token, '...')))
 
         system(cmd) #test via requests
 
@@ -277,12 +283,17 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
     while flag_loop:
         i += 1
 
-        print('\n{}\ni: {} samples: {} sample_delay: {}s cycle_delay: {}s'.format(
+        temperature_str = ''
+        if t4_conf.FLAG_TEMPERATURE:
+            temperature_str = ' / temperature_device: {} Celsius'.format(get_device_temperature())
+        
+        print('\n{}\ni: {} / samples: {} / sample_delay: {}s / cycle_delay: {}s{}'.format(
             50 * '#',
             i,
             t4_conf.SAMPLES,
             t4_conf.DELAY_SAMPLE,
-            seconds * minutes))
+            seconds * minutes,
+            temperature_str))
 
         #MEASURE
         record_list = []
@@ -407,6 +418,20 @@ def prepare_config():
 
     if config_result and config_extension in config_result:
         return config_result.strip(config_extension)
+
+
+def get_device_temperature():
+    """read device temperature in celsius"""
+
+    if t4_conf.FLAG_TEMPERATURE:
+        temperature_celsius = round(
+            ljm.eReadAddress(t4.handler,
+                             60052,
+                             ljm.constants.FLOAT32)
+            - t4.const_kelvin,
+            1)
+        
+        return temperature_celsius
 
     
 if __name__ == "__main__":
