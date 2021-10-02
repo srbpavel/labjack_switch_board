@@ -22,7 +22,7 @@ class T4():
         self.handler = ljm.openS("T4", "UDP", "ANY") #CONNECTIONLESS #recommended way to share a device among multiple processes
 
         #DEMO when device not available
-        >>>handler = ljm.open(4, 2, -2)
+        >>>handler = ljm.open(4, 2, -2) #handler = ljm.openS("T4", "UDP", "-2")
         >>> ljm.getHandleInfo(handler)
         (-4, 1, -2, 0, 0, 56)
         >>> ljm.eReadAddress(handler, 2, ljm.constants.FLOAT32)
@@ -48,6 +48,7 @@ class T4():
         """close current handler"""
 
         ljm.close(self.handler)
+        print('handler exit')
 
         
 #BATTERY
@@ -120,6 +121,7 @@ class Battery():
         self.influx_template_curl = t4_conf.TEMPLATE_CURL
 
         self.template_csv = t4_conf.TEMPLATE_CSV
+        self.template_csv_header = t4_conf.TEMPLATE_CSV_HEADER
 
         
     def get_ain(self, count = 3):
@@ -254,7 +256,7 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
             d[name] = Battery(
                 address = single_bat['ADDRESS'],
                 handler = t4.handler,
-                delay = 5, #future_use
+                delay = seconds * minutes, #future_use
                 ratio = single_bat['RATIO'],
                 offset = single_bat['OFFSET'],
                 flag_csv = single_bat['FLAG_CSV'],
@@ -265,8 +267,6 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
                 bat_id = single_bat['BATTERY_ID'])
             
     #CSV_PATH
-    #file_name = '{}.csv'.format(today_filename(datetime.now()))
-    #full_path_file_name = path.join(t4.workdir, file_name)
     create_dir(t4.workdir)
 
     #LOOP
@@ -289,43 +289,56 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
             record_list.append(bat_object.record)
 
         #DEBUG all records
-        print('\nmeasurement,host,Machine,BatId,BatAddress,BatCarrier,BatValid,BatDecimal,ts')
+        print('\n{}'.format(bat_object.template_csv_header))
         for r in record_list:
             print(r)
 
         #CSV
-        #file_name = '{}.csv'.format(today_filename(datetime.now()))
         file_name = '{}_{}.csv'.format(today_filename(datetime.now()),
                                        t4_conf.CONFIG_NAME)
+
         full_path_file_name = path.join(t4.workdir, file_name)
         write_file(full_path_file_name, record_list)
 
         #ONCE or FOREVER
-        origin_msg = None
-        loop_msg = '\norigin: {} / {}'
-        
-        if origin == 'CRON': #zjistit jestli je lepsi cron po 5-ti minutach nebo stale pripojeni a sleep/delay?
-            flag_loop = False
-            origin_msg = 'once'
-            print(loop_msg.format(origin, origin_msg))
-            t4.close_handler()
-        elif origin in ('TERMINAL', 'SERVICE'):
-            origin_msg = 'sleeping'
-            print(loop_msg.format(origin, origin_msg))
-            #SLEEP
-            sleep(seconds * minutes)
-            #_
-        elif origin == 'APP':
-            flag_loop = False
-            origin_msg = 'various'
-            print(loop_msg.format(origin, origin_msg))
-            t4.close_handler()
-        else:
-            print('\nloop error')
-            t4.close_handler()
+        origin_result = origin_info(origin, seconds * minutes)
+        flag_loop = origin_result.get('flag_loop', False)
+
+        if origin_result.get('break', False) is True:
             break
 
-        
+
+def origin_info(origin = None, delay = 10):
+    origin_msg = None
+    loop_msg = '\norigin: {} / {}'
+
+    d = {'flag_loop':True,
+         'break':False}
+    
+    if origin == 'CRON':
+        d['flag_loop'] = False
+        origin_msg = 'once'
+        print(loop_msg.format(origin, origin_msg))
+        t4.close_handler()
+    elif origin in ('TERMINAL', 'SERVICE'):
+        origin_msg = 'sleeping'
+        print(loop_msg.format(origin, origin_msg))
+        #SLEEP
+        sleep(delay)
+        #_
+    elif origin == 'APP':
+        d['flag_loop'] = False
+        origin_msg = 'various'
+        print(loop_msg.format(origin, origin_msg))
+        t4.close_handler()
+    else:
+        print('\nloop error')
+        t4.close_handler()
+        d['break'] = True
+
+    return d
+
+
 def write_file(g, data):
     """write data by lines to file"""
 
@@ -355,6 +368,8 @@ def create_dir(d):
 
 
 def verify_config():
+    """read cmd arguments and test config path"""
+    
     opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
     args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
 
@@ -382,22 +397,25 @@ def verify_config():
     return config_file    
     
 
-if __name__ == "__main__":
+def prepare_config():
+    """final config verification"""
+    
     config_result = verify_config()
+    config_extension = '.py'
 
-    if config_result:
-        config_extension = '.py'
+    if config_result and config_extension in config_result:
+        return config_result.strip(config_extension)
 
-        if config_extension in config_result:
-            module_name = config_result.strip(config_extension)
+    
+if __name__ == "__main__":
+    #CONFIG
+    module_name = prepare_config()
+    t4_conf = __import__(module_name)
 
-            #CONFIG
-            t4_conf = __import__(module_name)
+    #LABJACK CONNECTION
+    t4=T4()
 
-            #LABJACK CONNECTION
-            t4=T4()
-
-            #CRON once or TERMINAL/SERVICE loop / test ASYNC
-            run_all_batteries(seconds = t4_conf.DELAY_SECONDS,
-                              minutes = t4_conf.DELAY_MINUTES,
-                              origin = t4.origin)
+    #CRON once or TERMINAL/SERVICE loop
+    run_all_batteries(seconds = t4_conf.DELAY_SECONDS,
+                      minutes = t4_conf.DELAY_MINUTES,
+                      origin = t4.origin)
