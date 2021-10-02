@@ -1,65 +1,11 @@
 from labjack import ljm
+from t4 import T4
 from time import sleep
 from datetime import datetime
 from os import system, path, makedirs, getcwd, listdir
 import sys
 
 
-#LABJACK
-class T4():
-    """
-    labjack t4 device
-    """
-
-    def __init__(self):
-        """
-        connect and open handler
-
-        self.handler = ljm.open(4, 2, "ANY") # dtT4 / ctTCP / id
-        self.handler = ljm.open(4, 2, "192.168.0.101:502") # device_type / connection_type / ip_address:port
-        self.handler = ljm.open(4, 2, "440010664") # serial_number as id
-
-        >>>ljm.getHandleInfo(self.handler)
-        (4, 3, 440010664, -1062731675, 502, 1040)
-
-        self.handler = ljm.openS("T4", "UDP", "ANY") #CONNECTIONLESS #recommended way to share a device among multiple processes
-
-
-        #DEMO when device not available
-        >>>handler = ljm.openS("T4", "UDP", "-2")
-        >>>handler = ljm.open(4, 6, -2) #https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/constants.py
-        >>>ljm.getHandleInfo(handler)
-        (-4, 1, -2, 0, 0, 56)
-        >>> ljm.eReadAddress(handler, 2, ljm.constants.FLOAT32)
-        0.0
-        >>>ljm.close(handler)
-        """
-
-        self.handler = ljm.openS(t4_conf.LABJACK_MODEL,
-                                 t4_conf.LABJACK_PROTOCOL,
-                                 t4_conf.LABJACK_NAME)
-        
-        self.origin = t4_conf.ORIGIN
-        self.workdir = t4_conf.WORKDIR
-        
-        self.info = ljm.getHandleInfo(self.handler)
-        self.ip = ljm.numberToIP(self.info[3])
-
-        self.const_kelvin = 273.15
-        
-        print('origin: {} \ninfo: {}\nip:{}\n'.format(self.origin,
-                                                      self.info,
-                                                      self.ip))
-
-        
-    def close_handler(self):
-        """close current handler"""
-
-        ljm.close(self.handler)
-        print('handler exit')
-
-        
-#BATTERY
 class Battery():
     """
     read battery voltage via 12 built-in ANALOG inputs
@@ -440,7 +386,7 @@ if __name__ == "__main__":
     t4_conf = __import__(module_name)
 
     #LABJACK CONNECTION
-    t4=T4()
+    t4 = T4(config = module_name)
 
     #CRON once or TERMINAL/SERVICE loop
     run_all_batteries(seconds = t4_conf.DELAY_SECONDS,
