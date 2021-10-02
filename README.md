@@ -27,7 +27,7 @@ TODO:
 DONE:
  - terminal: sleep [forever] / cron: open|close [once]
  - demo config to test code with no hw available 
- ```$python3 t4_battery.py --config t4_battery_config_demo.py```
+ `$python3 t4_battery.py --config t4_battery_config_demo.py`
  - various config for multi read
  - git / config / csv + influx 
 
