@@ -1,11 +1,11 @@
-# labjack_switch_board
-labjack
+#labjack_switch_board
+
 
 MACHINE:
  - https://labjack.com/support/software/installers/ljm
  - $tar -zvxf labjack_ljm_software_2019_07_16_x86_64.tar.gz
- - $whereis labjack_kipling >>> labjack_kipling: /usr/local/bin/labjack_kipling
  - #./labjack_ljm_installer.run
+ - $whereis labjack_kipling #labjack_kipling: /usr/local/bin/labjack_kipling
  - 
  - https://labjack.com/support/software/examples/ljm/python
  - #pip3 install labjack-ljm
@@ -33,5 +33,6 @@ DONE:
 
 CRON:
 
+```
 */10 * * * * /usr/bin/python3 /home/conan/soft/labjack_switch_board/t4_battery.py --config /home/conan/soft/labjack_switch_board/t4_battery_config_first.py 1>/home/conan/soft/labjack_switch_board/1_cron_first.log 2>/home/conan/soft/labjack_switch_board/2_cron_first.log
- 
+```
