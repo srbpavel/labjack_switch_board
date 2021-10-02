@@ -1,18 +1,18 @@
-#labjack_switch_board
+**labjack_switch_board [T4](https://labjack.com/products/t4)**
 
 
 MACHINE:
- - https://labjack.com/support/software/installers/ljm
- - $tar -zvxf labjack_ljm_software_2019_07_16_x86_64.tar.gz
- - #./labjack_ljm_installer.run
- - $whereis labjack_kipling #labjack_kipling: /usr/local/bin/labjack_kipling
+ - [LJM installer](https://labjack.com/support/software/installers/ljm)
+ - ```$tar -zvxf labjack_ljm_software_2019_07_16_x86_64.tar.gz```
+ - ```#./labjack_ljm_installer.run```
+ - ```$whereis labjack_kipling``` labjack_kipling: /usr/local/bin/labjack_kipling
  - 
- - https://labjack.com/support/software/examples/ljm/python
- - #pip3 install labjack-ljm
- - #pip3 show labjack-ljm
+ - [LJM python](https://labjack.com/support/software/examples/ljm/python)
+ - ```#pip3 install labjack-ljm```
+ - ```#pip3 show labjack-ljm```
  -
- - https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/ljm.py
- - https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/constants.py
+ - [labjack/ljm](https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/ljm.py)
+ - [labjack/constants](https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/constants.py)
 
 
 TODO:
@@ -26,7 +26,7 @@ TODO:
 
 DONE:
  - terminal: sleep [forever] / cron: open|close [once]
- - demo config to test code with no hw available  $python3 t4_battery.py --config t4_battery_config_demo.py
+ - demo config to test code with no hw available ```$python3 t4_battery.py --config t4_battery_config_demo.py```
  - various config for multi read
  - git / config / csv + influx 
 
