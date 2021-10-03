@@ -2,8 +2,8 @@ from labjack import ljm
 from t4 import T4
 from time import sleep
 from datetime import datetime
-from os import system, path, makedirs, getcwd, listdir
-import sys
+from os import system, path 
+import util
 
 
 class Battery():
@@ -91,6 +91,7 @@ class Battery():
             sleep(self.delay_samples)
 
         self.last_measure_time = datetime.now()
+        self.last_measure_time_ts = util.ts(self.last_measure_time)
 
         values.sort()
         values_min = min(values)
@@ -101,7 +102,7 @@ class Battery():
                                                           self.offset))
         
         print('{} / {} // min: {} max: {} /// diff: {}\n{}'.format(self.last_measure_time,
-                                                                   self.ts(),
+                                                                   self.last_measure_time_ts,
                                                                    values_min,
                                                                    values_max,
                                                                    round(values_max - values_min, 4),
@@ -110,12 +111,6 @@ class Battery():
         return sum(values) / count 
 
 
-    def ts(self):
-        """datetime to timestamp [ms format]"""
-        
-        return int(datetime.timestamp(self.last_measure_time) * 1000)
-
-    
     def measure(self):
         """
         - multiply measurement with voltage divider constant plus offset
@@ -162,7 +157,8 @@ class Battery():
             bat_decimal = self.final,
             bat_address = self.address,
 
-            ts = self.ts())
+            ts = self.last_measure_time_ts
+        )
 
         #DEBUG single record
         #print('\n{}\n'.format(self.record))
@@ -190,7 +186,8 @@ class Battery():
             bat_address = self.address, #TAG
             bat_decimal = self.final, #FIELD
 
-            ts = self.ts())
+            ts = self.last_measure_time_ts
+        )
 
         if self.flag_debug_influx:
             print('\n{}'.format(cmd.replace(self.influx_token, '...')))
@@ -221,7 +218,7 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
                 bat_id = single_bat['BATTERY_ID'])
             
     #CSV_PATH
-    create_dir(t4.workdir)
+    util.create_dir(t4.workdir)
 
     #LOOP
     flag_loop = True
@@ -231,7 +228,7 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
 
         temperature_str = ''
         if t4_conf.FLAG_TEMPERATURE:
-            temperature_str = ' / temperature_device: {} Celsius'.format(get_device_temperature())
+            temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature())
         
         print('\n{}\ni: {} / samples: {} / sample_delay: {}s / cycle_delay: {}s{}'.format(
             50 * '#',
@@ -244,7 +241,7 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
         #MEASURE
         record_list = []
         for bat_name, bat_object in d.items():
-            bat_object.measure()
+            bat_object.measure() # + INFLUX WRITE
             record_list.append(bat_object.record)
 
         #DEBUG all records
@@ -253,136 +250,26 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
             print(r)
 
         #CSV
-        file_name = '{}_{}.csv'.format(today_filename(datetime.now()),
+        file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
                                        t4_conf.CONFIG_NAME)
 
         full_path_file_name = path.join(t4.workdir, file_name)
-        write_file(full_path_file_name, record_list)
+        util.write_file(full_path_file_name, record_list)
 
         #ONCE or FOREVER
-        origin_result = origin_info(origin, seconds * minutes)
+        origin_result = util.origin_info(origin,
+                                         seconds * minutes,
+                                         t4_obj = t4)
+        
         flag_loop = origin_result.get('flag_loop', False)
 
         if origin_result.get('break', False) is True:
             break
 
 
-def origin_info(origin = None, delay = 10):
-    origin_msg = None
-    loop_msg = '\norigin: {} / {}'
-
-    d = {'flag_loop':True,
-         'break':False}
-    
-    if origin == 'CRON':
-        d['flag_loop'] = False
-        origin_msg = 'once'
-        print(loop_msg.format(origin, origin_msg))
-        t4.close_handler()
-    elif origin in ('TERMINAL', 'SERVICE'):
-        origin_msg = 'sleeping'
-        print(loop_msg.format(origin, origin_msg))
-        #SLEEP
-        sleep(delay)
-        #_
-    elif origin == 'APP':
-        d['flag_loop'] = False
-        origin_msg = 'various'
-        print(loop_msg.format(origin, origin_msg))
-        t4.close_handler()
-    else:
-        print('\nloop error')
-        t4.close_handler()
-        d['break'] = True
-
-    return d
-
-
-def write_file(g, data):
-    """write data by lines to file"""
-
-    print('\ndata write to: {}'.format(g))
-    ggg = open(g, 'a')
-
-    for line in data:
-        ggg.write('{}\n'.format(line))
-
-    ggg.close()
-
-
-def today_filename(date):
-    """year_month_day from datetime.now()"""
-    
-    today = '{}_{:02d}_{:02d}'.format(date.year, date.month, date.day)
-    return today
-
-
-def create_dir(d):
-    """create dir for full_path"""
-    
-    try:
-        makedirs(d)
-    except OSError as error:
-        pass
-
-
-def verify_config():
-    """read cmd arguments and test config path"""
-    
-    opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
-    args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
-
-    if "-c" in opts or "--config" in opts:
-        config_file = args[0].lower()
-        work_dir = getcwd()
-
-        if '/' in config_file:
-            print('FULL PATH ARGUMENT: {}'.format(config_file))
-            work_dir = path.dirname(config_file)
-            config_file = path.basename(config_file)
-
-        list_dir = listdir(work_dir)
-
-        if config_file in list_dir:
-            print('CONFIG_FILE: {}'.format(config_file))
-        else:
-            raise SystemExit('NOT VALID CONFIG_FILE: {}\nACTUAL WORKDIR: {}\nLIST_DIR:{}'.format(
-                config_file,
-                work_dir,
-                list_dir))
-    else:
-        raise SystemExit('USAGE: {} (-c | --config) <argument>'.format(sys.argv[0]))
-
-    return config_file    
-    
-
-def prepare_config():
-    """final config verification"""
-    
-    config_result = verify_config()
-    config_extension = '.py'
-
-    if config_result and config_extension in config_result:
-        return config_result.strip(config_extension)
-
-
-def get_device_temperature():
-    """read device temperature in celsius"""
-
-    if t4_conf.FLAG_TEMPERATURE:
-        temperature_celsius = round(
-            ljm.eReadAddress(t4.handler,
-                             60052,
-                             ljm.constants.FLOAT32)
-            - t4.const_kelvin,
-            1)
-        
-        return temperature_celsius
-
-    
 if __name__ == "__main__":
     #CONFIG
-    module_name = prepare_config()
+    module_name = util.prepare_config()
     t4_conf = __import__(module_name)
 
     #LABJACK CONNECTION

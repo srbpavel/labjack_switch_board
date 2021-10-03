@@ -203,13 +203,14 @@ class DS():
 
     def ds_temperature(self):
         self.dataRX = ljm.eReadNameByteArray(t4.handler, "ONEWIRE_DATA_RX", self.numRX)
-        self.temperature = (int(self.dataRX[0]) + (int(self.dataRX[1])<<8))
-
-        if self.temperature == 0x0550: #85C
+        self.temperature_raw = (int(self.dataRX[0]) + (int(self.dataRX[1])<<8))
+        self.temperature_binary = bin(self.temperature_raw)
+        
+        if self.temperature_raw == 0x0550: #85C
             print("The DS1822 power on reset value is 85 C.")
             print("Read again get the real temperature.")
         else:
-            self.temperature = self.temperature * 0.0625
+            self.temperature_decimal = self.temperature_raw * 0.0625
             ###print("Temperature = %f C" % self.temperature);
 
 
@@ -226,8 +227,12 @@ class DS():
         self.ds_read_bin_temp()
         self.ds_temperature()
 
-        print('{} / {}'.format(self.temperature,
-                               datetime.now()))
+        print('{} / {} / {} = {} + {} / {}'.format(self.temperature_decimal,
+                                                   self.temperature_binary,
+                                                   self.temperature_raw,
+                                                   self.dataRX[0],
+                                                   self.dataRX[1]<<8,
+                                                   datetime.now()))
 
         #CSV BACKUP
         if self.flag_csv:
@@ -300,7 +305,7 @@ class DS():
             ds_id = self.rom,
             ds_carrier = self.influx_ds_carrier,
             ds_valid = self.influx_ds_valid,
-            ds_decimal = self.temperature,
+            ds_decimal = self.temperature_decimal,
             ds_pin = self.dqPin,
 
             ts = self.ts())
@@ -351,7 +356,7 @@ class DS():
             ds_carrier = self.influx_ds_carrier, #TAG
             ds_valid = self.influx_ds_valid, #TAG
             ds_pin = self.dqPin, #TAG
-            ds_decimal = self.temperature, #FIELD
+            ds_decimal = self.temperature_decimal, #FIELD
 
             ts = self.ts())
 

@@ -56,3 +56,18 @@ class T4():
 
         ljm.close(self.handler)
         print('handler exit')
+
+
+    def get_device_temperature(self):
+        """read device temperature in celsius"""
+
+        temperature_celsius = round(
+            ljm.eReadAddress(self.handler,
+                             60052,
+                             ljm.constants.FLOAT32)
+            - self.const_kelvin,
+            1)
+
+        print('T4 temperature: {}'.format(temperature_celsius))
+        
+        return temperature_celsius
