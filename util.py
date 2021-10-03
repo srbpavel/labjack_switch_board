@@ -75,7 +75,7 @@ def verify_config():
     
 
 def prepare_config():
-    """final config verification"""
+    """load config"""
     
     config_result = verify_config()
     config_extension = '.py'
@@ -87,7 +87,6 @@ def prepare_config():
 def origin_info(origin = None,
                 delay = 10,
                 t4_obj = None):
-    
     """parse origin for program flow"""
 
     origin_msg = None

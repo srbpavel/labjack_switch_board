@@ -31,7 +31,7 @@ class T4():
         >>>ljm.close(handler)
         """
 
-        print('t4')
+        #print('t4')
         config = __import__(config)
         
         self.handler = ljm.openS(config.LABJACK_MODEL,
