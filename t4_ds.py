@@ -1,49 +1,10 @@
 from labjack import ljm
 from t4 import T4
 import sys
-from os import system, path, makedirs, getcwd, listdir
+from os import system, path
 from time import sleep 
 from datetime import datetime
-
-
-def verify_config():
-    """read cmd arguments and test config path"""
-    
-    opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
-    args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
-
-    if "-c" in opts or "--config" in opts:
-        config_file = args[0].lower()
-        work_dir = getcwd()
-
-        if '/' in config_file:
-            print('FULL PATH ARGUMENT: {}'.format(config_file))
-            work_dir = path.dirname(config_file)
-            config_file = path.basename(config_file)
-
-        list_dir = listdir(work_dir)
-
-        if config_file in list_dir:
-            print('CONFIG_FILE: {}'.format(config_file))
-        else:
-            raise SystemExit('NOT VALID CONFIG_FILE: {}\nACTUAL WORKDIR: {}\nLIST_DIR:{}'.format(
-                config_file,
-                work_dir,
-                list_dir))
-    else:
-        raise SystemExit('USAGE: {} (-c | --config) <argument>'.format(sys.argv[0]))
-
-    return config_file    
-    
-
-def prepare_config():
-    """final config verification"""
-    
-    config_result = verify_config()
-    config_extension = '.py'
-
-    if config_result and config_extension in config_result:
-        return config_result.strip(config_extension)
+import util
 
 
 class DS():
@@ -51,9 +12,11 @@ class DS():
     
     # Configure 1-Wire pins and options.
     def __init__(self):
-        self.const_12bit = 0.0625
+        self.const_12bit_resolution = 0.0625
         self.convert_delay = 0.5 #sec
 
+        self.record_list = []
+        
         self.flag_csv = t4_conf.FLAG_CSV
         self.flag_influx = t4_conf.FLAG_INFLUX
         self.flag_debug_influx = t4_conf.FLAG_DEBUG_INFLUX
@@ -217,12 +180,13 @@ class DS():
     def temp_formula(self):
         """(int(dataRX[0]) + (int(dataRX[1])<<8))*0.0625"""
     
-        return (int(self.dataRX[0]) + (int(self.dataRX[1])<<8)) * self.const_12bit
+        return (int(self.dataRX[0]) + (int(self.dataRX[1])<<8)) * self.const_12bit_resolution
 
 
     def measure(self):
         self.last_measure_time = datetime.now()
-
+        self.last_measure_time_ts = util.ts(self.last_measure_time)
+        
         self.ds_setup_bin_temp()
         self.ds_read_bin_temp()
         self.ds_temperature()
@@ -249,39 +213,6 @@ class DS():
              sleep(t4_conf.DELAY_MINUTES * t4_conf.DELAY_SECONDS)
 
 
-    def ts(self):
-        """datetime to timestamp [ms format]"""
-        
-        return int(datetime.timestamp(self.last_measure_time) * 1000)
-
-
-    def create_dir(self, d):
-        """create dir for full_path"""
-    
-        try:
-            makedirs(d)
-        except OSError as error:
-            pass
-
-
-    def today_filename(self, date):
-        """year_month_day from datetime.now()"""
-    
-        today = '{}_{:02d}_{:02d}'.format(date.year, date.month, date.day)
-        return today
-
-
-    def write_file(self, g, data):
-        """write data by lines to file"""
-
-        print('\ndata write to: {}'.format(g))
-        ggg = open(g, 'a')
-        
-        ggg.write('{}\n'.format(data))
-
-        ggg.close()
-
-        
     def write_csv(self):
         """csv backup
 
@@ -297,10 +228,10 @@ class DS():
         """
 
        
-        self.record = self.template_csv.format(
+        self.record_list.append(self.template_csv.format(
             measurement = self.influx_measurement,
             host = self.influx_host,
-
+            
             machine = self.influx_machine_id,
             ds_id = self.rom,
             ds_carrier = self.influx_ds_carrier,
@@ -308,21 +239,23 @@ class DS():
             ds_decimal = self.temperature_decimal,
             ds_pin = self.dqPin,
 
-            ts = self.ts())
-
+            ts = self.last_measure_time_ts
+        ))
+        
         #CSV_PATH
-        self.create_dir(t4.workdir)
+        util.create_dir(t4.workdir)
 
         #CSV
-        file_name = '{}_{}.csv'.format(self.today_filename(datetime.now()),
+        file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
                                        t4_conf.CONFIG_NAME)
         
         full_path_file_name = path.join(t4.workdir, file_name)
-        self.write_file(full_path_file_name, self.record)
+        #util.write_file(full_path_file_name, self.record)
+        util.write_file(full_path_file_name, self.record_list)
         
         #DEBUG single record
         print('\n{}\n{}\n'.format(self.template_csv_header,
-                                  self.record))
+                                  self.record_list))
 
         
     def write_influx(self):
@@ -358,7 +291,8 @@ class DS():
             ds_pin = self.dqPin, #TAG
             ds_decimal = self.temperature_decimal, #FIELD
 
-            ts = self.ts())
+            ts = self.last_measure_time_ts
+        )
 
         if self.flag_debug_influx:
             print('\n{}'.format(cmd.replace(self.influx_token, '...')))
@@ -368,23 +302,22 @@ class DS():
 
         
 if __name__ == "__main__":
-    """$python3 -i 1_wire.py --config t4_ds_config.py"""
+    """$python3 -i t4_ds.py --config t4_ds_config.py"""
 
     #CONFIG
-    module_name = prepare_config()
+    module_name = util.prepare_config()
     t4_conf = __import__(module_name)
 
     #LABJACK CONNECTION
     t4 = T4(config = module_name)
 
-    info = ljm.getHandleInfo(t4.handler)
-    deviceType = info[0]
-
-    if deviceType == ljm.constants.dtT4:
-        # Configure EIO0 as digital I/O.
-        print('set T4 DIO')
-        ljm.eWriteName(t4.handler, "DIO_INHIBIT", 0xFFEFF)
-        ljm.eWriteName(t4.handler, "DIO_ANALOG_ENABLE", 0x00000)
+    #info = ljm.getHandleInfo(t4.handler)
+    #deviceType = info[0]
+    #if deviceType == ljm.constants.dtT4:
+    # Configure EIO0 as digital I/O.
+    print('set T4 DIO')
+    ljm.eWriteName(t4.handler, "DIO_INHIBIT", 0xFFEFF)
+    ljm.eWriteName(t4.handler, "DIO_ANALOG_ENABLE", 0x00000)
 
     ds = DS()
     ds.ds_search()

@@ -8,8 +8,8 @@ def ts(time_and_date):
     """datetime to timestamp [ms format]"""
 
     ts = int(datetime.timestamp(time_and_date) * 1000)
-    print('UTIL time_and_date: {} -> {}'.format(time_and_date,
-                                                ts))
+    #print('UTIL time_and_date: {} -> {}'.format(time_and_date,
+    #                                            ts))
     
     return ts
 
@@ -17,7 +17,7 @@ def ts(time_and_date):
 def write_file(g, data):
     """write data=[] by lines to file"""
 
-    print('\nUTIL data write to: {}'.format(g))
+    #print('\nUTIL data write to: {}'.format(g))
 
     ggg = open(g, 'a')
 
@@ -34,7 +34,7 @@ def today_filename(time_and_date):
                                       time_and_date.month,
                                       time_and_date.day)
     
-    print('\nUTIL today: {}'.format(today))
+    #print('\nUTIL today: {}'.format(today))
     
     return today
 
@@ -42,7 +42,7 @@ def today_filename(time_and_date):
 def create_dir(directory):
     """create dir for full_path"""
 
-    print('\nUTIL create_dir: {}'.format(directory))
+    #print('\nUTIL create_dir: {}'.format(directory))
     
     try:
         makedirs(directory)
@@ -61,14 +61,14 @@ def verify_config():
         work_dir = getcwd()
 
         if '/' in config_file:
-            print('UTIL >>> FULL PATH ARGUMENT: {}'.format(config_file))
+            print('FULL PATH ARGUMENT: {}'.format(config_file))
             work_dir = path.dirname(config_file)
             config_file = path.basename(config_file)
 
         list_dir = listdir(work_dir)
 
         if config_file in list_dir:
-            print('UTIL >>> CONFIG_FILE: {}'.format(config_file))
+            print('CONFIG_FILE: {}'.format(config_file))
         else:
             raise SystemExit('NOT VALID CONFIG_FILE: {}\nACTUAL WORKDIR: {}\nLIST_DIR:{}'.format(
                 config_file,
@@ -123,6 +123,6 @@ def origin_info(origin = None,
         t4_obj.close_handler()
         d['break'] = True
 
-    print('UTIL {}'.format(d))
+    #print('UTIL {}'.format(d))
         
     return d
