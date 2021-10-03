@@ -1,3 +1,4 @@
+#FORKED https://github.com/labjack/labjack-ljm-python/blob/master/Examples/More/1-Wire/1_wire.py
 from labjack import ljm
 from t4 import T4
 import sys
@@ -83,7 +84,7 @@ class DS():
         aValues = [function, numTX, numRX]
 
         ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
-        ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
+        ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1) #perform one_wire transaction
         sleep(1)
 
 
@@ -93,11 +94,11 @@ class DS():
         aNames = ["ONEWIRE_SEARCH_RESULT_H", "ONEWIRE_SEARCH_RESULT_L", "ONEWIRE_ROM_BRANCHS_FOUND_H", "ONEWIRE_ROM_BRANCHS_FOUND_L"]
         aValues = ljm.eReadNames(t4.handler, len(aNames), aNames)
 
-        romH = aValues[0] #"ONEWIRE_SEARCH_RESULT_H"
-        romL = aValues[1] #"ONEWIRE_SEARCH_RESULT_L"
+        romH = aValues[0] #ONEWIRE_SEARCH_RESULT_H
+        romL = aValues[1] #ONEWIRE_SEARCH_RESULT_L
         rom = (int(romH)<<8) + int(romL)
-        pathH = aValues[2] #"ONEWIRE_ROM_BRANCHS_FOUND_H"
-        pathL = aValues[3] #"ONEWIRE_ROM_BRANCHS_FOUND_L"
+        pathH = aValues[2] #ONEWIRE_ROM_BRANCHS_FOUND_H
+        pathL = aValues[3] #ONEWIRE_ROM_BRANCHS_FOUND_L
         path = (int(pathH)<<8) + int(pathL)
 
         #dict x object ?
@@ -130,9 +131,9 @@ class DS():
         i += 1
         print('[{}]'.format(i))
         result_values = self.search_path()
-        branch_found = result_values[3]
+        branch_found = result_values[3] #ONEWIRE_ROM_BRANCHS_FOUND_L
     
-        if branch_found != 0 and branch_found != branch:
+        if branch_found not in (0, branch):
             #SET NEW BRANCH
             self.set_onewire_path_l(branch_found)
 
