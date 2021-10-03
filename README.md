@@ -13,10 +13,11 @@ MACHINE:
  -
  - [labjack/ljm](https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/ljm.py)
  - [labjack/constants](https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/constants.py)
+ - [one_wire](https://github.com/labjack/labjack-ljm-python/blob/master/Examples/More/1-Wire/1_wire.py)
 
 
 TODO:
- - dodelat taky jako service + sig_term pro ljm.close(handler) at to nedelam na hulvata
+ - dodelat taky jako service + sig_term pro ljm.close(handler) at to nekilluju na hulvata
  - async mereni ruznych portu
  - otestovat influx schema na rpi_zero fotopastech
  - zaroven zapisovat battery 12v/5v data z rpi camera vystupu do jinyho measurementu (ale asi jiny repo?)
