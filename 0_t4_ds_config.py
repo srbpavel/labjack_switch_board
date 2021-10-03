@@ -12,9 +12,6 @@ LABJACK_NAME = 'srbp_t4' #ANY
 
 FLAG_TEMPERATURE = True #False
 
-#DS
-DQ_PIN = 8 #EIO0 -> DIO8 -> 8
-
 #SAMPLING
 DELAY_SAMPLE = 0.01
 SAMPLES = 10
@@ -34,73 +31,38 @@ INFLUX_PRECISION = 'ms'
 INFLUX_DEFAULT_CARRIER = 'labjack'
 INFLUX_DEFAULT_VALID_STATUS = 'true'
 
-HOST = 'ruth'
+HOST = ''
 
-TEMPLATE_CSV_HEADER = 'measurement,host,Machine,BatId,BatAddress,BatCarrier,BatValid,BatDecimal,ts'
-TEMPLATE_CSV = '{measurement},{host},{machine},{bat_id},{bat_address},{bat_carrier},{bat_valid},{bat_decimal},{ts}'
-#rpi,spongebob,rpi_zero_006,004_20Ah,6,labjack,true,13.0388,1632651760595"
+TEMPLATE_CSV_HEADER = 'measurement,host,Machine,DsId,DsPin,DsCarrier,DsValid,DsDecimal,ts'
+TEMPLATE_CSV = '{measurement},{host},{machine},{ds_id},{ds_pin},{ds_carrier},{ds_valid},{ds_decimal},{ts}'
+#dallas,ruth,hrnecek_s_ledem,841704586024,8,labjack,true,21.125,1633248964923
 
-#TAG: host / Machine / BatId / BatAddress / BatCarrier / BatValid
-#FIELD: BatDecimal
+#TAG: host / Machine / DsId / DsPin / DsCarrier / DsValid
+#FIELD: DsDecimal
 
-TEMPLATE_CURL = 'curl -k --request POST "https://{server}:{port}/api/v2/write?org={org}&bucket={bucket}&precision={precision}" --header "Authorization: Token {token}" --data-raw "{measurement},host={host},Machine={machine_id},BatId={bat_id},BatCarrier={bat_carrier},BatValid={bat_valid},BatAddress={bat_address} BatDecimal={bat_decimal} {ts}"'
+TEMPLATE_CURL = 'curl -k --request POST "https://{server}:{port}/api/v2/write?org={org}&bucket={bucket}&precision={precision}" --header "Authorization: Token {token}" --data-raw "{measurement},host={host},Machine={machine_id},DsId={ds_id},DsCarrier={ds_carrier},DsValid={ds_valid},DsPin={ds_pin} DsDecimal={ds_decimal} {ts}"'
 
-#curl -k --request POST "https://ruth:8086/api/v2/write?org=foookin_paavel&bucket=bat_test&precision=ms" --header "Authorization: Token ..." --data-raw "rpi,host=spongebob,Machine=rpi_zero_006,BatId=004_20Ah,BatCarrier=labjack,BatValid=true,BatAddress=6 BatDecimal=13.0282 1632832989983"
+#curl -k --request POST "https://ruth:8086/api/v2/write?org=foookin_paavel&bucket=ds_test&precision=ms" --header "Authorization: Token ..." --data-raw "dallas,host=ruth,Machine=hrnecek_s_ledem,DsId=841704586024,DsCarrier=labjack,DsValid=true,DsPin=8 DsDecimal=21.125 1633248964923"
 
 #LIST OF DICTS
-#ALL_BATTERIES = [
-"""
-#FIRST
-{'FLAG':True, #False,
- 'FLAG_CSV': True, #False,
- 'FLAG_INFLUX':True, #False,
- 'FLAG_DEBUG_INFLUX':True, #False,
- 'ADDRESS':0, #AIN0:0
- 'RATIO':1, #1 ~ no voltage divider
- 'OFFSET':0,
- 'MEASUREMENT':'rpi', 
- 'MACHINE':'single_cell_18650',
- 'BATTERY_ID':'037_3000mAh',
- },
-"""
-
-ALL_BATTERIES = [    
-#SECOND
-{'FLAG':True, #False,
- 'FLAG_CSV': True, #False,
- 'FLAG_INFLUX':True, #False,
- 'FLAG_DEBUG_INFLUX':True, #False,
- 'ADDRESS':2, #AIN1:2
- 'RATIO':7.8, #6.8, #R1 / R2 ~ 68k / 10k = 6.8 + 1 = 7.8 #https://labjack.com/support/app-notes/signal-voltages-out-range
- 'OFFSET':0.02 - 0.02, #-0.014,
- 'MEASUREMENT':'rpi', 
- 'MACHINE':'rpi_zero_008',
- 'BATTERY_ID':'003_20Ah',
- },
-
-#THIRD
-{'FLAG':True, #False,
- 'FLAG_CSV': True, #False,
- 'FLAG_INFLUX':True, #False,
- 'FLAG_DEBUG_INFLUX':True, #False,
- 'ADDRESS':4, #AIN2:4
- 'RATIO':7.8, #6.8,
- 'OFFSET':0.04 - 0.01, #1.77,
- 'MEASUREMENT':'rpi', 
- 'MACHINE':'rpi_zero_007',
- 'BATTERY_ID':'002_45Ah',
- },
-
-#FOURTH
-{'FLAG':True, #False,
- 'FLAG_CSV': True, #False,
- 'FLAG_INFLUX':True, #False,
- 'FLAG_DEBUG_INFLUX':True, #False,
- 'ADDRESS':6, #AIN3:6
- 'RATIO':7.8, #6.8,
- 'OFFSET':0.09 - 0.0, #1.64,
- 'MEASUREMENT':'rpi', 
- 'MACHINE':'rpi_zero_006',
- 'BATTERY_ID':'004_20Ah',
- }
+ALL_DS = [
+    #DS_1
+    {'FLAG':True, #False,
+     'FLAG_CSV': True, #False,
+     'FLAG_INFLUX':True, #False,
+     'FLAG_DEBUG_INFLUX':True, #False,
+     'DQ_PIN':8, #EIO0 -> DIO8 -> 8
+     'MEASUREMENT':'dallas',
+     'MACHINE':'hrnecek_s_ledem',
+    },
+    
+    #DS_2
+    {'FLAG':False,
+     'FLAG_CSV': True, #False,
+     'FLAG_INFLUX':True, #False,
+     'FLAG_DEBUG_INFLUX':True, #False,
+     'DQ_PIN':14, #EIO6 -> DIO14 -> 14
+     'MEASUREMENT':'dallas',
+     'MACHINE':'mrazak',
+    }
 ]

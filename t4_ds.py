@@ -11,16 +11,29 @@ class DS():
     """one_wire max_integrated ds temperature sensor"""
     
     # Configure 1-Wire pins and options.
-    def __init__(self):
+    def __init__(self,
+                 pin = None,
+                 handler = None,
+                 delay = 10,
+                 flag_csv = True,
+                 flag_influx = False,
+                 flag_debug_influx = False,
+                 measurement = None,
+                 machine_id = None):
+        """create ds instance as per config"""
+
+        self.pin = pin
+        self.handler = handler
+        
         self.const_12bit_resolution = 0.0625
         self.convert_delay = 0.5 #sec
 
-        self.record_list = []
+        #self.record_list = []
         
-        self.flag_csv = t4_conf.FLAG_CSV
-        self.flag_influx = t4_conf.FLAG_INFLUX
-        self.flag_debug_influx = t4_conf.FLAG_DEBUG_INFLUX
-
+        self.flag_csv = flag_csv
+        self.flag_influx = flag_influx
+        self.flag_debug_influx = flag_debug_influx
+        
         self.influx_server = t4_conf.INFLUX_SERVER
         self.influx_port = t4_conf.INFLUX_PORT
 
@@ -30,9 +43,9 @@ class DS():
         self.influx_precision = t4_conf.INFLUX_PRECISION
         self.influx_host = t4_conf.HOST
 
-        self.influx_measurement = t4_conf.MEASUREMENT
-        self.influx_machine_id = t4_conf.MACHINE
-
+        self.influx_measurement = measurement
+        self.influx_machine_id = machine_id
+        
         self.influx_ds_carrier = t4_conf.INFLUX_DEFAULT_CARRIER
         self.influx_ds_valid = t4_conf.INFLUX_DEFAULT_VALID_STATUS
         
@@ -40,11 +53,11 @@ class DS():
 
         self.template_csv = t4_conf.TEMPLATE_CSV
         self.template_csv_header = t4_conf.TEMPLATE_CSV_HEADER
-        
-        self.dqPin = t4_conf.DQ_PIN  # EIO0 -> DIO8 -> 8
+
+        self.dqPin = pin #t4_conf.DQ_PIN  # EIO0 -> DIO8 -> 8
         self.dpuPin = 0  # Not used
         self.options = 0  # bit 2 = 0 (DPU disabled), bit 3 = 0 (DPU polarity low, ignored)
-
+        
         aNames = ["ONEWIRE_DQ_DIONUM",
                   "ONEWIRE_DPU_DIONUM",
                   "ONEWIRE_OPTIONS"]
@@ -93,7 +106,7 @@ class DS():
         self.pathL = aValues[3]
         self.path = (int(self.pathH)<<8) + int(self.pathL)
 
-        print("  ROM ID = %d" % self.rom)
+        print("\n  ROM ID = %d" % self.rom)
         print("  Path = %d" % self.path)
 
 
@@ -191,7 +204,7 @@ class DS():
         self.ds_read_bin_temp()
         self.ds_temperature()
 
-        print('{} / {} / {} = {} + {} / {}'.format(self.temperature_decimal,
+        print('\n{} / {} / {} = {} + {} / {}'.format(self.temperature_decimal,
                                                    self.temperature_binary,
                                                    self.temperature_raw,
                                                    self.dataRX[0],
@@ -215,20 +228,13 @@ class DS():
 
     def write_csv(self):
         """csv backup
-
-        TAG: host / Machine / BatId / BatAddress / BatCarrier / BatValid
-        FIELD: BatDecimal
-
-        measurement,host,Machine,BatId,BatAddress,BatCarrier,BatValid,BatDecimal,ts
-        rpi,spongebob,rpi_zero_006,004_20Ah,6,labjack,true,13.0388,1632651760595"
-
         TEMPLATE_CSV_HEADER = 'measurement,host,Machine,DsId,DsPin,DsCarrier,DsValid,DsDecimal,ts'
-
         TEMPLATE_CSV = '{measurement},{host},{machine},{ds_id},{ds_pin},{ds_carrier},{ds_valid},{ds_decimal},{ts}'
-        """
 
+        dallas,ruth,hrnecek_s_ledem,841704586024,8,labjack,true,18.8125,1633246322588
+        """
        
-        self.record_list.append(self.template_csv.format(
+        self.record = self.template_csv.format(
             measurement = self.influx_measurement,
             host = self.influx_host,
             
@@ -240,37 +246,16 @@ class DS():
             ds_pin = self.dqPin,
 
             ts = self.last_measure_time_ts
-        ))
-        
-        #CSV_PATH
-        util.create_dir(t4.workdir)
-
-        #CSV
-        file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
-                                       t4_conf.CONFIG_NAME)
-        
-        full_path_file_name = path.join(t4.workdir, file_name)
-        #util.write_file(full_path_file_name, self.record)
-        util.write_file(full_path_file_name, self.record_list)
-        
-        #DEBUG single record
-        print('\n{}\n{}\n'.format(self.template_csv_header,
-                                  self.record_list))
+        )
 
         
     def write_influx(self):
-        """construct influx call and write data"""
-
-        """
-        TEMPLATE_CSV = '{measurement},{host},{machine},{ds_id},{ds_address},{ds_carrier},{ds_valid},{ds_decimal},{ts}'
-        #rpi,spongebob,rpi_zero_006,004_20Ah,6,labjack,true,13.0388,1632651760595"
-
-        #TAG: host / Machine / BatId / BatAddress / BatCarrier / BatValid
-        #FIELD: BatDecimal
+        """construct influx call and write data
+        #TAG: host / Machine / DsId / DsPin / DsCarrier / DsValid
+        #FIELD: DsDecimal
         
         TEMPLATE_CURL = 'curl -k --request POST "https://{server}:{port}/api/v2/write?org={org}&bucket={bucket}&precision={precision}" --header "Authorization: Token {token}" --data-raw "{measurement},host={host},Machine={machine_id},DsId={ds_id},DsCarrier={ds_carrier},DsValid={ds_valid},DsAddress={ds_address} DsDecimal={ds_decimal} {ts}"'
         """
-
         
         cmd = self.influx_template_curl.format(
             server = self.influx_server,
@@ -300,7 +285,82 @@ class DS():
         ###
         system(cmd) #test via requests
 
+
+###GLOBAL
+def run_all_ds(seconds = 10, minutes = 1, origin = None):
+    """filter config for active temperature sensors and measure"""
+
+    #print('all_ds: {}'.format(t4_conf.ALL_DS))
+
+    #OBJECTS
+    d = {}
+    for single_ds in t4_conf.ALL_DS:
+        if single_ds['FLAG'] is True:
+            #print('single_ds: {}'.format(single_ds))
+
+            name = 'ds_pin_{}'.format(single_ds['DQ_PIN'])
+            d[name] = DS(pin = single_ds['DQ_PIN'],
+                         handler = t4.handler,
+
+                         delay = seconds * minutes, #future_use
+
+                         flag_csv = single_ds['FLAG_CSV'],
+                         flag_influx = single_ds['FLAG_INFLUX'],
+                         flag_debug_influx = single_ds['FLAG_DEBUG_INFLUX'],
+
+                         measurement = single_ds['MEASUREMENT'],
+                         machine_id = single_ds['MACHINE'])
+
+    #CSV_PATH
+    util.create_dir(t4.workdir)
+            
+    flag_loop = True
+    i = 0
+    while flag_loop:
+        i += 1
+
+        temperature_str = ''
+        if t4_conf.FLAG_TEMPERATURE:
+            temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature())
         
+        print('\n{}\ni: {} / samples: {} / sample_delay: {}s / cycle_delay: {}s{}'.format(
+            50 * '#',
+            i,
+            t4_conf.SAMPLES,
+            t4_conf.DELAY_SAMPLE,
+            seconds * minutes,
+            temperature_str))
+
+        #MEASURE
+        record_list = []
+        for ds_name, ds_object in d.items():
+            ds_object.ds_search() #SEARCH EVERY CYCLE FOR ACTIVE ROM's
+            ds_object.measure() # + INFLUX WRITE
+            record_list.append(ds_object.record)
+
+        #DEBUG all records
+        print('\n{}'.format(ds_object.template_csv_header))
+        for r in record_list:
+            print(r)
+
+        #CSV
+        file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
+                                       t4_conf.CONFIG_NAME)
+
+        full_path_file_name = path.join(t4.workdir, file_name)
+        util.write_file(full_path_file_name, record_list)
+
+        #ONCE or FOREVER
+        origin_result = util.origin_info(origin,
+                                         seconds * minutes,
+                                         t4_obj = t4)
+        
+        flag_loop = origin_result.get('flag_loop', False)
+    
+        if origin_result.get('break', False) is True:
+            break
+
+
 if __name__ == "__main__":
     """$python3 -i t4_ds.py --config t4_ds_config.py"""
 
@@ -314,15 +374,14 @@ if __name__ == "__main__":
     #info = ljm.getHandleInfo(t4.handler)
     #deviceType = info[0]
     #if deviceType == ljm.constants.dtT4:
-    # Configure EIO0 as digital I/O.
-    print('set T4 DIO')
+
+    # Configure EIO0 as digital I/O. #tady to dela jen pro jedno nebo pro vsechny?
+    #print('set T4 DIO')
     ljm.eWriteName(t4.handler, "DIO_INHIBIT", 0xFFEFF)
     ljm.eWriteName(t4.handler, "DIO_ANALOG_ENABLE", 0x00000)
 
-    ds = DS()
-    ds.ds_search()
-    ds.measure()
-    
-    print('\ndataRX: {}'.format(ds.dataRX))
+    #CRON once or TERMINAL/SERVICE loop
+    run_all_ds(seconds = t4_conf.DELAY_SECONDS,
+               minutes = t4_conf.DELAY_MINUTES,
+               origin = t4.origin)
 
-    #t4.close_handler()    

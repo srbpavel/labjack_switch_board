@@ -8,16 +8,12 @@ def ts(time_and_date):
     """datetime to timestamp [ms format]"""
 
     ts = int(datetime.timestamp(time_and_date) * 1000)
-    #print('UTIL time_and_date: {} -> {}'.format(time_and_date,
-    #                                            ts))
     
     return ts
 
 
 def write_file(g, data):
     """write data=[] by lines to file"""
-
-    #print('\nUTIL data write to: {}'.format(g))
 
     ggg = open(g, 'a')
 
@@ -34,16 +30,12 @@ def today_filename(time_and_date):
                                       time_and_date.month,
                                       time_and_date.day)
     
-    #print('\nUTIL today: {}'.format(today))
-    
     return today
 
 
 def create_dir(directory):
     """create dir for full_path"""
 
-    #print('\nUTIL create_dir: {}'.format(directory))
-    
     try:
         makedirs(directory)
     except OSError as error:
@@ -123,6 +115,4 @@ def origin_info(origin = None,
         t4_obj.close_handler()
         d['break'] = True
 
-    #print('UTIL {}'.format(d))
-        
     return d

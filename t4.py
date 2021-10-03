@@ -68,6 +68,4 @@ class T4():
             - self.const_kelvin,
             1)
 
-        print('T4 temperature: {}'.format(temperature_celsius))
-        
         return temperature_celsius
