@@ -157,3 +157,47 @@ $python3 -i import_influx.py
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 IndexError: list index out of range
+
+###########
+###DS graph
+
+from(bucket: "ds_test")
+|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+|> filter(fn: (r) => r["_measurement"] == "dallas")
+//|> filter(fn: (r) => r["DsCarrier"] == "labjack")
+//|> filter(fn: (r) => r["DsId"] == "841704586024")
+//|> filter(fn: (r) => r["DsPin"] == "8")
+
+//|> drop(columns: ["_start", "_stop", "_measurement", "DsValid"])
+|> drop(columns: ["_start", "_stop", "_measurement", "DsValid"])
+
+//|> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+
+//|> sort(columns: ["_time"], desc:true)
+
+|> yield(name: "min")
+
+###########
+###DS table
+
+from(bucket: "ds_test")
+|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+|> filter(fn: (r) => r["_measurement"] == "dallas")
+//|> filter(fn: (r) => r["DsCarrier"] == "labjack")
+//|> filter(fn: (r) => r["DsId"] == "841704586024")
+//|> filter(fn: (r) => r["DsPin"] == "8")
+
+//|> drop(columns: ["_start", "_stop", "_measurement", "DsValid"])
+|> drop(columns: ["_start", "_stop", "_measurement", "DsValid"])
+
+//|> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+
+//
+|> sort(columns: ["_time"], desc:true)
+
+|>limit(n: 15)
+
+|> yield(name: "min")
+
+###########
+###

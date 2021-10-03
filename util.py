@@ -15,6 +15,8 @@ def ts(time_and_date):
 def write_file(g, data):
     """write data=[] by lines to file"""
 
+    print('\ndata write to: {}'.format(g))
+    
     ggg = open(g, 'a')
 
     for line in data:
