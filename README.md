@@ -16,7 +16,8 @@ MACHINE:
 
 
 TODO:
- - 1-wire ds teplomery rozmakat
+ - DS hledani vice ROM
+ - DS pro vice pinu
  - dodelat taky jako service + sig_term pro ljm.close(handler) at to nedelam na hulvata
  - async mereni ruznych portu
  - otestovat influx schema na rpi_zero fotopastech
@@ -26,6 +27,8 @@ TODO:
 
 
 DONE:
+ - 1-wire ds teplomery rozmakat 
+ - util pro sdilenou cast
  - terminal: sleep [forever] / cron: open|close [once]
  - demo config to test code with no hw available 
  - `$python3 t4_battery.py --config t4_battery_config_demo.py`
