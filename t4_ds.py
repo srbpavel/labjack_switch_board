@@ -258,14 +258,6 @@ class DS():
             self.write_influx(d = sensor)
 
             
-    def loop(self):
-        """terminal debug loop"""
-        
-        while True:
-             ds.measure()
-             sleep(t4_conf.DELAY_MINUTES * t4_conf.DELAY_SECONDS)
-
-    
     def write_csv(self, d = None):
         """
         prepare csv backup record
