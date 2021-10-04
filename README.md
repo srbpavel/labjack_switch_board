@@ -1,5 +1,7 @@
 **labjack_switch_board:: [T4](https://labjack.com/products/t4)**
 
+![Screenshot](pic/screen_shot_001.png)
+
 
 MACHINE:
  - [LJM installer](https://labjack.com/support/software/installers/ljm)
