@@ -26,6 +26,7 @@ class DS():
         self.handler = handler
         
         self.const_12bit_resolution = 0.0625
+        self.const_decimal_85_celsius = 0x0550
         self.convert_delay = 0.5 #sec
 
         self.flag_csv = flag_csv
@@ -141,7 +142,7 @@ class DS():
 
             #SEARCH AGAIN
             self.search(i = i,
-                        branch = result_values[3])
+                        branch = branch_found)
         else:
             self.set_onewire_path_l(0)
             #print('>>> rom search done -> all_sensors: {}'.format(self.all_sensors))
@@ -224,10 +225,10 @@ class DS():
         sensor['dataRX'] = ljm.eReadNameByteArray(t4.handler, "ONEWIRE_DATA_RX", sensor['numRX'])
         sensor['temperature_raw'] = (int(sensor['dataRX'][0]) + (int(sensor['dataRX'][1])<<8))
         sensor['temperature_binary'] = bin(sensor['temperature_raw'])
-        
-        if sensor['temperature_raw'] == 0x0550:
+
+        if sensor['temperature_raw'] == self.const_decimal_85_celsius:
             print('foookin wire contact, fix it !!!')
-            sensor['temperature_decimal'] = 85
+            sensor['temperature_decimal'] =  self.const_decimal_85_celsius * self.const_12bit_resolution
         else:
             sensor['temperature_decimal'] = sensor['temperature_raw'] * self.const_12bit_resolution
 
@@ -407,9 +408,6 @@ if __name__ == "__main__":
 
     #DIO_INHIBIT + DIO_ANALOG_ENABLE
     t4.set_dio_inhibit()
-    #t4.read_dio_inhibit()
-    #t4.read_dio_analog_enable()
-    #_
     
     #CRON once or TERMINAL/SERVICE loop
     run_all_ds(seconds = t4_conf.DELAY_SECONDS,
