@@ -13,6 +13,7 @@ LABJACK_NAME = 'srbp_t4' #ANY
 
 FLAG_TEMPERATURE = True #False
 FLAG_DEBUG_DIO_INHIBIT = True #False
+FLAG_DEBUG_ROM = True #False
 
 #CYCLE sec * min: 1*1 / 10*1 / 60*5
 DELAY_SECONDS = 60 #1

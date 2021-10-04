@@ -25,13 +25,14 @@ class DS():
         self.pin = pin
         self.handler = handler
         
-        self.const_12bit_resolution = 0.0625
+        self.const_12bit_resolution = 0.0625 # 1/16
         self.const_decimal_85_celsius = 0x0550
         self.convert_delay = 0.5 #sec
 
         self.flag_csv = flag_csv
         self.flag_influx = flag_influx
         self.flag_debug_influx = flag_debug_influx
+        #self.flag_debug_rom = FLAG_DEBUG_ROM
         
         self.influx_server = t4_conf.INFLUX_SERVER
         self.influx_port = t4_conf.INFLUX_PORT
@@ -113,17 +114,16 @@ class DS():
             }
         )
 
-        """
-        print('rom: {} + hex: {} / romH[0]: {} + romL[1]: {} / path:{} / pathH[2]: {} + pathL[3]: {}'.format(
-            rom,
-            str(hex(rom))[2:], #same format as for my influxdb esp32 data
-            romH,
-            romL,
-            path,
-            pathH,
-            pathL)
-        )
-        """
+        if t4_conf.FLAG_DEBUG_ROM:
+            print('rom: {} + hex: {} / romH[0]: {} + romL[1]: {} / path:{} / pathH[2]: {} + pathL[3]: {}\n'.format(
+                rom,
+                str(hex(rom))[2:], #same format as for my influxdb esp32 data
+                romH,
+                romL,
+                path,
+                pathH,
+                pathL)
+            )
 
         return aValues
 
@@ -149,14 +149,15 @@ class DS():
 
 
     def set_onewire_path_l(self, value):
+        #print('set branch to: {}'.format(value))
+
         aNames = ["ONEWIRE_PATH_L"]
         aValues = [value]
 
-        #print('set branch to: {}'.format(value))
-    
         ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
         ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
-        sleep(1)
+
+        #sleep(1)
 
         
     def setup_bin_temp(self, sensor = None):
@@ -194,7 +195,7 @@ class DS():
         function = 0x55 #MATCH
         numTX = 1
         dataTX = [0xBE] #0xBE = DS1822 Read scratchpad command
-        sensor['numRX'] = 9 #bytes [76, 1, 75, 70, 127, 255, 12, 16, 131] -> (76+256)*0.0625 = 20.75 celsius
+        sensor['numRX'] = 9 #bytes [76, 1, 75, 70, 127, 255, 12, 16, 131] -> (76 + (1<<8)) * 0.0625 = 20.75 celsius
 
         aNames = ["ONEWIRE_FUNCTION",
                   "ONEWIRE_NUM_BYTES_TX",
