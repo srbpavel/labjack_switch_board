@@ -1,4 +1,5 @@
 from labjack import ljm
+from os import path
 
 
 #LABJACK
@@ -39,7 +40,10 @@ class T4():
                                  config.LABJACK_NAME)
         
         self.origin = config.ORIGIN
-        self.workdir = config.WORKDIR
+
+        self.work_dir = config.WORK_DIR
+        self.backup_dir = path.join(self.work_dir,
+                                    config.BACKUP_DIR)
         
         self.info = ljm.getHandleInfo(self.handler)
         self.ip = ljm.numberToIP(self.info[3])

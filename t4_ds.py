@@ -66,7 +66,7 @@ class DS():
 
         ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
 
-        print('\n    DQ pin = {} / DPU pin = {} / Options = {}'.format(
+        print('\n>>> DQ pin = {} / DPU pin = {} / Options = {}'.format(
             self.dqPin,
             self.dpuPin,
             self.options)
@@ -112,6 +112,7 @@ class DS():
             }
         )
 
+        """
         print('rom: {} + hex: {} / romH[0]: {} + romL[1]: {} / path:{} / pathH[2]: {} + pathL[3]: {}'.format(
             rom,
             str(hex(rom))[2:], #same format as for my influxdb esp32 data
@@ -121,6 +122,7 @@ class DS():
             pathH,
             pathL)
         )
+        """
 
         return aValues
 
@@ -129,7 +131,7 @@ class DS():
         """rom search loop for 0xFO"""
 
         i += 1
-        print('[{}]'.format(i))
+        #print('[{}]'.format(i))
         result_values = self.search_path()
         branch_found = result_values[3] #ONEWIRE_ROM_BRANCHS_FOUND_L
     
@@ -149,7 +151,7 @@ class DS():
         aNames = ["ONEWIRE_PATH_L"]
         aValues = [value]
 
-        print('set branch to: {}'.format(value))
+        #print('set branch to: {}'.format(value))
     
         ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
         ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
@@ -238,7 +240,7 @@ class DS():
         self.read_bin_temp(sensor)
         self.temperature(sensor)
 
-        print('\n@ {} C / {} / {} = {} + {} / rom: {} + hex: {} / {} / dataRX: {}'.format(
+        print('{} C / {} / {} = {} + {} / rom: {} + hex: {} / {} / dataRX: {}'.format(
             sensor['temperature_decimal'],
             sensor['temperature_binary'],
             sensor['temperature_raw'],
@@ -319,7 +321,7 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
     """filter config for active temperature sensors and measure"""
 
     #CSV_PATH
-    util.create_dir(t4.workdir)
+    util.create_dir(t4.backup_dir)
             
     flag_loop = True
     i = 0
@@ -330,7 +332,7 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
         if t4_conf.FLAG_TEMPERATURE:
             temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature())
         
-        print('\n{}\ni: {} / cycle_delay: {}s{}'.format(
+        print('{}\ni: {} / cycle_delay: {}s{}'.format(
             50 * '#',
             i,
             seconds * minutes,
@@ -352,7 +354,7 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
                              measurement = single_ds['MEASUREMENT'],
                              machine_id = single_ds['MACHINE'])
 
-                print('\n>>> OBJECT: {}\n'.format(name))
+                print('>>> OBJECT: {}\n'.format(name))
 
                 #INITIAL SEARCH
                 d[name].all_sensors = [] #DEBUG all temperature data at one place
@@ -379,7 +381,7 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
         file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
                                        t4_conf.CONFIG_NAME)
             
-        full_path_file_name = path.join(t4.workdir, file_name)
+        full_path_file_name = path.join(t4.backup_dir, file_name)
         util.write_file(full_path_file_name, record_list)
 
         #ONCE or FOREVER

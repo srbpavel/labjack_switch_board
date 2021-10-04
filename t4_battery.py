@@ -218,7 +218,7 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
                 bat_id = single_bat['BATTERY_ID'])
             
     #CSV_PATH
-    util.create_dir(t4.workdir)
+    util.create_dir(t4.backup_dir)
 
     #LOOP
     flag_loop = True
@@ -253,7 +253,7 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
         file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
                                        t4_conf.CONFIG_NAME)
 
-        full_path_file_name = path.join(t4.workdir, file_name)
+        full_path_file_name = path.join(t4.backup_dir, file_name)
         util.write_file(full_path_file_name, record_list)
 
         #ONCE or FOREVER

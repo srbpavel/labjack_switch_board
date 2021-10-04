@@ -1,6 +1,7 @@
 CONFIG_NAME = ''
 
-WORKDIR = ''
+WORK_DIR = '/home/conan/soft/labjack_switch_board'
+BACKUP_DIR = 'csv'
 
 ORIGIN = 'TERMINAL' #CRON / TERMINAL / SERVICE / python APP
 
