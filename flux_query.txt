@@ -200,4 +200,25 @@ from(bucket: "ds_test")
 |> yield(name: "min")
 
 ###########
+###ONE TABLE OF LAST VALUES
+
+from(bucket: "ds_test")
+|> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+|> filter(fn: (r) => r["_measurement"] == "dallas")
+
+//|> drop(columns: ["_start", "_stop", "_measurement", "DsValid"])
+|> drop(columns: ["_start", "_stop"])
+
+|> group(columns: ["Machine", "DsId"])
+
+|> sort(columns: ["_time"], desc:true)
+
+|>limit(n: 1)
+
+|>group()
+|> sort(columns: ["_value"], desc: true)
+
+//|> yield(name: "min")
+
+###########
 ###

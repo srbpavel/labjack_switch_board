@@ -405,10 +405,19 @@ if __name__ == "__main__":
     #LABJACK CONNECTION
     t4 = T4(config = module_name)
 
-    #Configure EIO0 as digital I/O. #ZJISTIT jestli to dela jen pro jedno nebo pro vsechny?
-    ljm.eWriteName(t4.handler, "DIO_INHIBIT", 0xFFEFF)
-    ljm.eWriteName(t4.handler, "DIO_ANALOG_ENABLE", 0x00000)
+    #https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
 
+    #FLEXIBLE I/0: EIO0 as digital I/O #EIO0 -> DIO8 -> 8  
+    #bin(0x7FFFFF - (1<<8))
+    #ljm.eWriteName(t4.handler, "DIO_INHIBIT", 0xFFEFF) #hex(0b11111111111011111111) / bit 8 set to 0 for DIGITAL INPUT
+
+    #bin(0x7FFFFF - (1<<14))
+    #DEDICATED DIGITAL I/0: EIO6 as digital I/O #EIO6 -> DIO14 -> 14
+    #ljm.eWriteName(t4.handler, "DIO_INHIBIT", 0XEFFFF) #hex(0b11111011111111111111) / bit 14 set to 0 for DIGITAL INPUT
+
+    ljm.eWriteName(t4.handler, "DIO_INHIBIT", 0XEFEFF) #hex(0b11111011111011111111) / bit 14 + 8 set to 0
+    ljm.eWriteName(t4.handler, "DIO_ANALOG_ENABLE", 0x00000) #podle me ze vsech udela DIO_ANALOG_ENABLE -> 0
+    
     #CRON once or TERMINAL/SERVICE loop
     run_all_ds(seconds = t4_conf.DELAY_SECONDS,
                minutes = t4_conf.DELAY_MINUTES,
