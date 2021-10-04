@@ -1,8 +1,5 @@
 **labjack_switch_board:: [T4](https://labjack.com/products/t4)**
 
-![Screenshot](pic/screen_shot_001.png)
-
-
 MACHINE:
  - [LJM installer](https://labjack.com/support/software/installers/ljm)
  - ```$tar -zvxf labjack_ljm_software_2019_07_16_x86_64.tar.gz```
@@ -51,3 +48,9 @@ CRON:
 ```
 */10 * * * * /usr/bin/python3 /home/conan/soft/labjack_switch_board/t4_battery.py --config /home/conan/soft/labjack_switch_board/t4_battery_config_first.py 1>/home/conan/soft/labjack_switch_board/1_cron_first.log 2>/home/conan/soft/labjack_switch_board/2_cron_first.log
 ```
+
+ * temperature
+![Screenshot](pic/screen_shot_001.png)
+
+ * battery
+![Screenshot](pic/screen_shot_002.png)
