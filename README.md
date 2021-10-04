@@ -14,8 +14,7 @@ MACHINE:
  - [labjack/ljm](https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/ljm.py)
  - [labjack/constants](https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/constants.py)
  - [one_wire](https://github.com/labjack/labjack-ljm-python/blob/master/Examples/More/1-Wire/1_wire.py)
- - [DS18B20](https://www.maximintegrated.com/en/products/sensors/DS18B20.html?intcid=para)
- - [pdf](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)
+ - [DS18B20](https://www.maximintegrated.com/en/products/sensors/DS18B20.html?intcid=para) -> [pdf](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)
 
 
 TODO:
