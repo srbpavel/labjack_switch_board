@@ -33,26 +33,23 @@ class T4():
         """
 
         #print('t4')
-        config = __import__(config)
-        self.config = config
+        self.config = __import__(config)
         
-        self.handler = ljm.openS(config.LABJACK_MODEL,
-                                 config.LABJACK_PROTOCOL,
-                                 config.LABJACK_NAME)
+        self.handler = ljm.openS(self.config.LABJACK_MODEL,
+                                 self.config.LABJACK_PROTOCOL,
+                                 self.config.LABJACK_NAME)
         
-        self.origin = config.ORIGIN
+        self.origin = self.config.ORIGIN
 
-        self.work_dir = config.WORK_DIR
+        self.work_dir = self.config.WORK_DIR
         self.backup_dir = path.join(self.work_dir,
-                                    config.BACKUP_DIR)
+                                    self.config.BACKUP_DIR)
         
         self.info = ljm.getHandleInfo(self.handler)
         self.ip = ljm.numberToIP(self.info[3])
 
         self.const_kelvin = 273.15
 
-        #self.all_ds = config.ALL_DS
-        
         print('origin: {} \ninfo: {}\nip:{}\n'.format(self.origin,
                                                       self.info,
                                                       self.ip))
@@ -103,29 +100,29 @@ class T4():
         #>>> hex(0xFFFFF - (1<<8 | 1<<14))
         #'0xfbeff'
 
-        if self.config.FLAG_DEBUG_DIO_INHIBIT:
-            self.read_dio_inhibit()
-            self.read_dio_analog_enable()
-
         dq_pin_numbers = [pin.get('DQ_PIN') for pin in self.config.ALL_DS]
-        print('\ndq_pin_numbers: {}'.format(dq_pin_numbers))
+
         dio_inhibit_cmd = '{}{}))'.format(
             'hex(0xFFFFF - (',
             ' | '.join(['1<<{}'.format(pin) for pin in dq_pin_numbers])
         )
-        print('dio_inhibit_cmd: {}'.format(dio_inhibit_cmd))
-
+        
         dio_inhibit_hex_str = eval(dio_inhibit_cmd)
-        print('dio_inhibit_hex_str: {}'.format(dio_inhibit_hex_str))
-
         dio_inhibit_int = int(dio_inhibit_hex_str, 16)
-        print('dio_inhibit_hex_int: {}'.format(dio_inhibit_int))
-
         dio_inhibit_bin = bin(dio_inhibit_int)
-        print('dio_inhibit_hex_bin: {}'.format(dio_inhibit_bin))
-        print('{}98765432109876543210'.format(' ' * 23))
+        
+        if self.config.FLAG_DEBUG_DIO_INHIBIT:
+            self.read_dio_inhibit()
+            self.read_dio_analog_enable()
 
-        #bit 14 + 8 set to 0
+            print('dq_pin_numbers: {}'.format(dq_pin_numbers))
+            print('dio_inhibit_cmd: {}'.format(dio_inhibit_cmd))
+            print('dio_inhibit_hex_str: {}'.format(dio_inhibit_hex_str))
+            print('dio_inhibit_hex_int: {}'.format(dio_inhibit_int))
+            print('dio_inhibit_hex_bin: {}'.format(dio_inhibit_bin))
+            print('{}98765432109876543210'.format(' ' * 23))
+            
+        #as per config: dqPIN = bit number -> set to 0
         ljm.eWriteName(self.handler,
                        "DIO_INHIBIT",
                        dio_inhibit_int)
