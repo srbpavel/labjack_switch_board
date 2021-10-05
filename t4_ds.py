@@ -374,12 +374,14 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
                 while flag_lock_cycle:
                     counter_lock_cycle += 1
 
-                    print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
+                    if t4.debug_onewire_lock:
+                        print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
 
                     status_onewire_lock = t4.onewire_lock(ds_info = pin)
                     
                     if status_onewire_lock == True:
-                        print('ONEWIRE_LOCK >>> start DS object')
+                        if t4.debug_onewire_lock:
+                            print('ONEWIRE_LOCK >>> start DS object')
                     
                         d[name] = DS(pin = pin,
                                      handler = t4.handler,
@@ -413,7 +415,9 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
                         flag_lock_cycle = False
                         
                     else:
+                        #if t4.debug_onewire_lock:
                         print('ONEWIRE_LOCK >>> block, WAIT'.format())                    
+
                         sleep(t4.delay_onewire_lock)
                     
         #DEBUG records from ALL ds_objects
@@ -433,8 +437,6 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
             print('break')
             break
 
-    print('proc tady mam break kdyz mam flag_loop = {}'.format(flag_loop))
-    
 
 if __name__ == "__main__":
     """$python3 -i t4_ds.py --config t4_ds_config.py"""

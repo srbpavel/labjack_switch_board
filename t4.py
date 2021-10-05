@@ -57,6 +57,8 @@ class T4():
         self.ip = ljm.numberToIP(self.info[3])
 
         self.const_kelvin = 273.15
+
+        self.debug_onewire_lock = self.config.FLAG_DEBUG_ONEWIRE_LOCK
         
         print('origin: {} \ninfo: {}\nip:{}\n'.format(self.origin,
                                                       self.info,
@@ -97,8 +99,9 @@ class T4():
         )
         
         #READ
-        fff = self.read_onewire_lock()
-        print('ONEWIRE_LOCK >>> status: {} / lock_file: {}'.format(status_msg,
+        if self.debug_onewire_lock:
+            fff = self.read_onewire_lock()
+            print('ONEWIRE_LOCK >>> status: {} / lock_file: {}'.format(status_msg,
                                                                    fff)
         )
         
@@ -109,27 +112,34 @@ class T4():
     def onewire_lock(self, ds_info):
         try:
             fff = self.read_onewire_lock()
-            print('ONEWIRE_LOCK >>> {} / pin: {}'.format(fff, ds_info))
+            if self.debug_onewire_lock:
+                print('ONEWIRE_LOCK >>> {} / pin: {}'.format(fff, ds_info))
 
             lock_dict = json.loads(fff[0].strip().replace("'", "\""))
-            print('lock_dict_STR: {}'.format(lock_dict))
+            if self.debug_onewire_lock:
+                print('lock_dict_STR: {}'.format(lock_dict))
+
             lock_dict['status'] = json.loads(lock_dict['status'].lower())
-            print('lock_dict_BOOL: {}'.format(lock_dict))
+            if self.debug_onewire_lock:
+                print('lock_dict_BOOL: {}'.format(lock_dict))
 
             #check IndexError LATER
             if lock_dict['status'] is True:
-                print('ONEWIRE_LOCK >>> lock is open: {} / should lock now'.format(fff))
+                if self.debug_onewire_lock:
+                    print('ONEWIRE_LOCK >>> lock is open: {} / should lock now'.format(fff))
 
                 #LOCK NOW
                 self.write_onewire_lock(ds_info = ds_info, status = False)
                 
                 #DEBUG VERIFY IF LOCKED
-                fff = self.read_onewire_lock()
-                print('ONEWIRE_LOCK >>> fff[{}]: {}'.format(len(fff), fff))
+                if self.debug_onewire_lock:
+                    fff = self.read_onewire_lock()
+                    print('ONEWIRE_LOCK >>> fff[{}]: {}'.format(len(fff), fff))
                 
                 return True
             else:
-                print('ONEWIRE_LOCK >>> lock is blocked')
+                if self.debug_onewire_lock:
+                    print('ONEWIRE_LOCK >>> lock is blocked')
 
                 return False
             
