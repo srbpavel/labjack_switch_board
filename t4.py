@@ -102,11 +102,11 @@ class T4():
         if self.debug_onewire_lock:
             fff = self.read_onewire_lock()
             print('ONEWIRE_LOCK >>> status: {} / lock_file: {}'.format(status_msg,
-                                                                   fff)
+                                                                       fff)
         )
-        
-        #DEBUG SLEEP for WACTH monitoring
-        sleep(1)
+            
+        #DEBUG SLEEP for WATCH monitoring
+        #sleep(1)
 
         
     def onewire_lock(self, ds_info):
@@ -123,7 +123,6 @@ class T4():
             if self.debug_onewire_lock:
                 print('lock_dict_BOOL: {}'.format(lock_dict))
 
-            #check IndexError LATER
             if lock_dict['status'] is True:
                 if self.debug_onewire_lock:
                     print('ONEWIRE_LOCK >>> lock is open: {} / should lock now'.format(fff))
@@ -137,6 +136,7 @@ class T4():
                     print('ONEWIRE_LOCK >>> fff[{}]: {}'.format(len(fff), fff))
                 
                 return True
+
             else:
                 if self.debug_onewire_lock:
                     print('ONEWIRE_LOCK >>> lock is blocked')

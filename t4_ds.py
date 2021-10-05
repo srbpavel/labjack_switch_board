@@ -321,14 +321,15 @@ class DS():
 def t4_header_info(i = 0, delay = 10):
     temperature_str = ''
     if t4_conf.FLAG_TEMPERATURE:
-        temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature())
-        
-        print('{}\ni: {} / cycle_delay: {}s{}'.format(
-            50 * '#',
-            i,
-            delay,
-            temperature_str)
+        temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature()
         )
+        
+    print('{}\ni: {} / cycle_delay: {}s{}'.format(
+        50 * '#',
+        i,
+        delay,
+        temperature_str)
+    )
         
 
 def csv_data_to_file(data = None):
