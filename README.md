@@ -31,7 +31,7 @@ TODO:
 
 
 DONE:
- - async mereni ruznych portu / ale pres ONEWIRE_LOCK file protoze T4 je potreba hlidat pro nastaveni sbernice/pin jinak meri neco nechce
+ - async mereni ruznych portu / ale pres ONEWIRE_LOCK file protoze T4 je potreba hlidat pro nastaveni sbernice/pin jinak meri co nechce
  - DS hledani vice ROM
  - DS pro vice pinu
  - 1-wire ds teplomery rozmakat 
