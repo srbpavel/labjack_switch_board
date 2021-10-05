@@ -15,7 +15,7 @@ def ts(time_and_date):
 def write_file(g = None, mode = 'w', data = None):
     """write data = [] to file by lines (add's \n)"""
 
-    print('data write to: {}'.format(g))
+    print('\ndata write to: {}'.format(g))
     
     ggg = open(g, mode) # 'w' 'a'
 
