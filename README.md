@@ -62,3 +62,6 @@ $python3 -i t4_ds.py --config t4_ds_config_pin_14.py
 
  * battery
 ![Screenshot](pic/screen_shot_002.png)
+
+ * 2x CRON job's at the same time, dqPIN 8 waitting for pin 14 to finish and free T4
+![Screenshot](pic/screen_shot_003.png)
