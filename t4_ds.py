@@ -417,7 +417,7 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
                         
                     else:
                         #if t4.debug_onewire_lock:
-                        print('ONEWIRE_LOCK >>> block, WAIT'.format())                    
+                        print('ONEWIRE_LOCK >>> block, WAIT {}'.format(datetime.now()))                    
 
                         sleep(t4.delay_onewire_lock)
                     
