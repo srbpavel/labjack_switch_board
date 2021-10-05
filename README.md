@@ -24,7 +24,6 @@ MACHINE:
 
 TODO:
  - dodelat taky jako service + sig_term pro ljm.close(handler) at to nekilluju na hulvata
- - async mereni ruznych portu
  - otestovat influx schema na rpi_zero fotopastech
  - zaroven zapisovat battery 12v/5v data z rpi camera vystupu do jinyho measurementu (ale asi jiny repo?)
  - otestovat import z backup csv
@@ -32,6 +31,7 @@ TODO:
 
 
 DONE:
+ - async mereni ruznych portu / ale pres ONEWIRE_LOCK file protoze T4 je potreba hlidat pro nastaveni sbernice/pin jinak meri neco nechce
  - DS hledani vice ROM
  - DS pro vice pinu
  - 1-wire ds teplomery rozmakat 
@@ -48,6 +48,14 @@ CRON:
 ```
 */10 * * * * /usr/bin/python3 /home/conan/soft/labjack_switch_board/t4_battery.py --config /home/conan/soft/labjack_switch_board/t4_battery_config_first.py 1>/home/conan/soft/labjack_switch_board/1_cron_first.log 2>/home/conan/soft/labjack_switch_board/2_cron_first.log
 ```
+
+ONEWIRE_LOCK:
+```
+$watch -n0.1 'cat -n onewire_dict.lock'
+$python3 -i t4_ds.py --config t4_ds_config_pin_8.py
+$python3 -i t4_ds.py --config t4_ds_config_pin_14.py
+```
+
 
  * temperature
 ![Screenshot](pic/screen_shot_001.png)
