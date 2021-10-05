@@ -27,12 +27,11 @@ class DS():
         
         self.const_12bit_resolution = 0.0625 # 1/16
         self.const_decimal_85_celsius = 0x0550
-        self.convert_delay = 0.5 #sec
+        self.convert_delay = t4_conf.DELAY_ONEWIRE_DS_CONVERT
 
         self.flag_csv = flag_csv
         self.flag_influx = flag_influx
         self.flag_debug_influx = flag_debug_influx
-        #self.flag_debug_rom = FLAG_DEBUG_ROM
         
         self.influx_server = t4_conf.INFLUX_SERVER
         self.influx_port = t4_conf.INFLUX_PORT
@@ -319,6 +318,35 @@ class DS():
 
 
 ###GLOBAL
+def t4_header_info(i = 0, delay = 10):
+    temperature_str = ''
+    if t4_conf.FLAG_TEMPERATURE:
+        temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature())
+        
+        print('{}\ni: {} / cycle_delay: {}s{}'.format(
+            50 * '#',
+            i,
+            delay,
+            temperature_str)
+        )
+        
+
+def csv_data_to_file(data = None):
+    file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
+                                   t4_conf.CONFIG_NAME)
+    
+    full_path_file_name = path.join(t4.backup_dir, file_name)
+    util.write_file(g = full_path_file_name,
+                    mode = 'a',
+                    data = data) #record_list
+    
+
+def show_record_list(data = None):
+    print('\n{}'.format(t4_conf.TEMPLATE_CSV_HEADER))
+    for record in data:
+        print(record)
+
+    
 def run_all_ds(seconds = 10, minutes = 1, origin = None):
     """filter config for active temperature sensors and measure"""
 
@@ -330,61 +358,70 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
     while flag_loop:
         i += 1
 
-        temperature_str = ''
-        if t4_conf.FLAG_TEMPERATURE:
-            temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature())
+        #T4 HEADER info
+        t4_header_info(i = i, delay = seconds * minutes)
         
-        print('{}\ni: {} / cycle_delay: {}s{}'.format(
-            50 * '#',
-            i,
-            seconds * minutes,
-            temperature_str)
-        )
-        
-        #OBJECTS !!! measure always at active dqPIN object, otherwise data from last bus used !!!!
+        #OBJECTS
         d = {}
         record_list = []
         for single_ds in t4_conf.ALL_DS:
             if single_ds['FLAG'] is True:
-                name = 'ds_pin_{}'.format(single_ds['DQ_PIN'])
-                d[name] = DS(pin = single_ds['DQ_PIN'],
-                             handler = t4.handler,
-                             delay = seconds * minutes, #future_use
-                             flag_csv = single_ds['FLAG_CSV'],
-                             flag_influx = single_ds['FLAG_INFLUX'],
-                             flag_debug_influx = single_ds['FLAG_DEBUG_INFLUX'],
-                             measurement = single_ds['MEASUREMENT'],
-                             machine_id = single_ds['MACHINE'])
+                pin = single_ds['DQ_PIN']
+                name = 'ds_pin_{}'.format(pin)
+                    
+                flag_lock_cycle = True
+                counter_lock_cycle = 0                
+                while flag_lock_cycle:
+                    counter_lock_cycle += 1
 
-                print('>>> OBJECT: {}\n'.format(name))
+                    print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
 
-                #INITIAL SEARCH
-                d[name].all_sensors = [] #DEBUG all temperature data at one place
-                d[name].search_init()
+                    status_onewire_lock = t4.onewire_lock(ds_info = pin)
+                    
+                    if status_onewire_lock == True:
+                        print('ONEWIRE_LOCK >>> start DS object')
+                    
+                        d[name] = DS(pin = pin,
+                                     handler = t4.handler,
+                                     delay = seconds * minutes, #future_use
+                                     flag_csv = single_ds['FLAG_CSV'],
+                                     flag_influx = single_ds['FLAG_INFLUX'],
+                                     flag_debug_influx = single_ds['FLAG_DEBUG_INFLUX'],
+                                     measurement = single_ds['MEASUREMENT'],
+                                     machine_id = single_ds['MACHINE'])
 
-                #SEARCH FOR ROM's via BRANCHES
-                counter = 0
-                last_branch = 0
-                d[name].search(i = counter, branch = last_branch)
+                        print('>>> OBJECT: {}\n'.format(name))
+                        
+                        #INITIAL SEARCH
+                        d[name].all_sensors = [] #DEBUG all temperature data at one place
+                        d[name].search_init()
+                        
+                        #SEARCH FOR ROM's via BRANCHES
+                        rom_counter = 0
+                        last_branch = 0
+                        d[name].search(i = rom_counter, branch = last_branch)
 
-                #MEASURE temperature from ALL_SENSORS
-                for single_sensor in d[name].all_sensors:
-                    d[name].measure(sensor = single_sensor) # + INFLUX WRITE
+                        #MEASURE temperature from ALL_SENSORS
+                        for single_sensor in d[name].all_sensors:
+                            d[name].measure(sensor = single_sensor) # + INFLUX WRITE
 
-                    if d[name].flag_csv:
-                        record_list.append(d[name].record)
-                
+                            if d[name].flag_csv:
+                                record_list.append(d[name].record)
+
+                        #ONEWIRE free LOCK
+                        #t4.free_onewire_lock(ds_info = pin)
+                        t4.write_onewire_lock(ds_info = pin, status = True)
+                        flag_lock_cycle = False
+                        
+                    else:
+                        print('ONEWIRE_LOCK >>> block, WAIT'.format())                    
+                        sleep(t4.delay_onewire_lock)
+                    
         #DEBUG records from ALL ds_objects
-        print('\n{}'.format(t4_conf.TEMPLATE_CSV_HEADER))
-        for r in record_list:
-            print(r)
-
+        show_record_list(data = record_list)
+        
         #CSV
-        file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
-                                       t4_conf.CONFIG_NAME)
-            
-        full_path_file_name = path.join(t4.backup_dir, file_name)
-        util.write_file(full_path_file_name, record_list)
+        csv_data_to_file(data = record_list)
 
         #ONCE or FOREVER
         origin_result = util.origin_info(origin,
@@ -394,8 +431,11 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
         flag_loop = origin_result.get('flag_loop', False)
     
         if origin_result.get('break', False) is True:
+            print('break')
             break
 
+    print('proc tady mam break kdyz mam flag_loop = {}'.format(flag_loop))
+    
 
 if __name__ == "__main__":
     """$python3 -i t4_ds.py --config t4_ds_config.py"""

@@ -1,5 +1,9 @@
 from labjack import ljm
 from os import path
+from datetime import datetime
+from time import sleep
+import util
+import json
 
 
 #LABJACK
@@ -44,15 +48,155 @@ class T4():
         self.work_dir = self.config.WORK_DIR
         self.backup_dir = path.join(self.work_dir,
                                     self.config.BACKUP_DIR)
+
+        self.delay_onewire_lock = self.config.DELAY_ONEWIRE_LOCK
+        self.lock_file_onewire = path.join(self.work_dir,
+                                           self.config.ONEWIRE_LOCK_FILE)
         
         self.info = ljm.getHandleInfo(self.handler)
         self.ip = ljm.numberToIP(self.info[3])
 
         self.const_kelvin = 273.15
-
+        
         print('origin: {} \ninfo: {}\nip:{}\n'.format(self.origin,
                                                       self.info,
-                                                      self.ip))
+                                                      self.ip)
+        )
+
+        
+    def read_onewire_lock(self):
+        f = open(self.lock_file_onewire, 'r')
+        fff = f.readlines()
+        f.close()
+
+        return fff
+    
+
+    def write_onewire_lock(self, ds_info = None, status = False):
+        """LOCK or UNLOCK"""
+
+        #true -> unlock
+        #false -> lock
+
+        status_msg = 'lock'
+        if status == True:
+            status_msg = 'unlock'
+        
+        data_to_write = [{'status': str(status), #'True',
+                          'pin': ds_info,
+                          'datetime': '{}'.format(datetime.now()
+                          )
+        }
+        ]
+        
+        util.write_file(g = self.lock_file_onewire,
+                        mode = 'w',
+                        data = data_to_write
+        )
+        
+        #READ
+        fff = self.read_onewire_lock()
+        print('ONEWIRE_LOCK >>> status: {} / lock_file: {}'.format(status_msg,
+                                                                   fff)
+        )
+        #_
+        
+        #DEBUG SLEEP for WACTH monitoring
+        sleep(1)
+
+        
+    def onewire_lock(self, ds_info):
+        try:
+            #READ
+            """
+            f = open(self.lock_file_onewire, 'r')
+            fff = f.readlines()
+            f.close()
+            """
+            
+            fff = self.read_onewire_lock()
+            print('ONEWIRE_LOCK >>> {} / pin: {}'.format(fff, ds_info))
+
+            lock_dict = json.loads(fff[0].strip().replace("'", "\""))
+            print('lock_dict_STR: {}'.format(lock_dict))
+            lock_dict['status'] = json.loads(lock_dict['status'].lower())
+            print('lock_dict_BOOL: {}'.format(lock_dict))
+            #_
+            
+            #check IndexError LATER
+            #if 'True\n' in fff[0]:
+            if lock_dict['status'] is True:
+                print('ONEWIRE_LOCK >>> lock is open: {} / should lock now'.format(fff))
+
+                #LOCK NOW
+                """
+                data_to_write = [{'status': 'False',
+                                  'pin': ds_info,
+                                  'datetime': '{}'.format(
+                                      datetime.now()
+                                  )
+                }
+                ]                
+
+                util.write_file(g = self.lock_file_onewire,
+                                mode = 'w',
+                                data = data_to_write
+                )
+                """
+                self.write_onewire_lock(ds_info = ds_info, status = False)
+                
+                #DEBUG VERIFY IF LOCKED
+                #READ
+                """
+                f = open(self.lock_file_onewire, 'r')
+                fff = f.readlines()
+                f.close()
+                """
+                fff = self.read_onewire_lock()
+                print('ONEWIRE_LOCK >>> fff[{}]: {}'.format(len(fff), fff))
+                #_
+                
+                return True
+            else:
+                print('ONEWIRE_LOCK >>> lock is blocked')
+
+                return False
+            
+        except FileNotFoundError:
+            print('ONEWIRE_LOCK >>> FileNotFoundError [create new lock file]: {}'.format(self.lock_file_onewire)
+            )
+
+            #CREATE FILE AND LOCK NOW
+            """
+            data_to_write = [{'status': 'True',
+                              'pin': ds_info,
+                              'datetime': '{}'.format(datetime.now()
+                              )
+            }
+            ]
+
+            util.write_file(g = self.lock_file_onewire,
+                            mode = 'w',
+                            data = data_to_write
+            )
+            """
+            #self.write_onewire_lock(ds_info, True)
+            self.write_onewire_lock(ds_info = ds_info, status = False)
+            
+            #READ
+            """
+            f = open(self.lock_file_onewire, 'r')
+            fff = f.readlines()
+            f.close()
+            """
+            fff = self.read_onewire_lock()
+            print('ONEWIRE_LOCK >>> FileNotFoundError [verify data has been written]: {}'.format(fff))
+            #_
+            
+            return True
+
+        #except:
+        #    raise SystemExit('ONEWIRE_LOCK >>> ERROR: onewire_lock file')
 
         
     def close_handler(self):

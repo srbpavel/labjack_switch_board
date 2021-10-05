@@ -12,12 +12,12 @@ def ts(time_and_date):
     return ts
 
 
-def write_file(g, data):
-    """write data=[] by lines to file"""
+def write_file(g = None, mode = 'w', data = None):
+    """write data = [] to file by lines (add's \n)"""
 
-    print('\ndata write to: {}'.format(g))
+    print('data write to: {}'.format(g))
     
-    ggg = open(g, 'a')
+    ggg = open(g, mode) # 'w' 'a'
 
     for line in data:
         ggg.write('{}\n'.format(line))

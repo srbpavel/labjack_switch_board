@@ -254,7 +254,9 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
                                        t4_conf.CONFIG_NAME)
 
         full_path_file_name = path.join(t4.backup_dir, file_name)
-        util.write_file(full_path_file_name, record_list)
+        util.write_file(g = full_path_file_name,
+                        mode = 'a',
+                        data = record_list)
 
         #ONCE or FOREVER
         origin_result = util.origin_info(origin,
