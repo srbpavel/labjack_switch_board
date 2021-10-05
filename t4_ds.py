@@ -409,7 +409,6 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
                                 record_list.append(d[name].record)
 
                         #ONEWIRE free LOCK
-                        #t4.free_onewire_lock(ds_info = pin)
                         t4.write_onewire_lock(ds_info = pin, status = True)
                         flag_lock_cycle = False
                         

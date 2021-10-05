@@ -2,6 +2,7 @@ CONFIG_NAME = 'ds_sensor'
 
 WORK_DIR = '/home/conan/soft/labjack_switch_board'
 BACKUP_DIR = 'csv'
+ONEWIRE_LOCK_FILE = 'onewire_dict.lock'
 
 ORIGIN = 'TERMINAL' #CRON / TERMINAL / SERVICE / python APP
 
@@ -18,6 +19,8 @@ FLAG_DEBUG_ROM = True #False
 #CYCLE sec * min: 1*1 / 10*1 / 60*5
 DELAY_SECONDS = 60 #1
 DELAY_MINUTES = 5 #1
+DELAY_ONEWIRE_LOCK = 1 #sec 
+DELAY_ONEWIRE_DS_CONVERT = 0.5 #sec
 
 #INFLUX
 INFLUX_SERVER = ''
