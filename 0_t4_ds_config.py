@@ -57,6 +57,7 @@ ALL_DS = [
      'DQ_PIN':8, #EIO0 -> DIO8 -> 8
      'MEASUREMENT':'dallas',
      'MACHINE':'hrnecek_s_ledem',
+     'ROMS':[''],
     },
     
     #DS_2
@@ -67,5 +68,6 @@ ALL_DS = [
      'DQ_PIN':14, #EIO6 -> DIO14 -> 14
      'MEASUREMENT':'dallas',
      'MACHINE':'mrazak',
+     'ROMS':[''],
     }
 ]

@@ -378,6 +378,7 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
                     if t4.debug_onewire_lock:
                         print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
 
+                    #ONEWIRE_LOCK
                     status_onewire_lock = t4.onewire_lock(ds_info = pin)
                     
                     if status_onewire_lock == True:
@@ -404,11 +405,25 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
                         last_branch = 0
                         d[name].search(i = rom_counter, branch = last_branch)
 
+                        #CHECK ROM's
+                        pin_roms = single_ds['ROMS']
+                        found_roms = [hex(s.get('rom')) for s in d[name].all_sensors]
+                        print('config_ROMs: {} found_ROMs: {}'.format(pin_roms, found_roms))
+                        
                         #MEASURE temperature from ALL_SENSORS
                         for single_sensor in d[name].all_sensors:
-                            d[name].measure(sensor = single_sensor) # + INFLUX WRITE
 
-                            if d[name].flag_csv:
+                            #HOTFIX - umravnit 
+                            rom_valid = False
+                            if hex(single_sensor['rom']) in pin_roms:
+                                rom_valid = True
+                                #print('rom {} in ROMs'.format(hex(single_sensor['rom'])))
+                                d[name].measure(sensor = single_sensor) # + INFLUX WRITE
+                            else:
+                                print('ROMS error @@@@@ WRONG BUS @@@@@')
+                            #_
+                                
+                            if d[name].flag_csv and rom_valid:
                                 record_list.append(d[name].record)
 
                         #ONEWIRE free LOCK
