@@ -47,3 +47,20 @@
 '0x10100'
 >>> ((1<<8)|(1<<16))
 65792
+
+
+#KILL ZOMBIE CRON PROCCESS
+import os
+
+cmd = "ps axu| egrep 't4_ds.py --config'|awk {'print $2'} > zombies_to_kill"
+os.system(cmd)
+
+f = open('zombies_to_kill', 'r')
+fff = f.readlines()
+f.close()
+
+for to_kill in fff:
+ cmd_kill = 'kill {}'.format(to_kill.strip())
+ print(cmd_kill)
+
+#

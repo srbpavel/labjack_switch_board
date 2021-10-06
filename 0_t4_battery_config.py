@@ -2,6 +2,7 @@ CONFIG_NAME = ''
 
 WORK_DIR = '/home/conan/soft/labjack_switch_board'
 BACKUP_DIR = 'csv'
+ONEWIRE_LOCK_FILE = 'onewire_dict.lock'
 
 ORIGIN = 'TERMINAL' #CRON / TERMINAL / SERVICE / python APP
 
@@ -10,6 +11,9 @@ LABJACK_PROTOCOL = 'TCP' #UDP / USB / ANY
 LABJACK_NAME = 'ANY' #ANY / -2 for DEMO
 
 FLAG_TEMPERATURE = True #False
+FLAG_DEBUG_DIO_INHIBIT = False
+FLAG_DEBUG_ROM = False
+FLAG_DEBUG_ONEWIRE_LOCK = False
 
 #SAMPLING
 DELAY_SAMPLE = 0.01

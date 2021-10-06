@@ -408,7 +408,7 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
                         #CHECK ROM's
                         pin_roms = single_ds['ROMS']
                         found_roms = [hex(s.get('rom')) for s in d[name].all_sensors]
-                        print('config_ROMs: {} found_ROMs: {}'.format(pin_roms, found_roms))
+                        print('@@@ config_ROMs: {} found_ROMs: {}\n'.format(pin_roms, found_roms))
                         
                         #MEASURE temperature from ALL_SENSORS
                         for single_sensor in d[name].all_sensors:
