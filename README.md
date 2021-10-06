@@ -33,6 +33,8 @@ TODO:
 
 
 DONE:
+ - negative temperature
+ - ONEWIRE_LOCK nestaci obcas se to proste potka, takze hlidam jestli sedej ROM's z configu s nalezenejma, jeste se nad tim zamyslet
  - async mereni ruznych portu / ale pres ONEWIRE_LOCK file protoze T4 je potreba hlidat pro nastaveni sbernice/pin jinak meri co nechce
  - DS hledani vice ROM
  - DS pro vice pinu
