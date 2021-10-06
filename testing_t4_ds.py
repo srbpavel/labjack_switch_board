@@ -12,7 +12,11 @@ import util
 
 
 class DS():
-    """one_wire MAX_INTEGRATED DALLAS temperature sensor"""
+    """
+    one_wire MAXIM INTEGRATED / DALLAS temperature sensor
+
+    tested only with DS18B20
+    """
     
     def __init__(self,
                  pin = None,
@@ -159,9 +163,7 @@ class DS():
         ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
         ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
 
-        #sleep(1)
 
-        
     def setup_bin_temp(self, sensor = None):
         function = 0x55 #MATCH
         numTX = 1
@@ -220,9 +222,6 @@ class DS():
         ljm.eWriteNameByteArray(t4.handler, "ONEWIRE_DATA_TX", numTX, dataTX)
         ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
 
-        #convert delay
-        sleep(self.convert_delay)
-
 
     def temperature(self, sensor = None):
         sensor['dataRX'] = ljm.eReadNameByteArray(t4.handler, "ONEWIRE_DATA_RX", sensor['numRX'])
@@ -239,6 +238,7 @@ class DS():
             if sensor['temperature_raw'] & 0x8000:
                 sensor['temperature_decimal'] = -((sensor['temperature_raw'] ^ 0xFFFF) + 1) * self.const_12bit_resolution
 
+                
     def measure(self, sensor = None):
         self.last_measure_time = datetime.now()
         self.last_measure_time_ts = util.ts(self.last_measure_time)

@@ -218,7 +218,7 @@ class DS():
         ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
 
         #convert delay
-        sleep(self.convert_delay)
+        #sleep(self.convert_delay)
 
 
     def temperature(self, sensor = None):
