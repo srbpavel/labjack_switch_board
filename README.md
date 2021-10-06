@@ -72,3 +72,5 @@ $python3 -i t4_ds.py --config t4_ds_config_pin_14.py
 
  * 2x CRON job's at the same time, dqPIN 8 waitting for pin 14 to finish and free T4
 ![Screenshot](pic/screen_shot_003.png)
+
+![t4](pic/t4_na_vcelarskym_stolecku.jpg){:width="250px"}
