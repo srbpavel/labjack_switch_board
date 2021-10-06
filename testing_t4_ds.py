@@ -9,6 +9,7 @@ from os import system, path
 from time import sleep 
 from datetime import datetime
 import util
+import easy_email
 
 
 class DS():
@@ -116,7 +117,8 @@ class DS():
              'rom':rom,
              'pathH':pathH,
              'pathL':pathH,
-             'path':path
+             'path':path,
+             'pin':self.pin
             }
         )
 
@@ -237,6 +239,20 @@ class DS():
             #NEGATIVE
             if sensor['temperature_raw'] & 0x8000:
                 sensor['temperature_decimal'] = -((sensor['temperature_raw'] ^ 0xFFFF) + 1) * self.const_12bit_resolution
+
+        #EMAIL WARNING
+        if sensor['temperature_decimal'] in (0, -self.const_12bit_resolution):
+            print('temperature EMAIL WARNING')
+            
+            easy_email.send_email(
+                msg_subject = easy_email.templates['temperature_zero']['sub'].format(sensor['pin']),
+                msg_body = easy_email.templates['temperature_zero']['body'].format(
+                    datetime.now(),
+                    str(sensor)
+                ),
+                debug=False,
+                machine='ruth + T4',
+                sms =True)
 
                 
     def measure(self, sensor = None):
@@ -410,23 +426,25 @@ def run_single_ds_object(single_ds = None,
                 for single_sensor in d[name].all_sensors:
 
                     #HOTFIX - umravnit 
-                    rom_valid = False
+                    ###rom_valid = False
                     if hex(single_sensor['rom']) in pin_roms:
-                        rom_valid = True
+                        ###rom_valid = True
                         #print('rom {} in ROMs'.format(hex(single_sensor['rom'])))
                         d[name].measure(sensor = single_sensor) # + INFLUX WRITE
                         repeat_object_call.append(False)
+
+                        ###if d[name].flag_csv and rom_valid:
+                        record_list.append(d[name].record)
+                            
                     else:
                         print('ROMS error @@@@@ WRONG BUS @@@@@ -> repeat object call to set corrrect bus/pin')
                         repeat_object_call.append(True)
 
-                    if d[name].flag_csv and rom_valid:
-                        record_list.append(d[name].record)    
 
                 #REPEAT OBJECT CALL + ONEWIRE free LOCK
                 if True in repeat_object_call:
                     t4.write_onewire_lock(ds_info = pin, status = True)
-                    sleep(1) #LET's give parallel call time to finish and free bus/pin
+                    sleep(5) #LET's give parallel call time to finish and free bus/pin
                     run_single_ds_object(single_ds = single_ds,
                                          delay = delay,
                                          origin = origin,
