@@ -57,8 +57,11 @@ $python3 -i t4_ds.py --config t4_ds_config_pin_14.py
 ```
 
 
- * temperature
+ * positive temperature
 ![Screenshot](pic/screen_shot_001.png)
+
+ * negative temperature
+![Screenshot](pic/screen_shot_005.png)
 
  * battery
 ![Screenshot](pic/screen_shot_002.png)
