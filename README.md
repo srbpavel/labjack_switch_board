@@ -24,6 +24,9 @@ MACHINE:
  - [DS18B20](https://www.maximintegrated.com/en/products/sensors/DS18B20.html?intcid=para) -> [pdf](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)
 
 
+![t4](pic/t4_scale.jpg)
+
+
 TODO:
  - dodelat taky jako service + sig_term pro ljm.close(handler) at to nekilluju na hulvata
  - otestovat influx schema na rpi_zero fotopastech
@@ -72,5 +75,3 @@ $python3 -i t4_ds.py --config t4_ds_config_pin_14.py
 
  * 2x CRON job's at the same time, dqPIN 8 waitting for pin 14 to finish and free T4
 ![Screenshot](pic/screen_shot_003.png)
-
-![t4](pic/t4_na_vcelarskym_stolecku.jpg)
