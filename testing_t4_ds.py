@@ -226,6 +226,22 @@ class DS():
 
 
     def temperature(self, sensor = None):
+        """
+        DS18B20 
+
+        TEMPERATURE(°C) DIGITAL OUTPUT(BINARY) DIGITAL OUTPUT(HEX)
+        +125            0000 0111 1101 0000    07D0h
+        +85*            0000 0101 0101 0000    0550h
+        +25.0625        0000 0001 1001 0001    0191h
+        +10.125         0000 0000 1010 0010    00A2h
+        +0.5            0000 0000 0000 1000    0008h
+        0               0000 0000 0000 0000    0000h
+        -0.5            1111 1111 1111 1000    FFF8h
+        -10.125         1111 1111 0101 1110    FF5Eh
+        -25.0625        1111 1110 0110 1111    FE6Fh
+        -55             1111 1100 1001 0000    FC90h
+        """
+
         sensor['dataRX'] = ljm.eReadNameByteArray(t4.handler, "ONEWIRE_DATA_RX", sensor['numRX'])
         sensor['temperature_raw'] = (int(sensor['dataRX'][0]) + (int(sensor['dataRX'][1])<<8))
         sensor['temperature_binary'] = bin(sensor['temperature_raw'])
@@ -239,7 +255,10 @@ class DS():
             #NEGATIVE
             if sensor['temperature_raw'] & 0x8000:
                 sensor['temperature_decimal'] = -((sensor['temperature_raw'] ^ 0xFFFF) + 1) * self.const_12bit_resolution
-
+                #foookup register
+                #bin(0xFFFF) ---> '0b1111111111111111' ---> dataRX: [255, 255, 255, 255, 255, 255, 255, 255, 255]
+                #-((0xFFFF ^ 0xFFFF) + 1) * 1/16 ---> -0.0625
+                
         #EMAIL WARNING
         if sensor['temperature_decimal'] in (0, -self.const_12bit_resolution):
             print('temperature EMAIL WARNING')
