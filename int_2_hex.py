@@ -36,8 +36,52 @@ class IntToHex():
                          14:'E',
                          15:'F'}
 
+        self.hex_dict_str = {'0':0,
+                             '1':1,
+                             '2':2,
+                             '3':3,
+                             '4':4,
+                             '5':5,
+                             '6':6,
+                             '7':7,
+                             '8':8,
+                             '9':9,
+                             'A':10,
+                             'B':11,
+                             'C':12,
+                             'D':13,
+                             'E':14,
+                             'F':15}
+
         self.int_2_hex()
 
+
+    def hex_2_int(self, h = '0x0'):
+        """hex to int verification 
+
+        >>> from int_2_hex import IntToHex
+
+        >>> rom = IntToHex(96928329000)
+        >>> rom.hex_str
+        '0x169160ED28'
+
+        >>> rom.hex_2_int('0x169160ED28')
+        96928329000
+        """
+
+        #if '0x' not in h:
+        #    h = '0x{}'.format(h)
+
+        data = h[2:] #h.split('x')[-1]
+        c = len(data)
+        n_sum = 0
+
+        for n in data:
+            c -= 1
+            n_sum += self.hex_dict_str[n.upper()] * pow(16, c)
+
+        return n_sum
+        
         
     def int_2_hex(self):
         """int transform to hex string"""
