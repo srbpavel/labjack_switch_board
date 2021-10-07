@@ -1,22 +1,23 @@
 class IntToHex():
     """
-    int to hex function
+    int to hex function()     {JUST FOR FUN AN TO LEARN SOME}
+
 
     >>>from int_2_hex import IntToHex
 
-    >>>rom = IntToHex(96928329000)
+    >>> rom = IntToHex(96928329000)
     >>> rom.hex_str
     '0x169160ED28'
 
     >>> eval(rom.hex_str)
     96928329000
 
-    >>>hex(eval(rom.hex_str))
+    >>> hex(eval(rom.hex_str))
     '0x169160ed28'
     """
     
     def __init__(self, integer = 0):
-        #self.hex_list = []
+        self.hex_list_negative = []
         self.integer = integer
         self.hex_str = ''
         self.hex_dict = {0:0,
@@ -57,7 +58,8 @@ class IntToHex():
 
 
     def hex_2_int(self, h = '0x0'):
-        """hex to int verification 
+        """
+        hex to int verification 
 
         >>> from int_2_hex import IntToHex
 
@@ -68,9 +70,6 @@ class IntToHex():
         >>> rom.hex_2_int('0x169160ED28')
         96928329000
         """
-
-        #if '0x' not in h:
-        #    h = '0x{}'.format(h)
 
         data = h[2:] #h.split('x')[-1]
         c = len(data)
@@ -88,18 +87,10 @@ class IntToHex():
         
         self.hex_loop(self.integer)
         self.hex_str = '0x{}'.format(self.hex_str[::-1])
-
-        """
-        self.hex_list.reverse()
-        self.hex_result = '0x{}'.format(''.join([str(h) for h in self.hex_list])) 
-
-        print('integer: {}\n{} hex\n{} verification'.format(
-            self.integer,
-            #self.hex_result,
-            self.hex_str,
-            hex(self.integer)))
-        """
-
+        self.hex_list = self.reverse_list(self.hex_list_negative)
+        self.hex_list_str = self.reverse_list(array = self.hex_list_negative,
+                                              join = True)
+        
 
     def hex_loop(self, i):
         """hex math loop"""
@@ -107,19 +98,47 @@ class IntToHex():
         zbytek = -int((i//16 - i/16) * 16)
         vysledek = (i - zbytek)/16
         
-        #self.hex_list.append(self.hex_dict[zbytek])
+        self.hex_list_negative.append(self.hex_dict[zbytek])
         self.hex_str += str(self.hex_dict[zbytek])
         
         if vysledek > 16:
             self.hex_loop(vysledek)
         else:
-            letter = self.hex_dict[vysledek]
-            #self.hex_list.append(letter)
-            self.hex_str += str(letter)
+            char = self.hex_dict[vysledek]
+            self.hex_list_negative.append(char)
+            self.hex_str += str(char)
+
+            
+    def reverse_list(self, array = None, join = False):
+        """
+        return reverse list without list.reversed() OR [::-1] func
+
+        join = True -> '0x....'
+
+        
+        OR
 
 
+        [array[n] for n in range(len(array)-1, -1, -1)]
+        
+        [array[r] for r in range(7, -1, -1)] --> range from 7 to -1(not included] by step -1 -> [7, 6, 5, 4, 3, 2, 1, 0]
+        """
+
+        array_negative = []
+        size = len(array)
+        c = size - 1 #len(array)-1
+
+        for _ in range(size):
+            array_negative.append(array[c])
+            c -= 1
+
+        if join:
+            array_negative = '0x{}'.format(''.join([str(r) for r in array_negative]))
+
+        return array_negative
+
+    
 """
 https://learn.sparkfun.com/tutorials/hexadecimal/converting-tofrom-decimal
 https://stackoverflow.com/questions/7278779/bit-wise-operation-unary-invert
-https://stackoverflow.com/questions/3940128/how-can-i-reverse-a-list-in-python
 """
