@@ -234,9 +234,9 @@ class DS():
         +85*            0000 0101 0101 0000    0550h
         +25.0625        0000 0001 1001 0001    0191h
         +10.125         0000 0000 1010 0010    00A2h
-        +0.5            0000 0000 0000 1000    0008h
+        +0.5            0000 0000 0000 1000    0008h --> pow(2,3) * 1/16 = +0.5
         0               0000 0000 0000 0000    0000h
-        -0.5            1111 1111 1111 1000    FFF8h
+        -0.5            1111 1111 1111 1000    FFF8h --> -(pow(2,2) + pow(2,1) + pow(2,0) + 1) * 1/16 = -0.5
         -10.125         1111 1111 0101 1110    FF5Eh
         -25.0625        1111 1110 0110 1111    FE6Fh
         -55             1111 1100 1001 0000    FC90h
@@ -252,26 +252,29 @@ class DS():
         else:
             sensor['temperature_decimal'] = sensor['temperature_raw'] * self.const_12bit_resolution
 
-            #NEGATIVE
+            #NEGATIVE bin(0x8000) -> '0b1000000000000000'
             if sensor['temperature_raw'] & 0x8000:
                 sensor['temperature_decimal'] = -((sensor['temperature_raw'] ^ 0xFFFF) + 1) * self.const_12bit_resolution
-                #foookup register
+                #foookup register: watch dataRX for 255 full_house
                 #bin(0xFFFF) ---> '0b1111111111111111' ---> dataRX: [255, 255, 255, 255, 255, 255, 255, 255, 255]
                 #-((0xFFFF ^ 0xFFFF) + 1) * 1/16 ---> -0.0625
                 
         #EMAIL WARNING
-        if sensor['temperature_decimal'] in (0, -self.const_12bit_resolution):
-            print('temperature EMAIL WARNING')
-            
+        if sensor['temperature_decimal'] in (0, -self.const_12bit_resolution) or sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
+            print('EMAIL WARNING: temperature {}'.format(sensor['temperature_decimal']))
+
             easy_email.send_email(
-                msg_subject = easy_email.templates['temperature_zero']['sub'].format(sensor['pin']),
+                msg_subject = easy_email.templates['temperature_zero']['sub'].format(
+                    sensor['pin'],
+                    sensor['temperature_decimal']
+                ),
                 msg_body = easy_email.templates['temperature_zero']['body'].format(
                     datetime.now(),
                     str(sensor)
                 ),
-                debug=False,
-                machine='ruth + T4',
-                sms =True)
+            debug=False,
+            machine='ruth + T4',
+            sms =True)
 
                 
     def measure(self, sensor = None):
