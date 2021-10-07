@@ -110,7 +110,6 @@ class DS():
         pathL = aValues[3] #ONEWIRE_ROM_BRANCHS_FOUND_L
         path = (int(pathH)<<8) + int(pathL)
 
-        #dict x object ?
         self.all_sensors.append(
             {'romH':romH,
              'romL':romL,
@@ -140,7 +139,6 @@ class DS():
         """rom search loop for 0xFO"""
 
         i += 1
-        #print('[{}]'.format(i))
         result_values = self.search_path()
         branch_found = result_values[3] #ONEWIRE_ROM_BRANCHS_FOUND_L
     
@@ -153,11 +151,10 @@ class DS():
                         branch = branch_found)
         else:
             self.set_onewire_path_l(0)
-            #print('>>> rom search done -> all_sensors: {}'.format(self.all_sensors))
 
 
     def set_onewire_path_l(self, value):
-        #print('set branch to: {}'.format(value))
+        """print('set branch to: {}'.format(value))"""
 
         aNames = ["ONEWIRE_PATH_L"]
         aValues = [value]
@@ -167,6 +164,8 @@ class DS():
 
 
     def setup_bin_temp(self, sensor = None):
+        """prepare bin temperature for exact rom"""
+
         function = 0x55 #MATCH
         numTX = 1
         dataTX = [0x44] #0x44 -> DS1822 Convert T command
@@ -198,6 +197,8 @@ class DS():
 
 
     def read_bin_temp(self, sensor = None):
+        """read bin temperature from scratchpad"""
+
         function = 0x55 #MATCH
         numTX = 1
         dataTX = [0xBE] #0xBE = DS1822 Read scratchpad command
@@ -255,12 +256,13 @@ class DS():
             #NEGATIVE bin(0x8000) -> '0b1000000000000000'
             if sensor['temperature_raw'] & 0x8000:
                 sensor['temperature_decimal'] = -((sensor['temperature_raw'] ^ 0xFFFF) + 1) * self.const_12bit_resolution
-                #foookup register: watch dataRX for 255 full_house
+                #foookup register: watch dataRX for 255 full_house array
                 #bin(0xFFFF) ---> '0b1111111111111111' ---> dataRX: [255, 255, 255, 255, 255, 255, 255, 255, 255]
                 #-((0xFFFF ^ 0xFFFF) + 1) * 1/16 ---> -0.0625
                 
-        #EMAIL WARNING
+        #EMAIL temperature WARNING
         if sensor['temperature_decimal'] in (0, -self.const_12bit_resolution) or sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
+        #if sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
             print('EMAIL WARNING: temperature {}'.format(sensor['temperature_decimal']))
 
             easy_email.send_email(
@@ -441,31 +443,39 @@ def run_single_ds_object(single_ds = None,
                 #CHECK ROM's
                 pin_roms = single_ds['ROMS']
                 found_roms = [hex(s.get('rom')) for s in d[name].all_sensors]
-                print('@@@ config_ROMs: {} found_ROMs: {}\n'.format(pin_roms, found_roms))
+                check_roms_msg = '@@@ config_ROMs: {} found_ROMs: {}\n'.format(pin_roms, found_roms)
+                print(check_roms_msg)
                         
                 #MEASURE temperature from ALL_SENSORS
                 repeat_object_call = []
                 for single_sensor in d[name].all_sensors:
-
-                    #HOTFIX - umravnit 
-                    ###rom_valid = False
                     if hex(single_sensor['rom']) in pin_roms:
-                        ###rom_valid = True
-                        #print('rom {} in ROMs'.format(hex(single_sensor['rom'])))
                         d[name].measure(sensor = single_sensor) # + INFLUX WRITE
                         repeat_object_call.append(False)
-
-                        ###if d[name].flag_csv and rom_valid:
                         record_list.append(d[name].record)
-                            
                     else:
-                        print('ROMS error @@@@@ WRONG BUS @@@@@ -> repeat object call to set corrrect bus/pin')
+                        print('ROMS {} error @@@@@ WRONG BUS @@@@@ -> repeat object call'.format(
+                            hex(single_sensor['rom'])))
+                        
                         repeat_object_call.append(True)
-
 
                 #REPEAT OBJECT CALL + ONEWIRE free LOCK
                 if True in repeat_object_call:
                     t4.write_onewire_lock(ds_info = pin, status = True)
+
+                    #EMAIL rom WARNING
+                    print('EMAIL WARNING: rom WRONG BUS')
+                    easy_email.send_email(
+                        msg_subject = easy_email.templates['rom']['sub'].format(name),
+                        msg_body = easy_email.templates['rom']['body'].format(
+                            datetime.now(),
+                            '{}\n{}'.format(check_roms_msg,
+                                            d[name].all_sensors)
+                        ),
+                        debug=False,
+                        machine='ruth + T4',
+                        sms =True)
+
                     sleep(5) #LET's give parallel call time to finish and free bus/pin
                     run_single_ds_object(single_ds = single_ds,
                                          delay = delay,
@@ -473,8 +483,6 @@ def run_single_ds_object(single_ds = None,
                                          d = d,
                                          record_list = record_list)
                         
-                #_
-
                 #ONEWIRE free LOCK
                 t4.write_onewire_lock(ds_info = pin, status = True)
                 flag_lock_cycle = False
