@@ -116,3 +116,10 @@ class IntToHex():
             letter = self.hex_dict[vysledek]
             #self.hex_list.append(letter)
             self.hex_str += str(letter)
+
+
+"""
+https://learn.sparkfun.com/tutorials/hexadecimal/converting-tofrom-decimal
+https://stackoverflow.com/questions/7278779/bit-wise-operation-unary-invert
+https://stackoverflow.com/questions/3940128/how-can-i-reverse-a-list-in-python
+"""
