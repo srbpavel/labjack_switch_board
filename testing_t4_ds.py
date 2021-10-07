@@ -106,6 +106,7 @@ class DS():
         romH = aValues[0] #ONEWIRE_SEARCH_RESULT_H
         romL = aValues[1] #ONEWIRE_SEARCH_RESULT_L
         rom = (int(romH)<<8) + int(romL)
+        rom_hex = str(hex(rom))#[2:] #0xf4fa9d8728 / same format as for my influxdb esp32 data
         pathH = aValues[2] #ONEWIRE_ROM_BRANCHS_FOUND_H
         pathL = aValues[3] #ONEWIRE_ROM_BRANCHS_FOUND_L
         path = (int(pathH)<<8) + int(pathL)
@@ -114,6 +115,7 @@ class DS():
             {'romH':romH,
              'romL':romL,
              'rom':rom,
+             'rom_hex':rom_hex, 
              'pathH':pathH,
              'pathL':pathH,
              'path':path,
@@ -124,7 +126,7 @@ class DS():
         if t4_conf.FLAG_DEBUG_ROM:
             print('rom: {} + hex: {} / romH[0]: {} + romL[1]: {} / path:{} / pathH[2]: {} + pathL[3]: {}\n'.format(
                 rom,
-                str(hex(rom))[2:], #same format as for my influxdb esp32 data
+                rom_hex,
                 romH,
                 romL,
                 path,
@@ -261,8 +263,10 @@ class DS():
                 #-((0xFFFF ^ 0xFFFF) + 1) * 1/16 ---> -0.0625
                 
         #EMAIL temperature WARNING
-        if sensor['temperature_decimal'] in (0, -self.const_12bit_resolution) or sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
+        #DEBUG
         #if sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
+        #if sensor['temperature_decimal'] < 20:
+        if sensor['temperature_decimal'] in (0, -self.const_12bit_resolution) or sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
             print('EMAIL WARNING: temperature {}'.format(sensor['temperature_decimal']))
 
             easy_email.send_email(
@@ -294,7 +298,7 @@ class DS():
             sensor['dataRX'][0],
             sensor['dataRX'][1]<<8,
             sensor['rom'],
-            hex(sensor['rom']),
+            sensor['rom_hex'],
             datetime.now(),
             sensor['dataRX'])
         )
@@ -319,14 +323,14 @@ class DS():
        
         self.record = self.template_csv.format(
             measurement = self.influx_measurement,
-            host = self.influx_host,
-            machine = self.influx_machine_id,
-            ds_id = d['rom'],
-            ds_carrier = self.influx_ds_carrier,
-            ds_valid = self.influx_ds_valid,
-            ds_decimal = d['temperature_decimal'],
-            ds_pin = self.dqPin,
-            ts = self.last_measure_time_ts
+            host = self.influx_host, #str
+            machine = self.influx_machine_id, #str
+            ds_id = d['rom'], #int / not hex
+            ds_carrier = self.influx_ds_carrier, #str
+            ds_valid = self.influx_ds_valid, #str
+            ds_decimal = d['temperature_decimal'], #float
+            ds_pin = self.dqPin, #str(int())
+            ts = self.last_measure_time_ts #timestamp [ms]
         )
 
 
@@ -346,14 +350,14 @@ class DS():
             precision = self.influx_precision,
             token = self.influx_token,
             measurement = self.influx_measurement,
-            host = self.influx_host, #TAG
-            machine_id = self.influx_machine_id, #TAG
-            ds_id = d['rom'], #TAG
-            ds_carrier = self.influx_ds_carrier, #TAG
-            ds_valid = self.influx_ds_valid, #TAG
-            ds_pin = self.dqPin, #TAG
-            ds_decimal = d['temperature_decimal'], #FIELD
-            ts = self.last_measure_time_ts
+            host = self.influx_host, #TAG: str
+            machine_id = self.influx_machine_id, #TAG: str
+            ds_id = d['rom'], #TAG: str(int()) !!! not hex
+            ds_carrier = self.influx_ds_carrier, #TAG: str
+            ds_valid = self.influx_ds_valid, #TAG: str [true/false]
+            ds_pin = self.dqPin, #TAG: str(int())
+            ds_decimal = d['temperature_decimal'], #FIELD: float
+            ts = self.last_measure_time_ts #timestamp [ms]
         )
 
         if self.flag_debug_influx:
@@ -442,21 +446,19 @@ def run_single_ds_object(single_ds = None,
 
                 #CHECK ROM's
                 pin_roms = single_ds['ROMS']
-                found_roms = [hex(s.get('rom')) for s in d[name].all_sensors]
+                found_roms = [s.get('rom_hex') for s in d[name].all_sensors]
                 check_roms_msg = '@@@ config_ROMs: {} found_ROMs: {}\n'.format(pin_roms, found_roms)
                 print(check_roms_msg)
                         
                 #MEASURE temperature from ALL_SENSORS
                 repeat_object_call = []
                 for single_sensor in d[name].all_sensors:
-                    if hex(single_sensor['rom']) in pin_roms:
+                    if single_sensor['rom_hex'] in pin_roms:
                         d[name].measure(sensor = single_sensor) # + INFLUX WRITE
                         repeat_object_call.append(False)
                         record_list.append(d[name].record)
                     else:
-                        print('ROMS {} error @@@@@ WRONG BUS @@@@@ -> repeat object call'.format(
-                            hex(single_sensor['rom'])))
-                        
+                        print('ROMS {} error @@@@@ WRONG BUS @@@@@ -> repeat object call'.format(single_sensor['rom_hex']))
                         repeat_object_call.append(True)
 
                 #REPEAT OBJECT CALL + ONEWIRE free LOCK
