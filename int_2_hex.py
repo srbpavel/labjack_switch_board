@@ -103,7 +103,8 @@ class IntToHex():
         """
         return reverse list without usage of list.reversed() OR [::-1]
 
-        join = True -> '0x....'
+        join = True -> return string '0x....'
+        
 
         
         OR
