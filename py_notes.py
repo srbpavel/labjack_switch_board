@@ -54,10 +54,17 @@
 #KILL ZOMBIE CRON PROCCESS
 import os
 
-cmd = "ps axu| egrep 't4_ds.py --config'|awk {'print $2'} > zombies_to_kill"
+pattern = 't4_ds.py'
+log_file = 'zombies_to_kill.log'
+
+cmd = "ps axu| egrep '{} --config'|awk {'print $2'} > {}".format(
+ pattern,
+ log_file
+)
+
 os.system(cmd)
 
-f = open('zombies_to_kill', 'r')
+f = open(log_file, 'r')
 fff = f.readlines()
 f.close()
 
