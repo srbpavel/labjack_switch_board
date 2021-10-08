@@ -58,6 +58,8 @@ class DS():
         
         self.influx_template_curl = t4_conf.TEMPLATE_CURL
 
+        self.backup_influx = t4_conf.BACKUP_INFLUX
+        
         self.template_csv = t4_conf.TEMPLATE_CSV
         self.template_csv_header = t4_conf.TEMPLATE_CSV_HEADER
 
@@ -310,7 +312,11 @@ class DS():
         if self.flag_influx:
             self.write_influx(d = sensor)
 
-            
+            if self.backup_influx.get('STATUS', False):
+                #print('BACKUP influx: {}\n'.format(self.backup_influx))
+                self.write_backup_influx(d = sensor)
+
+                
     def write_csv(self, d = None):
         """
         prepare csv backup record
@@ -365,6 +371,38 @@ class DS():
 
         ###
         system(cmd) #test via requests
+
+
+    def write_backup_influx(self, d = None):
+        """backup influx machine"""
+
+        b = self.backup_influx
+        
+        b_cmd = self.influx_template_curl.format(
+            server = b['INFLUX_SERVER'],
+            port = b['INFLUX_PORT'],
+            org = b['INFLUX_ORG'],
+            bucket = b['INFLUX_BUCKET'],
+            precision = b['INFLUX_PRECISION'],
+            token = b['INFLUX_TOKEN']
+            ,
+            measurement = self.influx_measurement,
+            host = self.influx_host, #TAG: str
+            machine_id = self.influx_machine_id, #TAG: str
+            ds_id = d['rom'], #TAG: str(int()) !!! not hex
+            ds_carrier = b['INFLUX_DEFAULT_CARRIER'], #TAG: str
+            ds_valid = b['INFLUX_DEFAULT_VALID_STATUS'], #TAG: str [true/false]
+            ds_pin = self.dqPin, #TAG: str(int())
+            ds_decimal = d['temperature_decimal'], #FIELD: float
+            ts = self.last_measure_time_ts #timestamp [ms]
+        )
+
+        if self.flag_debug_influx:
+            print('\nbackup_influx{}'.format(b_cmd.replace(self.influx_token, '...')))
+
+        print('   + backup_influx')
+        system(b_cmd)
+        
 
 
 ###GLOBAL
