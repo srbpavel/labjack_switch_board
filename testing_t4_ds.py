@@ -384,8 +384,7 @@ class DS():
             org = b['INFLUX_ORG'],
             bucket = b['INFLUX_BUCKET'],
             precision = b['INFLUX_PRECISION'],
-            token = b['INFLUX_TOKEN']
-            ,
+            token = b['INFLUX_TOKEN'],
             measurement = self.influx_measurement,
             host = self.influx_host, #TAG: str
             machine_id = self.influx_machine_id, #TAG: str
