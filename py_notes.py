@@ -72,4 +72,9 @@ for to_kill in fff:
  cmd_kill = 'kill {}'.format(to_kill.strip())
  print(cmd_kill)
 
-#
+#DS ROM parts to analyze single bit
+rom='169160ed28'
+len(rom)
+
+[rom[r:r+2] for r in range(0, rom_len, 2)]
+>>>['16', '91', '60', 'ed', '28']

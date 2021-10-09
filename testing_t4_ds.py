@@ -282,7 +282,7 @@ class DS():
                 ),
             debug=False,
             machine='ruth + T4',
-            sms =True)
+            sms=False)
 
                 
     def measure(self, sensor = None):
@@ -514,7 +514,7 @@ def run_single_ds_object(single_ds = None,
                         ),
                         debug=False,
                         machine='ruth + T4',
-                        sms =True)
+                        sms=False)
 
                     sleep(5) #LET's give parallel call time to finish and free bus/pin
                     run_single_ds_object(single_ds = single_ds,
