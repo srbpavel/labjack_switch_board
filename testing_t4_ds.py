@@ -589,8 +589,13 @@ if __name__ == "__main__":
     #LABJACK CONNECTION
     t4 = T4(config = module_name)
 
-    #DIO_INHIBIT + DIO_ANALOG_ENABLE
-    t4.set_dio_inhibit()
+    #DQ_PINS
+    dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] == True]
+    #DIO_INHIBIT
+    t4.set_dio_inhibit(pins = dq_pin_numbers)
+    #DIO_ANALOG_ENABLE
+    #now TURN OFF always auto-configured AIN4-AIN11 https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
+    t4.set_dio_analog(pins = [0]) #dq_pin_numbers / DAT DO CONFIGU
     
     #CRON once or TERMINAL/SERVICE loop
     run_all_ds(seconds = t4_conf.DELAY_SECONDS,
