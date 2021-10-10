@@ -204,7 +204,7 @@ class T4():
         #>>> hex(0xFFFFF - (1<<8 | 1<<14))
         #'0xfbeff'
 
-        dq_pin_numbers = [pin.get('DQ_PIN') for pin in self.config.ALL_DS]
+        dq_pin_numbers = [pin.get('DQ_PIN') for pin in self.config.ALL_DS if pin['FLAG'] == True]
 
         dio_inhibit_cmd = '{}{}))'.format(
             'hex(0xFFFFF - (',
@@ -217,7 +217,7 @@ class T4():
         
         if self.config.FLAG_DEBUG_DIO_INHIBIT:
             self.read_dio_inhibit()
-            self.read_dio_analog_enable()
+            #self.read_dio_analog_enable()
 
             print('dq_pin_numbers: {}'.format(dq_pin_numbers))
             print('dio_inhibit_cmd: {}'.format(dio_inhibit_cmd))
@@ -232,15 +232,59 @@ class T4():
                        dio_inhibit_int)
 
         #podle me ze vsech udela DIO_ANALOG_ENABLE -> 0
+        """
+        SAMOZREJME ZE JO, PAC SIS TO BLBE PRECET A MAS TAM POSILAT 0b100000100000000
         ljm.eWriteName(self.handler,
                        "DIO_ANALOG_ENABLE",
                        0x00000)
+        """
 
-        if self.config.FLAG_DEBUG_DIO_INHIBIT:
-            self.read_dio_inhibit()
+        """
+        >>> (1<<8 | 1<<14)
+        16640
+        >>> hex(1<<8 | 1<<14)
+        '0x4100'
+        >>> bin(1<<8 | 1<<14)
+        '0b100000100000000'
+        """
+
+        #FLEXIBLE I/O -> DIO4-DIO11 --> fixed I/O lines ---> can be configured for ANALOG input/output
+        #                DIO12-DIO19 --> dedicated (digital only) I/O lines  
+        dio_analog_enable_cmd = '{}'.format(
+            ' | '.join(['1<<{}'.format(pin) for pin in dq_pin_numbers if pin <= 11])
+        )
+
+        print('dio_analog_enable_cmd: {}'.format(dio_analog_enable_cmd))
+        if dio_analog_enable_cmd:
+            dio_analog_enable_hex_str = hex(eval(dio_analog_enable_cmd))
+            dio_analog_enable_int = int(dio_analog_enable_hex_str, 16)
+            dio_analog_enable_bin = bin(dio_analog_enable_int)
+
+            if self.config.FLAG_DEBUG_DIO_INHIBIT:
+                self.read_dio_analog_enable()
+
+                print('dq_pin_numbers: {}'.format(dq_pin_numbers))
+                print('dio_analog_enable_cmd: {}'.format(dio_analog_enable_cmd))
+                print('dio_analog_enable_hex_str: {}'.format(dio_analog_enable_hex_str))
+                print('dio_analog_enable_int: {}'.format(dio_analog_enable_int))
+                print('dio_analog_enable_bin: {}'.format(dio_analog_enable_bin))
+
+                print('{}{}'.format(
+                    ' ' * 23,
+                    '21098765432109876543210'[-3 - max(dq_pin_numbers):])
+                )
+
+            #"""
+            #PROC VLASTNE DELAM ANALOG ENABLE ? 
+            ljm.eWriteName(self.handler,
+                           "DIO_ANALOG_ENABLE",
+                           #dio_analog_enable_int)
+                           0x00000)
+
             self.read_dio_analog_enable()
-        
-        
+            #"""
+            
+            
     def read_dio_inhibit(self):
         mb_name = 'DIO_INHIBIT'
         template_array = '{} bin:{} / hex:{}'
