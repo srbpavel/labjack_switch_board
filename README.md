@@ -1,6 +1,7 @@
 **labjack_switch_board:: [T4](https://labjack.com/products/t4)**
 * analog input: battery voltage
 * digital input: one wire dallas temperature sensors
+* not yet - wheatstone bridge
 
 
 
