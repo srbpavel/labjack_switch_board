@@ -292,7 +292,9 @@ class T4():
         ljm.eWriteName(self.handler,
                        "DIO_ANALOG_ENABLE",
                        dio_analog_enable_int)
+                       #0x00000)
 
+        
         #AFTER
         if self.config.FLAG_DEBUG_DIO_INHIBIT:
             self.read_dio_analog_enable()
