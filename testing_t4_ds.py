@@ -589,13 +589,22 @@ if __name__ == "__main__":
     #LABJACK CONNECTION
     t4 = T4(config = module_name)
 
+    #tohle asi neni na spravnym miste, pac to urcite ten konkurencni proces prepina, nez se zacnou testovat ROM's
+    #
     #DQ_PINS
     dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] == True]
     #DIO_INHIBIT
-    t4.set_dio_inhibit(pins = dq_pin_numbers)
+    t4.set_dio_inhibit(pins = dq_pin_numbers,
+                       value = 1)
     #DIO_ANALOG_ENABLE
     #now TURN OFF always auto-configured AIN4-AIN11 https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
-    t4.set_dio_analog(pins = [0]) #dq_pin_numbers / DAT DO CONFIGU
+    t4.set_dio_analog(pins = dq_pin_numbers, #[0],
+                      value = 0) #dq_pin_numbers / DAT DO CONFIGU
+
+    #DIO_DIRECTION / 0 as input / 1 as ouput
+    #https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
+    #https://labjack.com/support/datasheets/t-series/digital-io
+    #_
     
     #CRON once or TERMINAL/SERVICE loop
     run_all_ds(seconds = t4_conf.DELAY_SECONDS,

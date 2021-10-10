@@ -178,7 +178,7 @@ class T4():
         return temperature_celsius
 
 
-    def set_dio_inhibit(self, pins = None):
+    def set_dio_inhibit(self, pins = None, value = 1):
         """
         https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
 
@@ -207,7 +207,7 @@ class T4():
 
         dio_inhibit_cmd = '{}{}))'.format(
             'hex(0xFFFFF - (',
-            ' | '.join(['1<<{}'.format(pin) for pin in pins])
+            ' | '.join(['{}<<{}'.format(value, pin) for pin in pins])
         )
 
         dio_inhibit_hex_str = '0'
@@ -246,7 +246,7 @@ class T4():
             self.read_dio_inhibit()
 
         
-    def set_dio_analog(self, pins = None):
+    def set_dio_analog(self, pins = None, value = 1):
         """
         FLEXIBLE I/O -> DIO4-DIO11 --> fixed I/O lines ---> can be configured for ANALOG input/output
                         DIO12-DIO19 --> dedicated (digital only) I/O lines  
@@ -257,10 +257,10 @@ class T4():
         """
 
         dio_analog_enable_cmd = '{}'.format(
-            ' | '.join(['1<<{}'.format(pin) for pin in pins if pin <= 11])
+            ' | '.join(['{}<<{}'.format(value, pin) for pin in pins if pin <=11])
         )
 
-        dio_analog_enable_hex_str = '0'
+        dio_analog_enable_hex_str = '0x00000' # '0'
         if pins and dio_analog_enable_cmd:
             dio_analog_enable_hex_str = hex(eval(dio_analog_enable_cmd))
 
@@ -325,13 +325,14 @@ class T4():
                                     bin_str,
                                     hex(array_analog_enable)))
 
+        
     def show_bin_ruler(self,
                        bin_str = '',
                        space_count = 0,
                        new_line = None):
 
-        ruler = '9876543210' * 3
-
+        ruler = ''.join([str(r) for r in range(9, -1, -1)]) * 3
+        
         line_start = ''
         line_end = ''
         if new_line == 'start':
