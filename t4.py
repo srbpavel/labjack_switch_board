@@ -211,10 +211,9 @@ class T4():
             ' | '.join(['1<<{}'.format(pin) for pin in pins])
         )
 
+        dio_inhibit_hex_str = '0' #eval('{}'.format(0))
         if pins and dio_inhibit_cmd:
             dio_inhibit_hex_str = eval(dio_inhibit_cmd)
-        else:
-            dio_inhibit_hex_str = eval('{}'.format(0))
 
         dio_inhibit_int = int(dio_inhibit_hex_str, 16)
         dio_inhibit_bin = bin(dio_inhibit_int)
@@ -227,7 +226,23 @@ class T4():
             print('dio_inhibit_hex_str: {}'.format(dio_inhibit_hex_str))
             print('dio_inhibit_hex_int: {}'.format(dio_inhibit_int))
             print('dio_inhibit_hex_bin: {}'.format(dio_inhibit_bin))
-            print('{}98765432109876543210'.format(' ' * 23))
+
+            #print('{}98765432109876543210'.format(' ' * 23))
+            print('{}{}'.format(' ' * 23,
+                                '98765432109876543210'[-len(dio_inhibit_bin) + 2:])
+            )
+
+            """
+            valid_pins = [pin for pin in pins]
+            pin_max = 0
+            if valid_pins:
+                pin_max = max(valid_pins)
+
+            print('{}{}'.format(
+                ' ' * 23,
+                '21098765432109876543210'[-1 - pin_max:])
+            )
+            """
             
         ljm.eWriteName(self.handler,
                        "DIO_INHIBIT",
@@ -250,10 +265,9 @@ class T4():
             ' | '.join(['1<<{}'.format(pin) for pin in pins if pin <= 11])
         )
 
+        dio_analog_enable_hex_str = '0' #hex(eval('{}'.format(0)))
         if pins and dio_analog_enable_cmd:
             dio_analog_enable_hex_str = hex(eval(dio_analog_enable_cmd))
-        else:
-            dio_analog_enable_hex_str = hex(eval('{}'.format(0)))
 
         dio_analog_enable_int = int(dio_analog_enable_hex_str, 16)
         dio_analog_enable_bin = bin(dio_analog_enable_int)
@@ -267,15 +281,20 @@ class T4():
             print('dio_analog_enable_int: {}'.format(dio_analog_enable_int))
             print('dio_analog_enable_bin: {}'.format(dio_analog_enable_bin))
 
+            print('{}{}'.format(' ' * 25,
+                                '98765432109876543210'[-len(dio_analog_enable_bin) + 2:])
+            )
+            """
             valid_pins = [pin for pin in pins if pin <= 11]
             pin_max = 0
             if valid_pins:
                 pin_max = max(valid_pins)
-            
+
             print('{}{}'.format(
                 ' ' * 25,
                 '21098765432109876543210'[-1 - pin_max:])
             )
+            """
 
         ljm.eWriteName(self.handler,
                        "DIO_ANALOG_ENABLE",
@@ -289,9 +308,14 @@ class T4():
         template_array = '{} bin: {} / hex: {}'
         array_inibit = int(ljm.eReadName(self.handler, mb_name))
 
-        print('\n{}98765432109876543210'.format(' ' * 18))
+        bin_str = bin(array_inibit)
+        
+        print('\n{}{}'.format(' ' * 19,
+                              '98765432109876543210'[-len(bin_str) + 2:])
+        )
+        
         print(template_array.format(mb_name,
-                                    bin(array_inibit),
+                                    bin_str,
                                     hex(array_inibit)))
 
         
@@ -300,6 +324,12 @@ class T4():
         template_array = '{} bin: {} / hex: {}'
         array_analog_enable = int(ljm.eReadName(self.handler, mb_name))
 
+        bin_str = bin(array_analog_enable)
+        
+        print('\n{}{}'.format(' ' * 25,
+                              '98765432109876543210'[-len(bin_str) + 2:])
+        )
+        
         print(template_array.format(mb_name,
-                                    bin(array_analog_enable),
+                                    bin_str,
                                     hex(array_analog_enable)))

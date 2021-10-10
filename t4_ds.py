@@ -466,7 +466,7 @@ if __name__ == "__main__":
     t4 = T4(config = module_name)
 
     #DIO_INHIBIT + DIO_ANALOG_ENABLE
-    t4.set_dio_inhibit()
+    t4.set_dio_inhibit() #tohle asi neni na spravnym miste, pac to urcite ten konkurencni proces prepina, nez se zacnou testovat ROM's
     
     #CRON once or TERMINAL/SERVICE loop
     run_all_ds(seconds = t4_conf.DELAY_SECONDS,
