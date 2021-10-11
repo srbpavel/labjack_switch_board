@@ -16,9 +16,10 @@ MACHINE:
  - ```#pip3 install labjack-ljm```
  - ```#pip3 show labjack-ljm```
  -
- - [ain](https://labjack.com/support/datasheets/t-series/ain)
+ - [ain](https://labjack.com/support/datasheets/t-series/ain) -> [input cheat sheet](https://github.com/srbpavel/labjack_switch_board/blob/main/pic/t4_io_001.png)
  - [db15](https://labjack.com/support/datasheets/t-series/db15)
  - [digital-io / flexible-io](https://labjack.com/support/datasheets/t-series/digital-io/flexible-io)
+ -
  - [digital-io / one_wire](https://labjack.com/support/datasheets/t-series/digital-io/1-wire)
  - [app_notes / one_wire](https://labjack.com/support/app-notes/1-wire)
  -
