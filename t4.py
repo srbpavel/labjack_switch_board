@@ -180,6 +180,8 @@ class T4():
 
     def set_dio_inhibit(self, pins = None, value = 1):
         """
+        TURN ON/OFF always auto-configured AIN4-AIN11 https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
+
         https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
 
         FLEXIBLE I/0: EIO0 as digital I/O #EIO0 -> DIO8 -> 8  
@@ -231,10 +233,6 @@ class T4():
                                             space_count = 23,
                                             new_line = 'end')
             print(bin_ruler)
-            
-            #print('{}{}'.format(' ' * 23,
-            #                    '98765432109876543210'[-len(dio_inhibit_bin) + 2:])
-            #)
 
         #WRITE
         ljm.eWriteName(self.handler,
@@ -260,7 +258,7 @@ class T4():
             ' | '.join(['{}<<{}'.format(value, pin) for pin in pins if pin <=11])
         )
 
-        dio_analog_enable_hex_str = '0x00000' # '0'
+        dio_analog_enable_hex_str = '0x00000' #'0'
         if pins and dio_analog_enable_cmd:
             dio_analog_enable_hex_str = hex(eval(dio_analog_enable_cmd))
 
@@ -282,11 +280,6 @@ class T4():
                                             new_line = 'end')
             
             print(bin_ruler)
-            """
-            print('{}{}'.format(' ' * 25,
-                                '98765432109876543210'[-len(dio_analog_enable_bin) + 2:])
-            )
-            """
             
         #WRITE
         ljm.eWriteName(self.handler,
@@ -298,7 +291,17 @@ class T4():
         #AFTER
         if self.config.FLAG_DEBUG_DIO_INHIBIT:
             self.read_dio_analog_enable()
-            
+
+
+    def set_dio_direction(self, pins = None, value = 1):
+        """
+        DIO_DIRECTION / 0 as input / 1 as ouput
+        https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
+        https://labjack.com/support/datasheets/t-series/digital-io
+        """
+        
+        pass
+    
             
     def read_dio_inhibit(self):
         mb_name = 'DIO_INHIBIT'

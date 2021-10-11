@@ -403,7 +403,6 @@ class DS():
         system(b_cmd)
         
 
-
 ###GLOBAL
 def t4_header_info(i = 0, delay = 10):
     temperature_str = ''
@@ -517,6 +516,7 @@ def run_single_ds_object(single_ds = None,
                         sms=False)
 
                     sleep(5) #LET's give parallel call time to finish and free bus/pin
+
                     run_single_ds_object(single_ds = single_ds,
                                          delay = delay,
                                          origin = origin,
@@ -589,22 +589,23 @@ if __name__ == "__main__":
     #LABJACK CONNECTION
     t4 = T4(config = module_name)
 
-    #tohle asi neni na spravnym miste, pac to urcite ten konkurencni proces prepina, nez se zacnou testovat ROM's
-    #
+    """
+    1 - tohle asi neni na spravnym miste, pac to urcite ten konkurencni proces prepina, nez se zacnou testovat ROM's
+    2 - mozna to nezapisovat pojednom ale jako array najednou
+    """
     #DQ_PINS
     dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] == True]
+
     #DIO_INHIBIT
     t4.set_dio_inhibit(pins = dq_pin_numbers,
                        value = 1)
     #DIO_ANALOG_ENABLE
-    #now TURN OFF always auto-configured AIN4-AIN11 https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
     t4.set_dio_analog(pins = dq_pin_numbers, #[0],
                       value = 0) #dq_pin_numbers / DAT DO CONFIGU
 
-    #DIO_DIRECTION / 0 as input / 1 as ouput
-    #https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
-    #https://labjack.com/support/datasheets/t-series/digital-io
-    #_
+    #DIO_DIRECTION
+    t4.set_dio_direction(pins = dq_pin_numbers,
+                         value = 1)
     
     #CRON once or TERMINAL/SERVICE loop
     run_all_ds(seconds = t4_conf.DELAY_SECONDS,
