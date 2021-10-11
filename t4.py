@@ -56,7 +56,8 @@ class T4():
         self.ip = ljm.numberToIP(self.info[3])
 
         self.const_kelvin = 273.15
-
+        self.bin_ruler = ''.join([str(r) for r in range(9, -1, -1)]) * 3 #9876543210
+        
         self.debug_onewire_lock = self.config.FLAG_DEBUG_ONEWIRE_LOCK
         
         print('origin: {} \ninfo: {}\nip:{}\n'.format(self.origin,
@@ -352,20 +353,16 @@ class T4():
         0b111111011111011111111 
         """
         
-        ruler = ''.join([str(r) for r in range(9, -1, -1)]) * 3
-        
         line_start = ''
         line_end = ''
         if new_line == 'start':
             line_start = '\n'
         elif new_line == 'end':
             line_end = '\n'
-
-
         
         return '{}{}{}{}{}'.format(line_start, # '' OR '\n'
                                    ' ' * space_count, # many spaces
-                                   ruler[-len(bin_str) + 2:], # ...2109876543210
+                                   self.bin_ruler[-len(bin_str) + 2:], # ...2109876543210
                                    ' / ruler', #NOTE
                                    line_end) # '' OR '\n'
     
