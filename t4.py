@@ -66,6 +66,13 @@ class T4():
 
         
     def read_onewire_lock(self):
+        """
+        one_wire read LOCK status
+
+        true -> unlock
+        false -> lock
+        """
+
         f = open(self.lock_file_onewire, 'r')
         fff = f.readlines()
         f.close()
@@ -75,7 +82,7 @@ class T4():
 
     def write_onewire_lock(self, ds_info = None, status = False):
         """
-        one_wire LOCK/UNLOCK bus for read/write
+        write one_wire status LOCK/UNLOCK
         
         true -> unlock
         false -> lock
@@ -91,7 +98,8 @@ class T4():
                           )
         }
         ]
-        
+
+        #WRITE
         util.write_file(g = self.lock_file_onewire,
                         mode = 'w',
                         data = data_to_write
@@ -300,7 +308,7 @@ class T4():
         https://labjack.com/support/datasheets/t-series/digital-io
         """
         
-        pass
+        pass #FUTURE USE
     
             
     def read_dio_inhibit(self):
@@ -335,7 +343,15 @@ class T4():
                        bin_str = '',
                        space_count = 0,
                        new_line = None):
+        """
+        ruler to help identify bit possition
 
+        example: 0 for 14 and 8 
+                      
+          098765432109876543210 / ruler
+        0b111111011111011111111 
+        """
+        
         ruler = ''.join([str(r) for r in range(9, -1, -1)]) * 3
         
         line_start = ''
@@ -344,8 +360,12 @@ class T4():
             line_start = '\n'
         elif new_line == 'end':
             line_end = '\n'
-            
-        return '{}{}{}{}'.format(line_start,
-                                 ' ' * space_count,
-                                 ruler[-len(bin_str) + 2:],
-                                 line_end)
+
+
+        
+        return '{}{}{}{}{}'.format(line_start, # '' OR '\n'
+                                   ' ' * space_count, # many spaces
+                                   ruler[-len(bin_str) + 2:], # ...2109876543210
+                                   ' / ruler', #NOTE
+                                   line_end) # '' OR '\n'
+    
