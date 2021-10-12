@@ -1,0 +1,12 @@
+###REMOVE LOG WATCH
+
+ruth$
+watch -n1 'cat -n 1_testing_cron_ds_8.log 2_testing_cron_ds_8.log'
+watch -n1 'cat -n 1_testing_cron_ds_14.log 2_testing_cron_ds_14.log'
+
+spongebob$
+ssh -t -p 11472 conan@ruth 'cd ~/soft/labjack_switch_board ; screen -r 29759.testing_DS'
+ssh -t -p 11472 conan@ruth 'cd ~/soft/labjack_switch_board ; screen -r 19527.testing_DS_14'
+
+
+###

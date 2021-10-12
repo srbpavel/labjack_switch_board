@@ -101,7 +101,7 @@ class IntToHex():
             
     def reverse_list(self, array = [0], join = False):
         """
-        return reverse list without usage of list.reversed() OR [::-1]
+        return reverse list without usage of list.reversed() OR [::-1] [start:stop:step]'
 
         join = True -> return string '0x....'
         
