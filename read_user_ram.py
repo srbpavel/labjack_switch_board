@@ -1,6 +1,5 @@
 from labjack import ljm
 from t4 import T4
-from time import sleep
 import util
 from datetime import datetime
 
@@ -43,14 +42,14 @@ def write_ram_n(names = None,
 
     #BEFORE
     read_info = read_ram_n(names = names)
-    print('before: {}'.format(read_info))
+    print('before[n]: {}'.format(read_info))
     
     #WRITE
     ljm.eWriteNames(t4.handler, len(names), names, values)
     
     #AFTER
     read_info = read_ram_n(names = names)
-    print('after: {}'.format(read_info))
+    print('after[n]: {}'.format(read_info))
 
 
 def write_ram_a(addresses = None,
@@ -66,7 +65,7 @@ def write_ram_a(addresses = None,
 
     #BEFORE
     read_info = read_ram_a(addresses = addresses)
-    print('before: {}'.format(read_info))
+    print('before[a]: {}'.format(read_info))
     
     #WRITE
     ljm.eWriteAddresses(t4.handler,
@@ -77,7 +76,7 @@ def write_ram_a(addresses = None,
     
     #AFTER
     read_info = read_ram_a(addresses = addresses)
-    print('after: {}'.format(read_info))
+    print('after[a]: {}'.format(read_info))
 
 
 
@@ -88,8 +87,8 @@ def parse_ram_data(data = None):
     d = {'status': data[0],
          'pin': data[1]}
     
-    d['ts'] = float('{}.{}'.format(str(data[2])[:-2],
-                                   str(data[3])[1:-2]))
+    d['ts'] = float('{}.{}'.format(str(data[2])[:-2], #remove suffix .0
+                                   str(data[3])[1:-2])) # remove prefix 1 and suffix .0
     
     d['datetime'] = datetime.fromtimestamp(d['ts'])
     
@@ -125,9 +124,9 @@ if __name__ == "__main__":
     pin = 14
 
     ts = datetime.timestamp(now)
-    ts_sec, ts_ms = [t for t in str(ts).split('.')]
+    ts_sec, ts_ms = str(ts).split('.') #split for two RAM registers
     ts_sec = int(ts_sec)
-    ts_ms_plus = int(float('1.{}'.format(ts_ms)) * 1000000)
+    ts_ms_plus = int(float('1.{}'.format(ts_ms)) * 1000000) #add prefix 1 and multiply #otherwise timedelta error
     
     print('data_to write: status:{} pin:{} ts_sec:{} ts_ms:{} ts_ms_plus:{} / {} / ts:{}'.format(
         status,
@@ -146,13 +145,13 @@ if __name__ == "__main__":
     
     ###WRITE NEW
     #NAMES
-    #write_ram_n(names = aNames,
-    #            values = aValues)
+    write_ram_n(names = aNames,
+                values = aValues)
 
     #ADDRESSES
     write_ram_a(addresses = aAddresses,
                 values = aValues)
-    
+
     #PARSE DATA
     data  = read_ram_n(names = aNames)
     d = parse_ram_data(data)
