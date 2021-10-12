@@ -151,3 +151,15 @@ def bin_work(i):
 #
 >>> [pow(2, r) for r in range(0, 2*8)][::-1]
 [32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1]
+
+#DATA TYPE max size
+def get_max_size(byte = 1):
+ max_size = int('0b{}'.format('1' * 8 * byte), 2)
+ size = len(str(max_size))
+ print('bytes: {} / max_size: {} / len: {}'.format(byte, max_size, size))
+
+>>> [get_max_size(r) for r in range(1, 4+1)]
+bytes: 1 / max_size: 255 / len: 3
+bytes: 2 / max_size: 65535 / len: 5
+bytes: 3 / max_size: 16777215 / len: 8
+bytes: 4 / max_size: 4294967295 / len: 10
