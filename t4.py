@@ -65,6 +65,19 @@ class T4():
                                                       self.ip)
         )
 
+
+    def read_onewire_lock_ram(self):
+        """read RAM"""
+
+        #aNames = ['USER_RAM0_I32', 'USER_RAM1_I32', 'USER_RAM2_I32', 'USER_RAM3_I32']
+        aAddresses = [46080 ,46082, 46084 ,46086]
+        #data_type = ljm.constants.INT32
+        #aValues = [0, 0, 0, 0]
+        #read_info = read_ram_n(names = aNames)
+        read_info = self.read_ram_a(addresses = aAddresses)
+        
+        return read_info
+    
         
     def read_onewire_lock(self):
         """
@@ -91,8 +104,48 @@ class T4():
         f.close()
 
         return fff
-    
 
+
+    def write_onewire_lock_ram(self, ds_info = None, status = False):
+        """write RAM"""
+
+        status_msg = 'lock'
+        if status == True:
+            status_msg = 'unlock'
+
+        now = datetime.now()
+        #pin = 14
+
+        ts = datetime.timestamp(now)
+        ts_sec, ts_ms = str(ts).split('.') #split for two RAM registers
+        ts_sec = int(ts_sec)
+        ts_ms_plus = int(float('1.{}'.format(ts_ms)) * 1000000) #add prefix 1 and multiply #otherwise timedelta error
+
+        print('data_to write: status:{} pin:{} ts_sec:{} ts_ms:{} ts_ms_plus:{} / {} / ts:{}'.format(
+            status,
+            ds_info, #pin,
+            ts_sec,
+            ts_ms,
+            ts_ms_plus,
+            now,
+            ts))
+            
+        aAddresses = [46080 ,46082, 46084 ,46086]
+        aValues = [status, #true:1 / false:2
+                   ds_info, #pin: 14 / 8
+                   ts_sec,
+                   ts_ms_plus]
+
+        self.write_ram_a(addresses = aAddresses,
+                         values = aValues)
+
+        #READ
+        if self.debug_onewire_lock:
+            read_info = self.read_ram_a(addresses = aAddresses)
+            print('         RAM >>> status: {} / lock_file: {}'.format(status_msg,
+                                                                       read_info)
+        )
+        
     def write_onewire_lock(self, ds_info = None, status = False):
         """
         write one_wire status LOCK/UNLOCK
@@ -132,16 +185,46 @@ class T4():
     def onewire_lock(self, ds_info):
         try:
             fff = self.read_onewire_lock()
+            ##rrr = self.read_onewire_lock_ram()
             if self.debug_onewire_lock:
                 print('ONEWIRE_LOCK >>> {} / pin: {}'.format(fff, ds_info))
+                ##print('         RAM >>> {} / pin: {}'.format(rrr, ds_info))
 
             lock_dict = json.loads(fff[0].strip().replace("'", "\""))
+            ##lock_dict_ram = self.parse_ram_data(rrr)
             if self.debug_onewire_lock:
                 print('lock_dict_STR: {}'.format(lock_dict))
+                ##print('          RAM: {}'.format(lock_dict_ram))
 
             lock_dict['status'] = json.loads(lock_dict['status'].lower())
+                
             if self.debug_onewire_lock:
                 print('lock_dict_BOOL: {}'.format(lock_dict))
+                ##print('           RAM: {}'.format(lock_dict_ram))
+
+            """
+            #
+            if lock_dict_ram['status'] is True:
+                if self.debug_onewire_lock:
+                    print('         RAM >>> lock is open: {} / should lock now'.format(rrr))
+
+                #LOCK NOW
+                self.write_onewire_lock_ram(ds_info = ds_info, status = False)
+                
+                #DEBUG VERIFY IF LOCKED
+                if self.debug_onewire_lock:
+                    rrr = self.read_onewire_lock_ram()
+                    print('         RAM >>> rrr[{}]: {}'.format(len(rrr), rrr))
+                
+                ###return True
+
+            else:
+                if self.debug_onewire_lock:
+                    print('         RAM >>> lock is blocked')
+
+                ###return False
+            #_
+            """
 
             if lock_dict['status'] is True:
                 if self.debug_onewire_lock:
@@ -162,7 +245,8 @@ class T4():
                     print('ONEWIRE_LOCK >>> lock is blocked')
 
                 return False
-            
+
+     
         except FileNotFoundError:
             print('ONEWIRE_LOCK >>> FileNotFoundError [create new lock file]: {}'.format(self.lock_file_onewire)
             )
@@ -175,8 +259,8 @@ class T4():
             
             return True
 
-        except:
-            raise SystemExit('ONEWIRE_LOCK >>> ERROR: onewire_lock file')
+        #except:
+        #    raise SystemExit('ONEWIRE_LOCK >>> ERROR: onewire_lock file')
 
         
     def close_handler(self):
@@ -377,4 +461,129 @@ class T4():
                                    self.bin_ruler[-len(bin_str) + 2:], # ...2109876543210
                                    ' / ruler', #NOTE
                                    line_end) # '' OR '\n'
+
     
+    def read_ram_n(self, names = None):
+        """
+        read user_ram via NAME
+        
+        ['USER_RAM0_I32', 'USER_RAM1_I32', 'USER_RAM2_I32', 'USER_RAM3_I32']
+        """
+    
+        return ljm.eReadNames(self.handler,
+                              len(aNames),
+                              names)
+
+
+    def read_ram_a(self, addresses = None):
+        """
+        read user_ram via ADDRESS
+
+        [46080 ,46082, 46084 ,46086]
+        """
+
+        size = len(addresses)
+        datatypes = [ljm.constants.INT32 for r in range(size)]
+    
+        return ljm.eReadAddresses(self.handler,
+                                  size, 
+                                  addresses,
+                                  datatypes)
+
+
+    def write_ram_n(self,
+                    names = None,
+                    values = None):
+        """
+        write user_ram via NAME
+        
+        ['USER_RAM0_I32', 'USER_RAM1_I32', 'USER_RAM2_I32', 'USER_RAM3_I32']
+        """
+
+        #BEFORE
+        read_info = self.read_ram_n(names = names)
+        print('before[n]: {}'.format(read_info))
+        
+        #WRITE
+        ljm.eWriteNames(self.handler, len(names), names, values)
+    
+        #AFTER
+        read_info = self.read_ram_n(names = names)
+        print('after[n]: {}'.format(read_info))
+
+
+    def write_ram_a(self,
+                    addresses = None,
+                    values = None):
+        """
+        write user_ram via ADDRESS
+            
+        [46080 ,46082, 46084 ,46086]
+        """
+
+        size = len(addresses)
+        datatypes = [ljm.constants.INT32 for r in range(size)]
+            
+        #BEFORE
+        read_info = self.read_ram_a(addresses = addresses)
+        print('before[a]: {}'.format(read_info))
+        
+        #WRITE
+        ljm.eWriteAddresses(self.handler,
+                            size, 
+                            addresses,
+                            datatypes,
+                            values)
+    
+        #AFTER
+        read_info = self.read_ram_a(addresses = addresses)
+        print('after[a]: {}'.format(read_info))
+
+
+    def parse_ram_data(self,
+                       data = None):
+        """
+        create dict data + timestamp work
+
+        fixed for 4 possitions
+        """
+
+        d = {'status': data[0], #True/1 False/2
+             'pin': int(data[1])}
+
+        print(d)
+        
+        if d['status'] == 1:
+            d['status'] = True #1 OPEN
+        else: #2 CLOSE / 0 default after RESET
+            d['status'] = False
+
+        
+        d['ts'] = float('{}.{}'.format(str(data[2])[:-2], #remove suffix .0
+                                       str(data[3])[1:-2])) # remove prefix 1 and suffix .0
+        
+        d['datetime'] = datetime.fromtimestamp(d['ts'])
+        
+        return d
+
+    
+"""
+>>> ljm.eWriteName(t4.handler, 'POWER_LED', 4)
+>>> ljm.eReadName(t4.handler, 'POWER_LED')
+4.0
+>>> 
+>>> 
+>>> 
+>>> ljm.eWriteName(t4.handler, 'LED_COMM', 0)
+>>> ljm.eWriteName(t4.handler, 'LED_STATUS', 0)
+>>> 
+>>> ljm.eReadName(t4.handler, 'POWER_LED')
+4.0
+>>> ljm.eWriteName(t4.handler, 'POWER_LED', 0)
+>>> ljm.eWriteName(t4.handler, 'POWER_LED', 1)
+>>> ljm.eWriteName(t4.handler, 'POWER_LED', 0)
+>>> 
+>>> 
+>>> ljm.eReadName(t4.handler, 'POWER_LED')
+0.0
+"""
