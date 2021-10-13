@@ -568,22 +568,18 @@ class T4():
 
     
 """
+https://labjack.com/support/datasheets/t-series/leds
+
+>>> ljm.eWriteName(t4.handler, 'POWER_LED', 0)
+>>> ljm.eWriteName(t4.handler, 'POWER_LED', 1)
 >>> ljm.eWriteName(t4.handler, 'POWER_LED', 4)
+
 >>> ljm.eReadName(t4.handler, 'POWER_LED')
 4.0
->>> 
->>> 
->>> 
 >>> ljm.eWriteName(t4.handler, 'LED_COMM', 0)
 >>> ljm.eWriteName(t4.handler, 'LED_STATUS', 0)
 >>> 
->>> ljm.eReadName(t4.handler, 'POWER_LED')
-4.0
 >>> ljm.eWriteName(t4.handler, 'POWER_LED', 0)
->>> ljm.eWriteName(t4.handler, 'POWER_LED', 1)
->>> ljm.eWriteName(t4.handler, 'POWER_LED', 0)
->>> 
->>> 
 >>> ljm.eReadName(t4.handler, 'POWER_LED')
 0.0
 """
