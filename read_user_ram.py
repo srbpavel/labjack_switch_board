@@ -79,7 +79,13 @@ def write_ram_a(addresses = None,
     print('after[a]: {}'.format(read_info))
 
 
+def quick_read():
+    return t4.read_ram_a(addresses = [46080 ,46082, 46084 ,46086])
 
+
+def quick_write():
+    t4.write_ram_a(addresses = [46080 ,46082, 46084 ,46086], values = [0, 0, 0, 0])
+    
 
 def parse_ram_data(data = None):
     """create dict data + timestamp work"""
@@ -96,14 +102,14 @@ def parse_ram_data(data = None):
 
     
 if __name__ == "__main__":
-    """$python3 -i read_user_ram.py --config testing_t4_ds_config_pin_8.py"""
+    """$python3 -i read_user_ram.py --config testing_t4_ds_config_pin_8.py --task True"""
 
     #CONFIG
-    module_name = util.prepare_config()
-    t4_conf = __import__(module_name)
+    conf_dict = util.prepare_config()
+    t4_conf = __import__(conf_dict['module_name'])
 
     #LABJACK CONNECTION
-    t4 = T4(config = module_name)
+    t4 = T4(config = conf_dict['module_name'])
 
     #START
     aNames = ['USER_RAM0_I32', 'USER_RAM1_I32', 'USER_RAM2_I32', 'USER_RAM3_I32']
@@ -112,13 +118,18 @@ if __name__ == "__main__":
     aValues = [0, 0, 0, 0]
 
     #READ previous
+    """
     read_info = read_ram_n(names = aNames)
     print('previous: {}'.format(read_info))
+    """
 
     #WRITE 0
+    """
     ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
+    """
     
     #MODIFY
+    """
     now = datetime.now()
     status = True
     pin = 14
@@ -142,7 +153,6 @@ if __name__ == "__main__":
                ts_sec,
                ts_ms_plus]
 
-    
     ###WRITE NEW
     #NAMES
     write_ram_n(names = aNames,
@@ -152,6 +162,8 @@ if __name__ == "__main__":
     write_ram_a(addresses = aAddresses,
                 values = aValues)
 
+    """
+    
     #PARSE DATA
     data  = read_ram_n(names = aNames)
     d = parse_ram_data(data)

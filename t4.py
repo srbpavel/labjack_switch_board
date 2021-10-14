@@ -42,6 +42,9 @@ class T4():
                                  self.config.LABJACK_PROTOCOL,
                                  self.config.LABJACK_NAME)
         
+        #LED OFF
+        #ljm.eWriteName(self.handler, 'POWER_LED', 0)
+
         self.origin = self.config.ORIGIN
 
         self.work_dir = self.config.WORK_DIR
@@ -78,8 +81,10 @@ class T4():
         #aValues = [0, 0, 0, 0]
         #read_info = read_ram_n(names = aNames)
         read_info = self.read_ram_a(addresses = aAddresses)
+
+        now = datetime.now()
         
-        return read_info
+        return [read_info, now]
     
         
     def read_onewire_lock(self):
@@ -110,11 +115,18 @@ class T4():
 
 
     def write_onewire_lock_ram(self, ds_info = None, status = False):
-        """write RAM"""
+        """
+        write RAM
+
+        true -> unlock
+        false -> lock
+        """
 
         status_msg = 'lock'
+        status_new = 2 # 2 is we CLOSE
         if status == True:
             status_msg = 'unlock'
+            status_new = 1 # 1 is we OPEN
 
         now = datetime.now()
         #pin = 14
@@ -125,7 +137,7 @@ class T4():
         ts_ms_plus = int(float('1.{}'.format(ts_ms)) * 1000000) #add prefix 1 and multiply #otherwise timedelta error
 
         print('data_to write: status:{} pin:{} ts_sec:{} ts_ms:{} ts_ms_plus:{} / {} / ts:{}'.format(
-            status,
+            status_new, #status,
             ds_info, #pin,
             ts_sec,
             ts_ms,
@@ -134,11 +146,12 @@ class T4():
             ts))
             
         aAddresses = [46080 ,46082, 46084 ,46086]
-        aValues = [status, #true:1 / false:2
+        aValues = [status_new, #status, #true:1 / false:2
                    ds_info, #pin: 14 / 8
                    ts_sec,
                    ts_ms_plus]
 
+        #LOCK IT
         self.write_ram_a(addresses = aAddresses,
                          values = aValues)
 
@@ -187,25 +200,31 @@ class T4():
         
     def onewire_lock(self, ds_info):
         try:
-            fff = self.read_onewire_lock()
-            ##rrr = self.read_onewire_lock_ram()
+            ###fff = self.read_onewire_lock()
+            ##
+            rrr, now = self.read_onewire_lock_ram()
             if self.debug_onewire_lock:
-                print('ONEWIRE_LOCK >>> {} / pin: {}'.format(fff, ds_info))
-                ##print('         RAM >>> {} / pin: {}'.format(rrr, ds_info))
+                ###print('ONEWIRE_LOCK >>> {} / pin: {}'.format(fff, ds_info))
+                ##
+                print('         RAM >>> {} / pin: {} / {}'.format(rrr, ds_info,
+                                                                  now))
 
-            lock_dict = json.loads(fff[0].strip().replace("'", "\""))
-            ##lock_dict_ram = self.parse_ram_data(rrr)
+            ###lock_dict = json.loads(fff[0].strip().replace("'", "\""))
+            ##
+            lock_dict_ram = self.parse_ram_data(rrr)
             if self.debug_onewire_lock:
-                print('lock_dict_STR: {}'.format(lock_dict))
-                ##print('          RAM: {}'.format(lock_dict_ram))
+                ###print('lock_dict_STR: {}'.format(lock_dict))
+                ##
+                print('          RAM: {}'.format(lock_dict_ram))
 
-            lock_dict['status'] = json.loads(lock_dict['status'].lower())
+            ###lock_dict['status'] = json.loads(lock_dict['status'].lower())
                 
             if self.debug_onewire_lock:
-                print('lock_dict_BOOL: {}'.format(lock_dict))
-                ##print('           RAM: {}'.format(lock_dict_ram))
+                ###print('lock_dict_BOOL: {}'.format(lock_dict))
+                ##
+                print('           RAM: {}'.format(lock_dict_ram))
 
-            """
+            #"""
             #
             if lock_dict_ram['status'] is True:
                 if self.debug_onewire_lock:
@@ -219,16 +238,20 @@ class T4():
                     rrr = self.read_onewire_lock_ram()
                     print('         RAM >>> rrr[{}]: {}'.format(len(rrr), rrr))
                 
-                ###return True
+                ###
+                return True
 
             else:
                 if self.debug_onewire_lock:
                     print('         RAM >>> lock is blocked')
 
-                ###return False
+                ###
+                return False
             #_
-            """
+            #"""
 
+            #
+            """
             if lock_dict['status'] is True:
                 if self.debug_onewire_lock:
                     print('ONEWIRE_LOCK >>> lock is open: {} / should lock now'.format(fff))
@@ -248,7 +271,9 @@ class T4():
                     print('ONEWIRE_LOCK >>> lock is blocked')
 
                 return False
-
+            #_
+            """
+            
      
         except FileNotFoundError:
             print('ONEWIRE_LOCK >>> FileNotFoundError [create new lock file]: {}'.format(self.lock_file_onewire)
@@ -556,12 +581,14 @@ class T4():
 
         print(d)
         
-        if d['status'] == 1:
-            d['status'] = True #1 OPEN
-        else: #2 CLOSE / 0 default after RESET
+        if d['status'] in [0, 1]: #0 default after RESET / #1 OPEN
+            d['status'] = True
+        elif d['status'] == 2: #2 CLOSE
             d['status'] = False
-
-        
+        else:
+            print('RAM LOCK WARNING: {} / value from different proccess ?'.format(data))
+            d['status'] = True
+            
         d['ts'] = float('{}.{}'.format(str(data[2])[:-2], #remove suffix .0
                                        str(data[3])[1:-2])) # remove prefix 1 and suffix .0
         

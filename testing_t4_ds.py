@@ -459,7 +459,8 @@ def run_single_ds_object(single_ds = None,
                     
             if status_onewire_lock == True:
                 if t4.debug_onewire_lock:
-                    print('ONEWIRE_LOCK >>> start DS object')
+                    ###print('ONEWIRE_LOCK >>> start DS object')
+                    print('         RAM >>> start DS object')
                     
                 d[name] = DS(pin = pin,
                              handler = t4.handler,
@@ -500,7 +501,10 @@ def run_single_ds_object(single_ds = None,
 
                 #REPEAT OBJECT CALL + ONEWIRE free LOCK
                 if True in repeat_object_call:
-                    t4.write_onewire_lock(ds_info = pin, status = True)
+                    #FILE
+                    ###t4.write_onewire_lock(ds_info = pin, status = True)
+                    #RAM
+                    t4.write_onewire_lock_ram(ds_info = pin, status = True)
 
                     #EMAIL rom WARNING
                     print('EMAIL WARNING: rom WRONG BUS')
@@ -524,7 +528,8 @@ def run_single_ds_object(single_ds = None,
                                          record_list = record_list)
                         
                 #ONEWIRE free LOCK
-                t4.write_onewire_lock(ds_info = pin, status = True)
+                ###t4.write_onewire_lock(ds_info = pin, status = True)
+                t4.write_onewire_lock_ram(ds_info = pin, status = True)
                 flag_lock_cycle = False
                         
             else:
@@ -598,7 +603,7 @@ def create_task_file(pin = None):
         
 
 if __name__ == "__main__":
-    """$python3 -i t4_ds.py --config t4_ds_config.py"""
+    """$python3 -i t4_ds.py --config t4_ds_config.py --task True"""
 
     #CONFIG
     conf_dict = util.prepare_config()
@@ -608,11 +613,12 @@ if __name__ == "__main__":
     #dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] == True]
     dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] == True]
     
-    #TASK FOR cron ENCODER
+    #TASK for CRON encoder
     if conf_dict['task_status'] == 'True':
-        print('TASK_STATUS: {} / so we measure!!!'.format(conf_dict['task_status']))
+        print('TASK_STATUS: {} / we measure'.format(conf_dict['task_status']))
     elif conf_dict['task_status'] == 'False':
-        print('TASK_STATUS: {}'.format(conf_dict['task_status']))
+        print('TASK_STATUS: {} / create TS file for CRON encoder'.format(conf_dict['task_status']))
+
         create_task_file(pin = dq_pin_numbers)
 
         raise SystemExit('TASK: TS done >>> so exit')
@@ -630,10 +636,10 @@ if __name__ == "__main__":
     #DIO_ANALOG_ENABLE
     t4.set_dio_analog(pins = dq_pin_numbers, #[0],
                       value = 0) #dq_pin_numbers / DAT DO CONFIGU
-
     #DIO_DIRECTION
     t4.set_dio_direction(pins = dq_pin_numbers,
                          value = 1)
+
     
     #CRON once or TERMINAL/SERVICE loop
     run_all_ds(seconds = t4_conf.DELAY_SECONDS,

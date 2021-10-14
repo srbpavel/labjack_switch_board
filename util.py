@@ -19,7 +19,8 @@ def ts(time_and_date, precision = 'ms'):
 def write_file(g = None, mode = 'w', data = None):
     """write data = [] to file by lines (add's \n)"""
 
-    print('\ndata write to: {}'.format(g))
+    print('\ndata write to: {} / {}'.format(g,
+                                            datetime.timestamp(datetime.now())))
     
     ggg = open(g, mode) # 'w' 'a'
 
