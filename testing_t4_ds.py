@@ -5,7 +5,7 @@
 from labjack import ljm
 from t4 import T4
 import sys
-from os import system, path
+from os import system, path, listdir
 from time import sleep 
 from datetime import datetime
 import util
@@ -287,8 +287,8 @@ class DS():
                 
     def measure(self, sensor = None):
         self.last_measure_time = datetime.now()
-        self.last_measure_time_ts = util.ts(self.last_measure_time)
-
+        self.last_measure_time_ts = util.ts(self.last_measure_time, precision = 'ms')
+        
         self.setup_bin_temp(sensor)
         self.read_bin_temp(sensor)
         self.temperature(sensor)
@@ -579,23 +579,51 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
             break
 
 
+def create_task_file(pin = None):
+    """ts task file for cron / instead of one_wire lock"""
+
+    work_dir = t4_conf.WORK_DIR
+    concurent_dir = path.join(work_dir, t4_conf.CONCURENT_DIR)
+
+    util.create_dir(concurent_dir)
+
+    ts = util.ts(datetime.now(), precision = 'ns')
+    
+    ts_full_path_filename = path.join(concurent_dir, str(ts))
+
+    util.write_file(g = ts_full_path_filename,
+                    mode = 'w',
+                    data = [' '.join(sys.argv),
+                            pin[0]])
+        
+
 if __name__ == "__main__":
     """$python3 -i t4_ds.py --config t4_ds_config.py"""
 
     #CONFIG
-    module_name = util.prepare_config()
-    t4_conf = __import__(module_name)
+    conf_dict = util.prepare_config()
+    t4_conf = __import__(conf_dict['module_name'])
 
+    #DQ_PINS
+    #dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] == True]
+    dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] == True]
+    
+    #TASK FOR cron ENCODER
+    if conf_dict['task_status'] == 'True':
+        print('TASK_STATUS: {} / so we measure!!!'.format(conf_dict['task_status']))
+    elif conf_dict['task_status'] == 'False':
+        print('TASK_STATUS: {}'.format(conf_dict['task_status']))
+        create_task_file(pin = dq_pin_numbers)
+
+        raise SystemExit('TASK: TS done >>> so exit')
+    
     #LABJACK CONNECTION
-    t4 = T4(config = module_name)
-
+    t4 = T4(config = conf_dict['module_name'])
+    
     """
     1 - tohle asi neni na spravnym miste, pac to urcite ten konkurencni proces prepina, nez se zacnou testovat ROM's
     2 - mozna to nezapisovat pojednom ale jako array najednou
     """
-    #DQ_PINS
-    dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] == True]
-
     #DIO_INHIBIT
     t4.set_dio_inhibit(pins = dq_pin_numbers,
                        value = 1)

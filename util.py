@@ -4,10 +4,14 @@ from os import makedirs, system, path, getcwd, listdir
 import sys
 
 
-def ts(time_and_date):
-    """datetime to timestamp [ms format]"""
+def ts(time_and_date, precision = 'ms'):
+    """datetime to timestamp"""
 
-    ts = int(datetime.timestamp(time_and_date) * 1000)
+    power = 3 #ms format
+    if precision == 'ns':
+        power = 6
+    
+    ts = int(datetime.timestamp(time_and_date) * pow(10, power))
     
     return ts
 
@@ -43,15 +47,38 @@ def create_dir(directory):
     except OSError as error:
         pass
 
+    
+def get_argv_num(pattern = None, size = 0):
+    for r in range(size):
+        if sys.argv[r] in pattern:
+            return r
 
+        
+def create_task_file(self):
+    util.create_dir(self.concurent_dir)
+    
+    ts = util.ts(datetime.now(), precision = 'ns')
+    
+    ts_full_path_filename = path.join(self.concurent_dir, str(ts))
+
+    util.write_file(g = ts_full_path_filename,
+                    mode = 'w',
+                    data = [' '.join(sys.argv)])
+        
+    
 def verify_config():
     """read cmd arguments and test config path"""
-    
+
+    d = {}
     opts = [opt for opt in sys.argv[1:] if opt.startswith("-")]
     args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
+    size = len(sys.argv)
 
-    if "-c" in opts or "--config" in opts:
-        config_file = args[0].lower()
+    position_config = get_argv_num(pattern = ['-c', '--config'], size = size)
+    position_task = get_argv_num(pattern = ['-t', '--task'], size = size)
+
+    if position_config:
+        config_file = sys.argv[position_config + 1].lower()
         work_dir = getcwd()
 
         if '/' in config_file:
@@ -62,26 +89,33 @@ def verify_config():
         list_dir = listdir(work_dir)
 
         if config_file in list_dir:
+            d['config_file'] = config_file    
             print('CONFIG_FILE: {}'.format(config_file))
         else:
             raise SystemExit('NOT VALID CONFIG_FILE: {}\nACTUAL WORKDIR: {}\nLIST_DIR:{}'.format(
                 config_file,
                 work_dir,
                 list_dir))
-    else:
-        raise SystemExit('USAGE: {} (-c | --config) <argument>'.format(sys.argv[0]))
 
-    return config_file    
+    if position_task:
+        d['task_status'] = sys.argv[position_task + 1]
+
+    if position_task is None or position_config is None:
+        raise SystemExit('USAGE: {} (-c | --config) <argument> (-t | --task) <True/False>'.format(sys.argv[0]))
+
+    return d
     
 
 def prepare_config():
     """load config"""
-    
-    config_result = verify_config()
-    config_extension = '.py'
 
-    if config_result and config_extension in config_result:
-        return config_result.strip(config_extension)
+    config_extension = '.py'
+    config_result = verify_config()
+
+    if config_result.get('config_file') and config_extension in config_result['config_file']:
+        config_result['module_name'] = config_result['config_file'].strip(config_extension)
+
+    return config_result
 
 
 def origin_info(origin = None,

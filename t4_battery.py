@@ -91,7 +91,7 @@ class Battery():
             sleep(self.delay_samples)
 
         self.last_measure_time = datetime.now()
-        self.last_measure_time_ts = util.ts(self.last_measure_time)
+        self.last_measure_time_ts = util.ts(self.last_measure_time, precision = 'ms')
 
         values.sort()
         values_min = min(values)

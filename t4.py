@@ -48,6 +48,9 @@ class T4():
         self.backup_dir = path.join(self.work_dir,
                                     self.config.BACKUP_DIR)
 
+        self.concurent_dir = path.join(self.work_dir,
+                                    self.config.CONCURENT_DIR)
+
         self.delay_onewire_lock = self.config.DELAY_ONEWIRE_LOCK
         self.lock_file_onewire = path.join(self.work_dir,
                                            self.config.ONEWIRE_LOCK_FILE)
@@ -566,7 +569,7 @@ class T4():
         
         return d
 
-    
+
 """
 https://labjack.com/support/datasheets/t-series/leds
 
