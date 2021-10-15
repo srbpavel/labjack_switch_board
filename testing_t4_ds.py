@@ -442,6 +442,7 @@ def run_single_ds_object(single_ds=None,
                 print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
 
             # ONEWIRE_LOCK
+            """ #TOHLE SE POTKAVA !!!
             status_onewire_lock = False
             if t4.onewire_lock_type == 'file':  #S TIMHLE SE POTKAVAJ !!!
                 #status_onewire_lock = t4.onewire_lock_file(ds_info = pin)
@@ -453,9 +454,11 @@ def run_single_ds_object(single_ds=None,
                 status_onewire_lock = t4.onewire_lock_ram(ds_info = pin)
 
             if status_onewire_lock is True:
-            #if not path.exists(t4.onewire_lock_file):
-            #    with open(t4.onewire_lock_file, 'w') as f:
-            #        pass
+            """
+
+            if not path.exists(t4.onewire_lock_file): #taky se obcas potka kua !
+                with open(t4.onewire_lock_file, 'w') as f:
+                    pass
                 
                 # INHIBIT_one_wire_DS
                 inhibit_set()
@@ -525,9 +528,9 @@ def run_single_ds_object(single_ds=None,
                                          record_list=record_list)
                         
                 # ONEWIRE free LOCK
-                # t4.write_onewire_lock(ds_info=pin, status=True)
-                # t4.write_onewire_lock_ram(ds_info=pin, status=True)
-                system('rm {}'.format(t4.onewire_lock_file))
+                # t4.write_onewire_lock(ds_info=pin, status=True)  #FILE with data
+                # t4.write_onewire_lock_ram(ds_info=pin, status=True)  # RAM
+                system('rm {}'.format(t4.onewire_lock_file))  #FILE empty
                 flag_lock_cycle = False
                         
             else:
@@ -628,9 +631,11 @@ if __name__ == "__main__":
     if conf_dict['task_status'] == 'True':
         print('TASK_STATUS: {} / we measure'.format(conf_dict['task_status']))
 
-        # DEBUG_TEST
+        """
+        # DEBUG_TEST pac me zajima jak casto se to potka, a fakt ze casto !!!
         dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] is True]
         create_task_file(pin=dq_pin_numbers)
+        """
     elif conf_dict['task_status'] == 'False':
         print('TASK_STATUS: {} / create TS file for CRON encoder'.format(conf_dict['task_status']))
 
