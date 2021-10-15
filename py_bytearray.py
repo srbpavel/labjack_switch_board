@@ -1,4 +1,4 @@
->>> for record in ['{} {} {}'.format(r, [hex(b) for b in bytearray([r])], bytearray([r])) for r in range (0,255+1)]: print(record)
+>>> for record in ['{} {} {}'.format(r, [hex(b) for b in bytearray([r])], bytearray([r])) for r in range(0, 255 + 1)]: print(record)
 ... 
 0 ['0x0'] bytearray(b'\x00')
 1 ['0x1'] bytearray(b'\x01')

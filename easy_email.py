@@ -13,22 +13,22 @@ source_email = email_config.SOURCE_EMAIL
 v_pass = email_config.V_PASS
 
 target_email = email_config.TARGET_EMAIL
-sms_email  =  email_config.SMS_EMAIL
+sms_email = email_config.SMS_EMAIL
 
-sender_machine  =  email_config.SENDER_MACHINE
+sender_machine = email_config.SENDER_MACHINE
 
-templates  =  TEMPLATES
+templates = TEMPLATES
 
 
 def send_email(msg_subject,
                msg_body,
-               debug = False,
-               machine = None,
-               sms = None):
+               debug=False,
+               machine=None,
+               sms=None):
     
     context = create_default_context()
     server = SMTP(smtp_server, port)
-    server.starttls(context = context)
+    server.starttls(context=context)
 
     subject = "{}".format(msg_subject)
     body = "{}".format(msg_body)
@@ -52,7 +52,7 @@ def send_email(msg_subject,
 
     if debug is True:
         server.set_debuglevel(1)
-        #DEBUG
+        # DEBUG
         print("\n{}".format(msg.values()))
         print("\n{}".format(msg.keys()))
 
@@ -60,4 +60,3 @@ def send_email(msg_subject,
     server.login(source_email, v_pass)
     server.sendmail(source_email, all_targets, full_text)
     server.quit()
-

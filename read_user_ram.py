@@ -4,7 +4,7 @@ import util
 from datetime import datetime
 
 
-def read_ram_n(names = None):
+def read_ram_n(names=None):
     """
     read user_ram via NAME
 
@@ -16,11 +16,11 @@ def read_ram_n(names = None):
                           names)
 
 
-def read_ram_a(addresses = None):
+def read_ram_a(addresses=None):
     """
     read user_ram via ADDRESS
 
-    [46080 ,46082, 46084 ,46086]
+    [46080, 46082, 46084, 46086]
     """
 
     size = len(addresses)
@@ -32,69 +32,70 @@ def read_ram_a(addresses = None):
                               datatypes)
 
 
-def write_ram_n(names = None,
-                values = None):
+def write_ram_n(names=None,
+                values=None):
     """
     write user_ram via NAME
 
     ['USER_RAM0_I32', 'USER_RAM1_I32', 'USER_RAM2_I32', 'USER_RAM3_I32']
     """
 
-    #BEFORE
-    read_info = read_ram_n(names = names)
+    # BEFORE
+    read_info = read_ram_n(names=names)
     print('before[n]: {}'.format(read_info))
     
-    #WRITE
+    # WRITE
     ljm.eWriteNames(t4.handler, len(names), names, values)
     
-    #AFTER
-    read_info = read_ram_n(names = names)
+    # AFTER
+    read_info = read_ram_n(names=names)
     print('after[n]: {}'.format(read_info))
 
 
-def write_ram_a(addresses = None,
-                values = None):
+def write_ram_a(addresses=None,
+                values=None):
     """
     write user_ram via ADDRESS
     
-    [46080 ,46082, 46084 ,46086]
+    [46080, 46082, 46084, 46086]
     """
 
     size = len(addresses)
     datatypes = [ljm.constants.INT32 for r in range(size)]
 
-    #BEFORE
-    read_info = read_ram_a(addresses = addresses)
+    # BEFORE
+    read_info = read_ram_a(addresses=addresses)
     print('before[a]: {}'.format(read_info))
     
-    #WRITE
+    # WRITE
     ljm.eWriteAddresses(t4.handler,
                         size, 
                         addresses,
                         datatypes,
                         values)
     
-    #AFTER
-    read_info = read_ram_a(addresses = addresses)
+    # AFTER
+    read_info = read_ram_a(addresses=addresses)
     print('after[a]: {}'.format(read_info))
 
 
 def quick_read():
-    return t4.read_ram_a(addresses = [46080 ,46082, 46084 ,46086])
+    return t4.read_ram_a(addresses=[46080, 46082, 46084, 46086])
 
 
 def quick_write():
-    t4.write_ram_a(addresses = [46080 ,46082, 46084 ,46086], values = [0, 0, 0, 0])
+    t4.write_ram_a(addresses=[46080, 46082, 46084, 46086],
+                   values=[0, 0, 0, 0])
     
 
-def parse_ram_data(data = None):
+def parse_ram_data(data=None):
     """create dict data + timestamp work"""
 
     d = {'status': data[0],
          'pin': data[1]}
     
-    d['ts'] = float('{}.{}'.format(str(data[2])[:-2], #remove suffix .0
-                                   str(data[3])[1:-2])) # remove prefix 1 and suffix .0
+    d['ts'] = float('{}.{}'.format(str(data[2])[:-2],  # remove suffix .0
+                                   str(data[3])[1:-2]))  # remove prefix 1 and suffix .0
     
     d['datetime'] = datetime.fromtimestamp(d['ts'])
     
@@ -104,31 +105,31 @@ def parse_ram_data(data = None):
 if __name__ == "__main__":
     """$python3 -i read_user_ram.py --config testing_t4_ds_config_pin_8.py --task True"""
 
-    #CONFIG
+    # CONFIG
     conf_dict = util.prepare_config()
     t4_conf = __import__(conf_dict['module_name'])
 
-    #LABJACK CONNECTION
-    t4 = T4(config = conf_dict['module_name'])
+    # LABJACK CONNECTION
+    t4 = T4(config=conf_dict['module_name'])
 
-    #START
+    # START
     aNames = ['USER_RAM0_I32', 'USER_RAM1_I32', 'USER_RAM2_I32', 'USER_RAM3_I32']
-    aAddresses = [46080 ,46082, 46084 ,46086]
+    aAddresses = [46080, 46082, 46084, 46086]
     data_type = ljm.constants.INT32
     aValues = [0, 0, 0, 0]
 
-    #READ previous
+    # READ previous
     """
     read_info = read_ram_n(names = aNames)
     print('previous: {}'.format(read_info))
     """
 
-    #WRITE 0
+    # WRITE 0
     """
     ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
     """
     
-    #MODIFY
+    # MODIFY
     """
     now = datetime.now()
     status = True
@@ -164,8 +165,8 @@ if __name__ == "__main__":
 
     """
     
-    #PARSE DATA
-    data  = read_ram_n(names = aNames)
+    # PARSE DATA
+    data = read_ram_n(names=aNames)
     d = parse_ram_data(data)
 
     print('{}\n{}'.format(d, d['datetime']))

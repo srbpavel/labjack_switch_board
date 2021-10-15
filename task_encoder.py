@@ -2,9 +2,9 @@ import sys
 from os import system, path, listdir
 from datetime import datetime
 import util
-#ASI JE JEDNO JAKEJ config_file
+# ASI JE JEDNO JAKEJ config_file
 import testing_t4_ds_config_pin_8 as config
-#import testing_t4_ds_config_pin_14 as config
+# import testing_t4_ds_config_pin_14 as config
 
 
 def find_tasks():

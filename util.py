@@ -4,7 +4,7 @@ from os import makedirs, system, path, getcwd, listdir
 import sys
 
 
-def ts(time_and_date, precision = 'ms'):
+def ts(time_and_date, precision='ms'):
     """
     datetime to timestamp
 
@@ -13,7 +13,7 @@ def ts(time_and_date, precision = 'ms'):
     1 sec = 1 000 000 000 ns / nano sec
     """
 
-    power = 3 #ms format
+    power = 3  # ms format
     if precision == 'us':
         power = 6
     
@@ -22,7 +22,7 @@ def ts(time_and_date, precision = 'ms'):
     return ts
 
 
-def write_file(g = None, mode = 'w', data = None):
+def write_file(g=None, mode='w', data=None):
     """write data = [] to file by lines (add's \n)"""
 
     """
@@ -32,7 +32,7 @@ def write_file(g = None, mode = 'w', data = None):
     ))
     """
 
-    #OLD_way
+    # OLD_way
     """
     ggg = open(g, mode) # 'w' 'a'
 
@@ -42,8 +42,8 @@ def write_file(g = None, mode = 'w', data = None):
     ggg.close()
     """
 
-    #NEW
-    with open(g, mode) as ggg: # 'w' 'a'
+    # NEW
+    with open(g, mode) as ggg:  # 'w' 'a'
         for line in data:
             ggg.write('{}\n'.format(line))
 
@@ -67,7 +67,7 @@ def create_dir(directory):
         pass
 
     
-def get_argv_num(pattern = None, size = 0):
+def get_argv_num(pattern=None, size=0):
     for r in range(size):
         if sys.argv[r] in pattern:
             return r
@@ -76,13 +76,13 @@ def get_argv_num(pattern = None, size = 0):
 def create_task_file(self):
     util.create_dir(self.concurent_dir)
     
-    ts = util.ts(datetime.now(), precision = 'us') 
+    ts = util.ts(datetime.now(), precision='us')
     
     ts_full_path_filename = path.join(self.concurent_dir, str(ts))
 
-    util.write_file(g = ts_full_path_filename,
-                    mode = 'w',
-                    data = [' '.join(sys.argv)])
+    util.write_file(g=ts_full_path_filename,
+                    mode='w',
+                    data=[' '.join(sys.argv)])
         
     
 def verify_config():
@@ -93,8 +93,8 @@ def verify_config():
     args = [arg for arg in sys.argv[1:] if not arg.startswith("-")]
     size = len(sys.argv)
 
-    position_config = get_argv_num(pattern = ['-c', '--config'], size = size)
-    position_task = get_argv_num(pattern = ['-t', '--task'], size = size)
+    position_config = get_argv_num(pattern=['-c', '--config'], size=size)
+    position_task = get_argv_num(pattern=['-t', '--task'], size=size)
 
     if position_config:
         config_file = sys.argv[position_config + 1].lower()
@@ -108,7 +108,7 @@ def verify_config():
         list_dir = listdir(work_dir)
 
         if config_file in list_dir:
-            d['config_file'] = config_file    
+            d['config_file'] = config_file
             print('CONFIG_FILE: {}'.format(config_file))
         else:
             raise SystemExit('NOT VALID CONFIG_FILE: {}\nACTUAL WORKDIR: {}\nLIST_DIR:{}'.format(
@@ -123,10 +123,10 @@ def verify_config():
         raise SystemExit('USAGE: {} (-c | --config) <argument> (-t | --task) <True/False>'.format(sys.argv[0]))
 
     return d
-    
+
 
 def prepare_config():
-    """load config"""
+    """prepare config file as module"""
 
     config_extension = '.py'
     config_result = verify_config()
@@ -137,17 +137,17 @@ def prepare_config():
     return config_result
 
 
-def origin_info(origin = None,
-                delay = 10,
-                t4_obj = None):
+def origin_info(origin=None,
+                delay=10,
+                t4_obj=None):
     """parse origin for program flow"""
 
     origin_msg = None
     loop_msg = '\norigin: {} / {}'
 
-    d = {'flag_loop':True,
-         'break':False}
-    
+    d = {'flag_loop': True,
+         'break': False}
+
     if origin == 'CRON':
         d['flag_loop'] = False
         origin_msg = 'once'
@@ -156,7 +156,7 @@ def origin_info(origin = None,
     elif origin in ('TERMINAL', 'SERVICE'):
         origin_msg = 'sleeping'
         print(loop_msg.format(origin, origin_msg))
-        #SLEEP
+        # SLEEP
         sleep(delay)
     elif origin == 'APP':
         d['flag_loop'] = False

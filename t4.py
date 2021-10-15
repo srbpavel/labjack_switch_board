@@ -6,7 +6,7 @@ import util
 import json
 
 
-#LABJACK
+# LABJACK
 class T4():
     """
     labjack t4 device
@@ -42,8 +42,8 @@ class T4():
                                  self.config.LABJACK_PROTOCOL,
                                  self.config.LABJACK_NAME)
         
-        #LED OFF
-        #ljm.eWriteName(self.handler, 'POWER_LED', 0)
+        # LED OFF
+        # ljm.eWriteName(self.handler, 'POWER_LED', 0)
 
         self.origin = self.config.ORIGIN
 
@@ -52,12 +52,12 @@ class T4():
                                     self.config.BACKUP_DIR)
 
         self.concurent_dir = path.join(self.work_dir,
-                                    self.config.CONCURENT_DIR)
+                                       self.config.CONCURENT_DIR)
 
         self.onewire_lock_type = self.config.ONEWIRE_LOCK_TYPE
         self.delay_onewire_lock = self.config.DELAY_ONEWIRE_LOCK
 
-        self.onewire_lock_file = self.config.ONEWIRE_LOCK_FILE #always absolute path
+        self.onewire_lock_file = self.config.ONEWIRE_LOCK_FILE  # always absolute path
 
         self.onewire_lock_ram_a = self.config.ONEWIRE_LOCK_RAM_A
         
@@ -65,14 +65,13 @@ class T4():
         self.ip = ljm.numberToIP(self.info[3])
 
         self.const_kelvin = 273.15
-        self.bin_ruler = ''.join([str(r) for r in range(9, -1, -1)]) * 3 #9876543210
+        self.bin_ruler = ''.join([str(r) for r in range(9, -1, -1)]) * 3  # 9876543210
         
         self.debug_onewire_lock = self.config.FLAG_DEBUG_ONEWIRE_LOCK
         
         print('origin: {} \ninfo: {}\nip:{}\n'.format(self.origin,
                                                       self.info,
-                                                      self.ip)
-        )
+                                                      self.ip))
 
 
     def read_onewire_lock_ram(self):
@@ -80,9 +79,9 @@ class T4():
         one_wire read LOCK status: RAM
         """
 
-        #aAddresses = [46080 ,46082, 46084 ,46086]
+        # aAddresses = [46080 ,46082, 46084 ,46086]
         aAddresses = self.onewire_lock_ram_a
-        read_info = self.read_ram_a(addresses = aAddresses)
+        read_info = self.read_ram_a(addresses=aAddresses)
 
         now = datetime.now()
         
@@ -116,7 +115,7 @@ class T4():
         return fff
 
 
-    def write_onewire_lock_ram(self, ds_info = None, status = False):
+    def write_onewire_lock_ram(self, ds_info=None, status=False):
         """
         write one_wire status LOCK/UNLOCK: RAM
 
@@ -125,17 +124,17 @@ class T4():
         """
 
         status_msg = 'lock'
-        status_new = 2 #2 is we CLOSE
-        if status == True:
+        status_new = 2  # 2 is we CLOSE
+        if status is True:
             status_msg = 'unlock'
-            status_new = 1 #1 is we OPEN
+            status_new = 1  # 1 is we OPEN
 
         now = datetime.now()
 
         ts = datetime.timestamp(now)
-        ts_sec, ts_ms = str(ts).split('.') #split for two RAM registers
+        ts_sec, ts_ms = str(ts).split('.')  # split for two RAM registers
         ts_sec = int(ts_sec)
-        ts_ms_plus = int(float('1.{}'.format(ts_ms)) * 1000000) #add prefix 1 and multiply #otherwise timedelta error
+        ts_ms_plus = int(float('1.{}'.format(ts_ms)) * 1000000)  # add prefix 1 and multiply #otherwise timedelta error
 
         """
         print('RAM >>> data_to write: status:{} pin:{} ts_sec:{} ts_ms:{} ts_ms_plus:{} / {} / ts:{}'.format(
@@ -148,25 +147,24 @@ class T4():
             ts))
         """
             
-        #aAddresses = [46080 ,46082, 46084 ,46086]
+        # aAddresses = [46080 ,46082, 46084 ,46086]
         aAddresses = self.onewire_lock_ram_a
         aValues = [status_new,
                    ds_info,
                    ts_sec,
                    ts_ms_plus]
 
-        #LOCK IT
-        self.write_ram_a(addresses = aAddresses,
-                         values = aValues)
+        # LOCK IT
+        self.write_ram_a(addresses=aAddresses,
+                         values=aValues)
 
-        #VERIFY
+        # VERIFY
         if self.debug_onewire_lock:
-            read_info = self.read_ram_a(addresses = aAddresses)
+            read_info = self.read_ram_a(addresses=aAddresses)
             print('         RAM >>> status: {} / lock_file: {}'.format(status_msg,
-                                                                       read_info)
-        )
+                                                                       read_info))
         
-    def write_onewire_lock(self, ds_info = None, status = False):
+    def write_onewire_lock(self, ds_info=None, status=False):
         """
         write one_wire status LOCK/UNLOCK: FILE
         
@@ -175,38 +173,34 @@ class T4():
         """
 
         status_msg = 'lock'
-        if status == True:
+        if status is True:
             status_msg = 'unlock'
         
         data_to_write = [{'status': str(status),
                           'pin': ds_info,
-                          'datetime': '{}'.format(datetime.now()
-                          )
-        }
-        ]
+                          'datetime': '{}'.format(datetime.now())}]
 
-        #WRITE
-        util.write_file(g = self.onewire_lock_file,
-                        mode = 'w',
-                        data = data_to_write
-        )
+        # WRITE
+        util.write_file(g=self.onewire_lock_file,
+                        mode='w',
+                        data=data_to_write)
         
-        #READ
+        # READ
         if self.debug_onewire_lock:
             fff = self.read_onewire_lock()
             print('ONEWIRE_LOCK >>> status: {} / lock_file: {}'.format(status_msg,
-                                                                       fff)
-        )
+                                                                       fff))
             
-        #DEBUG SLEEP for WATCH monitoring
-        #sleep(1)
+        # DEBUG SLEEP for WATCH monitoring
+        # sleep(1)
 
         
     def onewire_lock_ram(self, ds_info):
         rrr, now = self.read_onewire_lock_ram()
         if self.debug_onewire_lock:
-            print('         RAM >>> {} / pin: {} / {}'.format(rrr, ds_info,
-                                                                  now))
+            print('         RAM >>> {} / pin: {} / {}'.format(rrr,
+                                                              ds_info,
+                                                              now))
 
         lock_dict_ram = self.parse_ram_data(rrr)
         if self.debug_onewire_lock:
@@ -219,10 +213,10 @@ class T4():
             if self.debug_onewire_lock:
                 print('         RAM >>> lock is open: {} / should lock now'.format(rrr))
 
-            #LOCK NOW
-            self.write_onewire_lock_ram(ds_info = ds_info, status = False)
+            # LOCK NOW
+            self.write_onewire_lock_ram(ds_info=ds_info, status=False)
                 
-            #DEBUG VERIFY IF LOCKED
+            # DEBUG VERIFY IF LOCKED
             if self.debug_onewire_lock:
                 rrr = self.read_onewire_lock_ram()
                 print('         RAM >>> rrr[{}]: {}'.format(len(rrr), rrr))
@@ -254,10 +248,10 @@ class T4():
                 if self.debug_onewire_lock:
                     print('ONEWIRE_LOCK >>> lock is open: {} / should lock now'.format(fff))
 
-                #LOCK NOW
-                self.write_onewire_lock(ds_info = ds_info, status = False)
+                # LOCK NOW
+                self.write_onewire_lock(ds_info=ds_info, status=False)
                 
-                #DEBUG VERIFY IF LOCKED
+                # DEBUG VERIFY IF LOCKED
                 if self.debug_onewire_lock:
                     fff = self.read_onewire_lock()
                     print('ONEWIRE_LOCK >>> fff[{}]: {}'.format(len(fff), fff))
@@ -271,11 +265,10 @@ class T4():
                 return False
      
         except FileNotFoundError:
-            print('ONEWIRE_LOCK >>> FileNotFoundError [create new lock file]: {}'.format(self.onewire_lock_file)
-            )
+            print('ONEWIRE_LOCK >>> FileNotFoundError [create new lock file]: {}'.format(self.onewire_lock_file))
 
-            #CREATE FILE AND LOCK NOW
-            self.write_onewire_lock(ds_info = ds_info, status = False)
+            # CREATE FILE AND LOCK NOW
+            self.write_onewire_lock(ds_info=ds_info, status=False)
             
             fff = self.read_onewire_lock()
             print('ONEWIRE_LOCK >>> FileNotFoundError [verify data has been written]: {}'.format(fff))
@@ -296,17 +289,15 @@ class T4():
     def get_device_temperature(self):
         """read device temperature in celsius"""
 
-        temperature_celsius = round(
-            ljm.eReadAddress(self.handler,
-                             60052,
-                             ljm.constants.FLOAT32)
-            - self.const_kelvin,
-            1)
+        temperature_celsius = round(ljm.eReadAddress(self.handler,
+                                                     60052,
+                                                     ljm.constants.FLOAT32) - self.const_kelvin,
+                                    1)
 
         return temperature_celsius
 
 
-    def set_dio_inhibit(self, pins = None, value = 1):
+    def set_dio_inhibit(self, pins=None, value=1):
         """
         TURN ON/OFF always auto-configured AIN4-AIN11 https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
 
@@ -347,7 +338,7 @@ class T4():
         dio_inhibit_int = int(dio_inhibit_hex_str, 16)
         dio_inhibit_bin = bin(dio_inhibit_int)
 
-        #BEFORE
+        # BEFORE
         if self.config.FLAG_DEBUG_DIO_INHIBIT:
             self.read_dio_inhibit()
 
@@ -357,22 +348,22 @@ class T4():
             print('dio_inhibit_hex_int: {}'.format(dio_inhibit_int))
             print('dio_inhibit_hex_bin: {}'.format(dio_inhibit_bin))
 
-            bin_ruler = self.show_bin_ruler(bin_str = dio_inhibit_bin,
-                                            space_count = 23,
-                                            new_line = 'end')
+            bin_ruler = self.show_bin_ruler(bin_str=dio_inhibit_bin,
+                                            space_count=23,
+                                            new_line='end')
             print(bin_ruler)
 
-        #WRITE
+        # WRITE
         ljm.eWriteName(self.handler,
                        "DIO_INHIBIT",
                        dio_inhibit_int)
 
-        #AFTER
+        # AFTER
         if self.config.FLAG_DEBUG_DIO_INHIBIT:
             self.read_dio_inhibit()
 
         
-    def set_dio_analog(self, pins = None, value = 1):
+    def set_dio_analog(self, pins=None, value=1):
         """
         FLEXIBLE I/O -> DIO4-DIO11 --> fixed I/O lines ---> can be configured for ANALOG input/output
                         DIO12-DIO19 --> dedicated (digital only) I/O lines  
@@ -383,17 +374,17 @@ class T4():
         """
 
         dio_analog_enable_cmd = '{}'.format(
-            ' | '.join(['{}<<{}'.format(value, pin) for pin in pins if pin <=11])
+            ' | '.join(['{}<<{}'.format(value, pin) for pin in pins if pin <= 11])
         )
 
-        dio_analog_enable_hex_str = '0x00000' #'0'
+        dio_analog_enable_hex_str = '0x00000'  # '0'
         if pins and dio_analog_enable_cmd:
             dio_analog_enable_hex_str = hex(eval(dio_analog_enable_cmd))
 
         dio_analog_enable_int = int(dio_analog_enable_hex_str, 16)
         dio_analog_enable_bin = bin(dio_analog_enable_int)
 
-        #BEFORE
+        # BEFORE
         if self.config.FLAG_DEBUG_DIO_INHIBIT:
             self.read_dio_analog_enable()
             
@@ -403,32 +394,31 @@ class T4():
             print('dio_analog_enable_int: {}'.format(dio_analog_enable_int))
             print('dio_analog_enable_bin: {}'.format(dio_analog_enable_bin))
 
-            bin_ruler = self.show_bin_ruler(bin_str = dio_analog_enable_bin,
-                                            space_count = 25,
-                                            new_line = 'end')
+            bin_ruler = self.show_bin_ruler(bin_str=dio_analog_enable_bin,
+                                            space_count=25,
+                                            new_line='end')
             
             print(bin_ruler)
             
-        #WRITE
+        # WRITE
         ljm.eWriteName(self.handler,
                        "DIO_ANALOG_ENABLE",
-                       dio_analog_enable_int)
-                       #0x00000)
+                       dio_analog_enable_int)  # 0x00000)
 
         
-        #AFTER
+        # AFTER
         if self.config.FLAG_DEBUG_DIO_INHIBIT:
             self.read_dio_analog_enable()
 
 
-    def set_dio_direction(self, pins = None, value = 1):
+    def set_dio_direction(self, pins=None, value=1):
         """
         DIO_DIRECTION / 0 as input / 1 as ouput
         https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
         https://labjack.com/support/datasheets/t-series/digital-io
         """
         
-        pass #FUTURE USE
+        pass  # FUTURE USE
     
             
     def read_dio_inhibit(self):
@@ -436,8 +426,8 @@ class T4():
         template_array = '{} bin: {} / hex: {}'
         array_inibit = int(ljm.eReadName(self.handler, mb_name))
         bin_str = bin(array_inibit)
-        bin_ruler = self.show_bin_ruler(bin_str = bin_str,
-                                        space_count = 19)
+        bin_ruler = self.show_bin_ruler(bin_str=bin_str,
+                                        space_count=19)
 
         print(bin_ruler)
         print(template_array.format(mb_name,
@@ -450,8 +440,8 @@ class T4():
         template_array = '{} bin: {} / hex: {}'
         array_analog_enable = int(ljm.eReadName(self.handler, mb_name))
         bin_str = bin(array_analog_enable)
-        bin_ruler = self.show_bin_ruler(bin_str = bin_str,
-                                        space_count = 25)
+        bin_ruler = self.show_bin_ruler(bin_str=bin_str,
+                                        space_count=25)
 
         print(bin_ruler)
         print(template_array.format(mb_name,
@@ -460,9 +450,9 @@ class T4():
 
         
     def show_bin_ruler(self,
-                       bin_str = '',
-                       space_count = 0,
-                       new_line = None):
+                       bin_str='',
+                       space_count=0,
+                       new_line=None):
         """
         ruler to help identify bit possition
 
@@ -479,14 +469,14 @@ class T4():
         elif new_line == 'end':
             line_end = '\n'
         
-        return '{}{}{}{}{}'.format(line_start, # '' OR '\n'
-                                   ' ' * space_count, # many spaces
-                                   self.bin_ruler[-len(bin_str) + 2:], # ...2109876543210
-                                   ' / ruler', #NOTE
-                                   line_end) # '' OR '\n'
+        return '{}{}{}{}{}'.format(line_start,  # '' OR '\n'
+                                   ' ' * space_count,  # many spaces
+                                   self.bin_ruler[-len(bin_str) + 2:],  # ...2109876543210
+                                   ' / ruler',  # NOTE
+                                   line_end)  # '' OR '\n'
 
     
-    def read_ram_n(self, names = None):
+    def read_ram_n(self, names=None):
         """
         read user_ram via NAME
         
@@ -498,7 +488,7 @@ class T4():
                               names)
 
 
-    def read_ram_a(self, addresses = None):
+    def read_ram_a(self, addresses=None):
         """
         read user_ram via ADDRESS
 
@@ -509,30 +499,30 @@ class T4():
         datatypes = [ljm.constants.INT32 for r in range(size)]
     
         return ljm.eReadAddresses(self.handler,
-                                  size, 
+                                  size,
                                   addresses,
                                   datatypes)
 
 
     def write_ram_n(self,
-                    names = None,
-                    values = None):
+                    names=None,
+                    values=None):
         """
         write user_ram via NAME
         
         ['USER_RAM0_I32', 'USER_RAM1_I32', 'USER_RAM2_I32', 'USER_RAM3_I32']
         """
 
-        #BEFORE
+        # BEFORE
         """
         read_info = self.read_ram_n(names = names)
         print('before[n]: {}'.format(read_info))
         """
         
-        #WRITE
+        # WRITE
         ljm.eWriteNames(self.handler, len(names), names, values)
     
-        #AFTER
+        # AFTER
         """
         read_info = self.read_ram_n(names = names)
         print('after[n]: {}'.format(read_info))
@@ -540,8 +530,8 @@ class T4():
 
 
     def write_ram_a(self,
-                    addresses = None,
-                    values = None):
+                    addresses=None,
+                    values=None):
         """
         write user_ram via ADDRESS
             
@@ -551,20 +541,20 @@ class T4():
         size = len(addresses)
         datatypes = [ljm.constants.INT32 for r in range(size)]
             
-        #BEFORE
+        # BEFORE
         """
         read_info = self.read_ram_a(addresses = addresses)
         print('before[a]: {}'.format(read_info))
         """
         
-        #WRITE
+        # WRITE
         ljm.eWriteAddresses(self.handler,
-                            size, 
+                            size,
                             addresses,
                             datatypes,
                             values)
     
-        #AFTER
+        # AFTER
         """
         read_info = self.read_ram_a(addresses = addresses)
         print('after[a]: {}'.format(read_info))
@@ -572,26 +562,26 @@ class T4():
 
 
     def parse_ram_data(self,
-                       data = None):
+                       data=None):
         """
         create dict data + timestamp work
 
         fixed for 4 possitions
         """
 
-        d = {'status': data[0], #True/1 False/2
+        d = {'status': data[0],  # True/1 False/2
              'pin': int(data[1])}
 
-        if d['status'] in [0, 1]: #0 default after RESET / #1 OPEN
+        if d['status'] in [0, 1]:  # 0 default after RESET / #1 OPEN
             d['status'] = True
-        elif d['status'] == 2: #2 CLOSE
+        elif d['status'] == 2:  # 2 CLOSE
             d['status'] = False
         else:
             print('RAM LOCK WARNING: {} / value from different proccess ?'.format(data))
             d['status'] = True
             
-        d['ts'] = float('{}.{}'.format(str(data[2])[:-2], #remove suffix .0
-                                       str(data[3])[1:-2])) # remove prefix 1 and suffix .0
+        d['ts'] = float('{}.{}'.format(str(data[2])[:-2],  # remove suffix .0
+                                       str(data[3])[1:-2]))  # remove prefix 1 and suffix .0
         
         d['datetime'] = datetime.fromtimestamp(d['ts'])
         

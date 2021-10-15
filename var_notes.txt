@@ -1,4 +1,4 @@
-###REMOVE LOG WATCH
+###REMOTE LOG WATCH
 
 ruth$
 watch -n1 'cat -n 1_testing_cron_ds_8.log 2_testing_cron_ds_8.log'
