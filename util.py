@@ -31,13 +31,21 @@ def write_file(g = None, mode = 'w', data = None):
         datetime.timestamp(datetime.now())
     ))
     """
-    
+
+    #OLD_way
+    """
     ggg = open(g, mode) # 'w' 'a'
 
     for line in data:
         ggg.write('{}\n'.format(line))
 
     ggg.close()
+    """
+
+    #NEW
+    with open(g, mode) as ggg: # 'w' 'a'
+        for line in data:
+            ggg.write('{}\n'.format(line))
 
     
 def today_filename(time_and_date):
@@ -150,7 +158,6 @@ def origin_info(origin = None,
         print(loop_msg.format(origin, origin_msg))
         #SLEEP
         sleep(delay)
-        #_
     elif origin == 'APP':
         d['flag_loop'] = False
         origin_msg = 'various'

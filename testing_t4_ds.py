@@ -1,12 +1,12 @@
-#FORKED https://github.com/labjack/labjack-ljm-python/blob/master/Examples/More/1-Wire/1_wire.py
+# FORKED https://github.com/labjack/labjack-ljm-python/blob/master/Examples/More/1-Wire/1_wire.py
 #
-#TESTING
+# TESTING
 #
 from labjack import ljm
 from t4 import T4
 import sys
 from os import system, path, listdir
-from time import sleep 
+from time import sleep
 from datetime import datetime
 import util
 import easy_email
@@ -150,7 +150,7 @@ class DS():
             #SET NEW BRANCH
             self.set_onewire_path_l(branch_found)
 
-            #SEARCH AGAIN
+            #and SEARCH AGAIN
             self.search(i = i,
                         branch = branch_found)
         else:
@@ -370,7 +370,7 @@ class DS():
             print('\n{}'.format(cmd.replace(self.influx_token, '...')))
 
         ###
-        system(cmd) #test via requests
+        system(cmd) #via requests in future
 
 
     def write_backup_influx(self, d = None):
@@ -438,7 +438,6 @@ def show_record_list(data = None):
 def run_single_ds_object(single_ds = None,
                          delay = 0,
                          origin = None,
-                         d = None,
                          record_list = None):
     """single dallas object"""
     
@@ -456,30 +455,32 @@ def run_single_ds_object(single_ds = None,
 
             #ONEWIRE_LOCK
             print('LOCK_TYPE: {}'.format(t4.onewire_lock_type))
+
+            """
+            #S TIMHLE SE POTKAVAJ !!!
             if t4.onewire_lock_type == 'ram':
                 status_onewire_lock = t4.onewire_lock_ram(ds_info = pin)
             elif t4.onewire_lock_type == 'file':
-                status_onewire_lock = t4.onewire_lock_file(ds_info = pin)                
-            if status_onewire_lock == True:
-                #INHIBIT
-                ###DQ_PINS
-                dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] == True]
+                if not path.exists(t4.onewire_lock_file):
+                    with open(t4.onewire_lock_file, 'w') as f:
+                        pass
+            
+                #status_onewire_lock = t4.onewire_lock_file(ds_info = pin)
+                status_onewire_lock = True
+            """
+
+            #if status_onewire_lock == True:
+            if not path.exists(t4.onewire_lock_file):
+                with open(t4.onewire_lock_file, 'w') as f:
+                    pass
                 
-                ###DIO_INHIBIT
-                t4.set_dio_inhibit(pins = dq_pin_numbers,
-                                   value = 1)
-                ###DIO_ANALOG_ENABLE
-                t4.set_dio_analog(pins = dq_pin_numbers, #[0],
-                                  value = 0) #dq_pin_numbers / DAT DO CONFIGU
-                ###DIO_DIRECTION
-                t4.set_dio_direction(pins = dq_pin_numbers,
-                                     value = 1)
-                #_
+                #INHIBIT_one_wire_DS
+                inhibit_set()
 
                 if t4.debug_onewire_lock:
-                    ###print('ONEWIRE_LOCK >>> start DS object')
-                    print('         RAM >>> start DS object')
-                    
+                    print('        LOCK >>> start DS object')
+
+                d = {}
                 d[name] = DS(pin = pin,
                              handler = t4.handler,
                              delay = delay, #future_use
@@ -519,13 +520,9 @@ def run_single_ds_object(single_ds = None,
 
                 #REPEAT OBJECT CALL + ONEWIRE free LOCK
                 if True in repeat_object_call:
-                    #FILE
-                    ###t4.write_onewire_lock(ds_info = pin, status = True)
-                    #RAM
-                    #t4.write_onewire_lock_ram(ds_info = pin, status = True)
-
                     #EMAIL rom WARNING
                     print('EMAIL WARNING: rom WRONG BUS')
+
                     easy_email.send_email(
                         msg_subject = easy_email.templates['rom']['sub'].format(name),
                         msg_body = easy_email.templates['rom']['body'].format(
@@ -542,12 +539,12 @@ def run_single_ds_object(single_ds = None,
                     run_single_ds_object(single_ds = single_ds,
                                          delay = delay,
                                          origin = origin,
-                                         d = d,
                                          record_list = record_list)
                         
                 #ONEWIRE free LOCK
                 ###t4.write_onewire_lock(ds_info = pin, status = True)
-                t4.write_onewire_lock_ram(ds_info = pin, status = True)
+                #t4.write_onewire_lock_ram(ds_info = pin, status = True)
+                system('rm {}'.format(t4.onewire_lock_file))
                 flag_lock_cycle = False
                         
             else:
@@ -573,7 +570,6 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
         t4_header_info(i = i, delay = delay)
         
         #OBJECTS
-        d = {}
         record_list = []
         for single_ds in t4_conf.ALL_DS:
 
@@ -581,7 +577,6 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
             run_single_ds_object(single_ds = single_ds,
                                  delay = delay,
                                  origin = origin,
-                                 d = d,
                                  record_list = record_list)
 
         #DEBUG records from ALL ds_objects
@@ -601,10 +596,29 @@ def run_all_ds(seconds = 10, minutes = 1, origin = None):
             print('break')
             break
 
+        
+def inhibit_set():
+    """inhibit call's"""
+
+    ###DQ_PINS
+    dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] == True]
+                
+    ###DIO_INHIBIT
+    t4.set_dio_inhibit(pins = dq_pin_numbers,
+                       value = 1)
+    ###DIO_ANALOG_ENABLE
+    t4.set_dio_analog(pins = dq_pin_numbers, #[0],
+                      value = 0) #dq_pin_numbers / DAT DO CONFIGU
+    ###DIO_DIRECTION
+    t4.set_dio_direction(pins = dq_pin_numbers,
+                         value = 1)
+    
+        
 
 def create_task_file(pin = None):
     """ts task file for cron / instead of one_wire lock"""
 
+    pins = '_'.join(str(p) for p in pin)
     work_dir = t4_conf.WORK_DIR
     concurent_dir = path.join(work_dir, t4_conf.CONCURENT_DIR)
 
@@ -612,12 +626,13 @@ def create_task_file(pin = None):
 
     ts = util.ts(datetime.now(), precision = 'us')
     
-    ts_full_path_filename = path.join(concurent_dir, '{}_{}'.format(ts, pin[0]))
+    ts_full_path_filename = path.join(concurent_dir, '{}_{}'.format(ts, pins))
 
     util.write_file(g = ts_full_path_filename,
                     mode = 'w',
                     data = [' '.join(sys.argv),
-                            pin[0]])
+                            pins]
+    )
         
 
 if __name__ == "__main__":
@@ -630,6 +645,10 @@ if __name__ == "__main__":
     #TASK for CRON encoder
     if conf_dict['task_status'] == 'True':
         print('TASK_STATUS: {} / we measure'.format(conf_dict['task_status']))
+        #DEBUG_TEST
+        dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] == True]
+        create_task_file(pin = dq_pin_numbers)
+        #_
     elif conf_dict['task_status'] == 'False':
         print('TASK_STATUS: {} / create TS file for CRON encoder'.format(conf_dict['task_status']))
 

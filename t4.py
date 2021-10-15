@@ -56,8 +56,8 @@ class T4():
 
         self.onewire_lock_type = self.config.ONEWIRE_LOCK_TYPE
         self.delay_onewire_lock = self.config.DELAY_ONEWIRE_LOCK
-        self.onewire_lock_file = path.join(self.work_dir,
-                                           self.config.ONEWIRE_LOCK_FILE)
+
+        self.onewire_lock_file = self.config.ONEWIRE_LOCK_FILE #always absolute path
 
         self.onewire_lock_ram_a = self.config.ONEWIRE_LOCK_RAM_A
         
@@ -81,7 +81,7 @@ class T4():
         """
 
         #aAddresses = [46080 ,46082, 46084 ,46086]
-        aAddresses = t4.onewire_lock_ram_a
+        aAddresses = self.onewire_lock_ram_a
         read_info = self.read_ram_a(addresses = aAddresses)
 
         now = datetime.now()
@@ -149,7 +149,7 @@ class T4():
         """
             
         #aAddresses = [46080 ,46082, 46084 ,46086]
-        aAddresses = t4.onewire_lock_ram_a
+        aAddresses = self.onewire_lock_ram_a
         aValues = [status_new,
                    ds_info,
                    ts_sec,

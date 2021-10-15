@@ -2,7 +2,17 @@ CONFIG_NAME = ''
 
 WORK_DIR = '/home/conan/soft/labjack_switch_board'
 BACKUP_DIR = 'csv'
-ONEWIRE_LOCK_FILE = 'onewire_dict.lock'
+
+ONEWIRE_LOCK_TYPE = 'file' #'ram' #'file'
+ONEWIRE_LOCK_FILE = '/tmp/onewire_dict.lock' #absolute path
+ONEWIRE_LOCK_RAM_A = [46080 ,46082, 46084 ,46086]
+ONEWIRE_LOCK_RAM_N = ['USER_RAM0_I32',
+                      'USER_RAM1_I32',
+                      'USER_RAM2_I32',
+                      'USER_RAM3_I32']
+
+CONCURENT_DIR = 'requests'
+CONCURENT_BACKUP_DIR = 'requests_backup'
 
 ORIGIN = 'TERMINAL' #CRON / TERMINAL / SERVICE / python APP
 
@@ -15,7 +25,6 @@ FLAG_DEBUG_DIO_INHIBIT = False
 FLAG_DEBUG_ROM = False
 FLAG_DEBUG_ONEWIRE_LOCK = False
 
-#SAMPLING
 DELAY_SAMPLE = 0.01
 SAMPLES = 10
 
