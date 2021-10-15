@@ -14,7 +14,7 @@ def ts(time_and_date, precision = 'ms'):
     """
 
     power = 3 #ms format
-    if precision == 'us': #ns
+    if precision == 'us':
         power = 6
     
     ts = int(datetime.timestamp(time_and_date) * pow(10, power))

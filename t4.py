@@ -56,8 +56,10 @@ class T4():
 
         self.onewire_lock_type = self.config.ONEWIRE_LOCK_TYPE
         self.delay_onewire_lock = self.config.DELAY_ONEWIRE_LOCK
-        self.lock_file_onewire = path.join(self.work_dir,
+        self.onewire_lock_file = path.join(self.work_dir,
                                            self.config.ONEWIRE_LOCK_FILE)
+
+        self.onewire_lock_ram_a = self.config.ONEWIRE_LOCK_RAM_A
         
         self.info = ljm.getHandleInfo(self.handler)
         self.ip = ljm.numberToIP(self.info[3])
@@ -78,11 +80,8 @@ class T4():
         one_wire read LOCK status: RAM
         """
 
-        #aNames = ['USER_RAM0_I32', 'USER_RAM1_I32', 'USER_RAM2_I32', 'USER_RAM3_I32']
-        aAddresses = [46080 ,46082, 46084 ,46086]
-        #data_type = ljm.constants.INT32
-        #aValues = [0, 0, 0, 0]
-        #read_info = read_ram_n(names = aNames)
+        #aAddresses = [46080 ,46082, 46084 ,46086]
+        aAddresses = t4.onewire_lock_ram_a
         read_info = self.read_ram_a(addresses = aAddresses)
 
         now = datetime.now()
@@ -110,7 +109,7 @@ class T4():
         ['###########', '###12V goowei', '', 'from(bucket: "bat_test")', '|> range(start: v.timeRangeStart, stop: v.timeRangeStop)']
         """
 
-        f = open(self.lock_file_onewire, 'r')
+        f = open(self.onewire_lock_file, 'r')
         fff = f.readlines()
         f.close()
 
@@ -149,7 +148,8 @@ class T4():
             ts))
         """
             
-        aAddresses = [46080 ,46082, 46084 ,46086]
+        #aAddresses = [46080 ,46082, 46084 ,46086]
+        aAddresses = t4.onewire_lock_ram_a
         aValues = [status_new,
                    ds_info,
                    ts_sec,
@@ -186,7 +186,7 @@ class T4():
         ]
 
         #WRITE
-        util.write_file(g = self.lock_file_onewire,
+        util.write_file(g = self.onewire_lock_file,
                         mode = 'w',
                         data = data_to_write
         )
@@ -271,7 +271,7 @@ class T4():
                 return False
      
         except FileNotFoundError:
-            print('ONEWIRE_LOCK >>> FileNotFoundError [create new lock file]: {}'.format(self.lock_file_onewire)
+            print('ONEWIRE_LOCK >>> FileNotFoundError [create new lock file]: {}'.format(self.onewire_lock_file)
             )
 
             #CREATE FILE AND LOCK NOW

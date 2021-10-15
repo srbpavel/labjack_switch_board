@@ -522,7 +522,7 @@ def run_single_ds_object(single_ds = None,
                     #FILE
                     ###t4.write_onewire_lock(ds_info = pin, status = True)
                     #RAM
-                    t4.write_onewire_lock_ram(ds_info = pin, status = True)
+                    #t4.write_onewire_lock_ram(ds_info = pin, status = True)
 
                     #EMAIL rom WARNING
                     print('EMAIL WARNING: rom WRONG BUS')
@@ -610,9 +610,9 @@ def create_task_file(pin = None):
 
     util.create_dir(concurent_dir)
 
-    ts = util.ts(datetime.now(), precision = 'ns')
+    ts = util.ts(datetime.now(), precision = 'us')
     
-    ts_full_path_filename = path.join(concurent_dir, '{}_{}'.format(ts, pin[0])) #pridat _pin 
+    ts_full_path_filename = path.join(concurent_dir, '{}_{}'.format(ts, pin[0]))
 
     util.write_file(g = ts_full_path_filename,
                     mode = 'w',
