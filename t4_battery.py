@@ -271,12 +271,12 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
 
 if __name__ == "__main__":
     #CONFIG
-    module_name = util.prepare_config()
-    t4_conf = __import__(module_name)
-
+    conf_dict = util.prepare_config()
+    t4_conf = __import__(conf_dict['module_name'])
+    
     #LABJACK CONNECTION
-    t4 = T4(config = module_name)
-
+    t4 = T4(config = conf_dict['module_name'])
+    
     #CRON once or TERMINAL/SERVICE loop
     run_all_batteries(seconds = t4_conf.DELAY_SECONDS,
                       minutes = t4_conf.DELAY_MINUTES,

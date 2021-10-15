@@ -5,10 +5,16 @@ import sys
 
 
 def ts(time_and_date, precision = 'ms'):
-    """datetime to timestamp"""
+    """
+    datetime to timestamp
+
+    1 sec = 1 000         ms / mili sec
+    1 sec = 1 000 000     us / micro sec
+    1 sec = 1 000 000 000 ns / nano sec
+    """
 
     power = 3 #ms format
-    if precision == 'ns':
+    if precision == 'us': #ns
         power = 6
     
     ts = int(datetime.timestamp(time_and_date) * pow(10, power))
@@ -19,8 +25,12 @@ def ts(time_and_date, precision = 'ms'):
 def write_file(g = None, mode = 'w', data = None):
     """write data = [] to file by lines (add's \n)"""
 
-    print('\ndata write to: {} / {}'.format(g,
-                                            datetime.timestamp(datetime.now())))
+    """
+    print('\ndata write to: {} / {}'.format(
+        g,
+        datetime.timestamp(datetime.now())
+    ))
+    """
     
     ggg = open(g, mode) # 'w' 'a'
 
@@ -58,7 +68,7 @@ def get_argv_num(pattern = None, size = 0):
 def create_task_file(self):
     util.create_dir(self.concurent_dir)
     
-    ts = util.ts(datetime.now(), precision = 'ns')
+    ts = util.ts(datetime.now(), precision = 'us') 
     
     ts_full_path_filename = path.join(self.concurent_dir, str(ts))
 

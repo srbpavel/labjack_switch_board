@@ -54,6 +54,7 @@ class T4():
         self.concurent_dir = path.join(self.work_dir,
                                     self.config.CONCURENT_DIR)
 
+        self.onewire_lock_type = self.config.ONEWIRE_LOCK_TYPE
         self.delay_onewire_lock = self.config.DELAY_ONEWIRE_LOCK
         self.lock_file_onewire = path.join(self.work_dir,
                                            self.config.ONEWIRE_LOCK_FILE)
@@ -73,7 +74,9 @@ class T4():
 
 
     def read_onewire_lock_ram(self):
-        """read RAM"""
+        """
+        one_wire read LOCK status: RAM
+        """
 
         #aNames = ['USER_RAM0_I32', 'USER_RAM1_I32', 'USER_RAM2_I32', 'USER_RAM3_I32']
         aAddresses = [46080 ,46082, 46084 ,46086]
@@ -89,7 +92,7 @@ class T4():
         
     def read_onewire_lock(self):
         """
-        one_wire read LOCK status
+        one_wire read LOCK status: FILE
 
         true -> unlock
         false -> lock
@@ -116,38 +119,39 @@ class T4():
 
     def write_onewire_lock_ram(self, ds_info = None, status = False):
         """
-        write RAM
+        write one_wire status LOCK/UNLOCK: RAM
 
-        true -> unlock
-        false -> lock
+        true -> unlock/1
+        false -> lock/2
         """
 
         status_msg = 'lock'
-        status_new = 2 # 2 is we CLOSE
+        status_new = 2 #2 is we CLOSE
         if status == True:
             status_msg = 'unlock'
-            status_new = 1 # 1 is we OPEN
+            status_new = 1 #1 is we OPEN
 
         now = datetime.now()
-        #pin = 14
 
         ts = datetime.timestamp(now)
         ts_sec, ts_ms = str(ts).split('.') #split for two RAM registers
         ts_sec = int(ts_sec)
         ts_ms_plus = int(float('1.{}'.format(ts_ms)) * 1000000) #add prefix 1 and multiply #otherwise timedelta error
 
-        print('data_to write: status:{} pin:{} ts_sec:{} ts_ms:{} ts_ms_plus:{} / {} / ts:{}'.format(
-            status_new, #status,
-            ds_info, #pin,
+        """
+        print('RAM >>> data_to write: status:{} pin:{} ts_sec:{} ts_ms:{} ts_ms_plus:{} / {} / ts:{}'.format(
+            status_new,
+            ds_info,
             ts_sec,
             ts_ms,
             ts_ms_plus,
             now,
             ts))
+        """
             
         aAddresses = [46080 ,46082, 46084 ,46086]
-        aValues = [status_new, #status, #true:1 / false:2
-                   ds_info, #pin: 14 / 8
+        aValues = [status_new,
+                   ds_info,
                    ts_sec,
                    ts_ms_plus]
 
@@ -155,7 +159,7 @@ class T4():
         self.write_ram_a(addresses = aAddresses,
                          values = aValues)
 
-        #READ
+        #VERIFY
         if self.debug_onewire_lock:
             read_info = self.read_ram_a(addresses = aAddresses)
             print('         RAM >>> status: {} / lock_file: {}'.format(status_msg,
@@ -164,7 +168,7 @@ class T4():
         
     def write_onewire_lock(self, ds_info = None, status = False):
         """
-        write one_wire status LOCK/UNLOCK
+        write one_wire status LOCK/UNLOCK: FILE
         
         true -> unlock
         false -> lock
@@ -198,60 +202,54 @@ class T4():
         #sleep(1)
 
         
-    def onewire_lock(self, ds_info):
-        try:
-            ###fff = self.read_onewire_lock()
-            ##
-            rrr, now = self.read_onewire_lock_ram()
-            if self.debug_onewire_lock:
-                ###print('ONEWIRE_LOCK >>> {} / pin: {}'.format(fff, ds_info))
-                ##
-                print('         RAM >>> {} / pin: {} / {}'.format(rrr, ds_info,
+    def onewire_lock_ram(self, ds_info):
+        rrr, now = self.read_onewire_lock_ram()
+        if self.debug_onewire_lock:
+            print('         RAM >>> {} / pin: {} / {}'.format(rrr, ds_info,
                                                                   now))
 
-            ###lock_dict = json.loads(fff[0].strip().replace("'", "\""))
-            ##
-            lock_dict_ram = self.parse_ram_data(rrr)
+        lock_dict_ram = self.parse_ram_data(rrr)
+        if self.debug_onewire_lock:
+            print('          RAM: {}'.format(lock_dict_ram))
+
+        if self.debug_onewire_lock:
+            print('           RAM: {}'.format(lock_dict_ram))
+
+        if lock_dict_ram['status'] is True:
             if self.debug_onewire_lock:
-                ###print('lock_dict_STR: {}'.format(lock_dict))
-                ##
-                print('          RAM: {}'.format(lock_dict_ram))
+                print('         RAM >>> lock is open: {} / should lock now'.format(rrr))
 
-            ###lock_dict['status'] = json.loads(lock_dict['status'].lower())
+            #LOCK NOW
+            self.write_onewire_lock_ram(ds_info = ds_info, status = False)
+                
+            #DEBUG VERIFY IF LOCKED
+            if self.debug_onewire_lock:
+                rrr = self.read_onewire_lock_ram()
+                print('         RAM >>> rrr[{}]: {}'.format(len(rrr), rrr))
+                
+            return True
+
+        else:
+            if self.debug_onewire_lock:
+                print('         RAM >>> lock is blocked')
+
+            return False
+
+    def onewire_lock_file(self, ds_info):
+        try:
+            fff = self.read_onewire_lock()
+            if self.debug_onewire_lock:
+                print('ONEWIRE_LOCK >>> {} / pin: {}'.format(fff, ds_info))
+
+            lock_dict = json.loads(fff[0].strip().replace("'", "\""))
+            if self.debug_onewire_lock:
+                print('lock_dict_STR: {}'.format(lock_dict))
+
+            lock_dict['status'] = json.loads(lock_dict['status'].lower())
                 
             if self.debug_onewire_lock:
-                ###print('lock_dict_BOOL: {}'.format(lock_dict))
-                ##
-                print('           RAM: {}'.format(lock_dict_ram))
+                print('lock_dict_BOOL: {}'.format(lock_dict))
 
-            #"""
-            #
-            if lock_dict_ram['status'] is True:
-                if self.debug_onewire_lock:
-                    print('         RAM >>> lock is open: {} / should lock now'.format(rrr))
-
-                #LOCK NOW
-                self.write_onewire_lock_ram(ds_info = ds_info, status = False)
-                
-                #DEBUG VERIFY IF LOCKED
-                if self.debug_onewire_lock:
-                    rrr = self.read_onewire_lock_ram()
-                    print('         RAM >>> rrr[{}]: {}'.format(len(rrr), rrr))
-                
-                ###
-                return True
-
-            else:
-                if self.debug_onewire_lock:
-                    print('         RAM >>> lock is blocked')
-
-                ###
-                return False
-            #_
-            #"""
-
-            #
-            """
             if lock_dict['status'] is True:
                 if self.debug_onewire_lock:
                     print('ONEWIRE_LOCK >>> lock is open: {} / should lock now'.format(fff))
@@ -271,9 +269,6 @@ class T4():
                     print('ONEWIRE_LOCK >>> lock is blocked')
 
                 return False
-            #_
-            """
-            
      
         except FileNotFoundError:
             print('ONEWIRE_LOCK >>> FileNotFoundError [create new lock file]: {}'.format(self.lock_file_onewire)
@@ -287,8 +282,8 @@ class T4():
             
             return True
 
-        #except:
-        #    raise SystemExit('ONEWIRE_LOCK >>> ERROR: onewire_lock file')
+        except:
+            raise SystemExit('ONEWIRE_LOCK >>> ERROR: onewire_lock file')
 
         
     def close_handler(self):
@@ -529,15 +524,19 @@ class T4():
         """
 
         #BEFORE
+        """
         read_info = self.read_ram_n(names = names)
         print('before[n]: {}'.format(read_info))
+        """
         
         #WRITE
         ljm.eWriteNames(self.handler, len(names), names, values)
     
         #AFTER
+        """
         read_info = self.read_ram_n(names = names)
         print('after[n]: {}'.format(read_info))
+        """
 
 
     def write_ram_a(self,
@@ -553,8 +552,10 @@ class T4():
         datatypes = [ljm.constants.INT32 for r in range(size)]
             
         #BEFORE
+        """
         read_info = self.read_ram_a(addresses = addresses)
         print('before[a]: {}'.format(read_info))
+        """
         
         #WRITE
         ljm.eWriteAddresses(self.handler,
@@ -564,8 +565,10 @@ class T4():
                             values)
     
         #AFTER
+        """
         read_info = self.read_ram_a(addresses = addresses)
         print('after[a]: {}'.format(read_info))
+        """
 
 
     def parse_ram_data(self,
@@ -579,8 +582,6 @@ class T4():
         d = {'status': data[0], #True/1 False/2
              'pin': int(data[1])}
 
-        print(d)
-        
         if d['status'] in [0, 1]: #0 default after RESET / #1 OPEN
             d['status'] = True
         elif d['status'] == 2: #2 CLOSE

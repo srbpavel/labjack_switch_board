@@ -455,9 +455,27 @@ def run_single_ds_object(single_ds = None,
                 print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
 
             #ONEWIRE_LOCK
-            status_onewire_lock = t4.onewire_lock(ds_info = pin)
-                    
+            print('LOCK_TYPE: {}'.format(t4.onewire_lock_type))
+            if t4.onewire_lock_type == 'ram':
+                status_onewire_lock = t4.onewire_lock_ram(ds_info = pin)
+            elif t4.onewire_lock_type == 'file':
+                status_onewire_lock = t4.onewire_lock_file(ds_info = pin)                
             if status_onewire_lock == True:
+                #INHIBIT
+                ###DQ_PINS
+                dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] == True]
+                
+                ###DIO_INHIBIT
+                t4.set_dio_inhibit(pins = dq_pin_numbers,
+                                   value = 1)
+                ###DIO_ANALOG_ENABLE
+                t4.set_dio_analog(pins = dq_pin_numbers, #[0],
+                                  value = 0) #dq_pin_numbers / DAT DO CONFIGU
+                ###DIO_DIRECTION
+                t4.set_dio_direction(pins = dq_pin_numbers,
+                                     value = 1)
+                #_
+
                 if t4.debug_onewire_lock:
                     ###print('ONEWIRE_LOCK >>> start DS object')
                     print('         RAM >>> start DS object')
@@ -594,7 +612,7 @@ def create_task_file(pin = None):
 
     ts = util.ts(datetime.now(), precision = 'ns')
     
-    ts_full_path_filename = path.join(concurent_dir, str(ts))
+    ts_full_path_filename = path.join(concurent_dir, '{}_{}'.format(ts, pin[0])) #pridat _pin 
 
     util.write_file(g = ts_full_path_filename,
                     mode = 'w',
@@ -609,37 +627,21 @@ if __name__ == "__main__":
     conf_dict = util.prepare_config()
     t4_conf = __import__(conf_dict['module_name'])
 
-    #DQ_PINS
-    #dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] == True]
-    dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] == True]
-    
     #TASK for CRON encoder
     if conf_dict['task_status'] == 'True':
         print('TASK_STATUS: {} / we measure'.format(conf_dict['task_status']))
     elif conf_dict['task_status'] == 'False':
         print('TASK_STATUS: {} / create TS file for CRON encoder'.format(conf_dict['task_status']))
 
+        #DQ_PINS
+        dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] == True]
+        
         create_task_file(pin = dq_pin_numbers)
 
         raise SystemExit('TASK: TS done >>> so exit')
     
     #LABJACK CONNECTION
     t4 = T4(config = conf_dict['module_name'])
-    
-    """
-    1 - tohle asi neni na spravnym miste, pac to urcite ten konkurencni proces prepina, nez se zacnou testovat ROM's
-    2 - mozna to nezapisovat pojednom ale jako array najednou
-    """
-    #DIO_INHIBIT
-    t4.set_dio_inhibit(pins = dq_pin_numbers,
-                       value = 1)
-    #DIO_ANALOG_ENABLE
-    t4.set_dio_analog(pins = dq_pin_numbers, #[0],
-                      value = 0) #dq_pin_numbers / DAT DO CONFIGU
-    #DIO_DIRECTION
-    t4.set_dio_direction(pins = dq_pin_numbers,
-                         value = 1)
-
     
     #CRON once or TERMINAL/SERVICE loop
     run_all_ds(seconds = t4_conf.DELAY_SECONDS,
