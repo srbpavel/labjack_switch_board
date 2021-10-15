@@ -329,8 +329,7 @@ class DS():
             ds_valid=self.influx_ds_valid,  # str
             ds_decimal=d['temperature_decimal'],  # float
             ds_pin=self.dqPin,  # str(int())
-            ts=self.last_measure_time_ts  # timestamp [ms]
-        )
+            ts=self.last_measure_time_ts)  # timestamp [ms]
 
 
     def write_influx(self, d=None):
@@ -385,8 +384,7 @@ class DS():
             ds_valid=b['INFLUX_DEFAULT_VALID_STATUS'],  # TAG: str [true/false]
             ds_pin=self.dqPin,  # TAG: str(int())
             ds_decimal=d['temperature_decimal'],  # FIELD: float
-            ts=self.last_measure_time_ts  # timestamp [ms]
-        )
+            ts=self.last_measure_time_ts)  # timestamp [ms]
 
         if self.flag_debug_influx:
             print('\nbackup_influx{}'.format(b_cmd.replace(self.influx_token, '...')))
@@ -406,8 +404,7 @@ def t4_header_info(i=0, delay=10):
         i,
         delay,
         temperature_str,
-        datetime.now())
-    )
+        datetime.now()))
         
 
 def csv_data_to_file(data=None):
@@ -445,25 +442,20 @@ def run_single_ds_object(single_ds=None,
                 print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
 
             # ONEWIRE_LOCK
-            print('LOCK_TYPE: {}'.format(t4.onewire_lock_type))
-
-            """
-            #S TIMHLE SE POTKAVAJ !!!
-            if t4.onewire_lock_type == 'ram':
-                status_onewire_lock = t4.onewire_lock_ram(ds_info = pin)
-            elif t4.onewire_lock_type == 'file':
+            status_onewire_lock = False
+            if t4.onewire_lock_type == 'file':  #S TIMHLE SE POTKAVAJ !!!
+                #status_onewire_lock = t4.onewire_lock_file(ds_info = pin)
                 if not path.exists(t4.onewire_lock_file):
                     with open(t4.onewire_lock_file, 'w') as f:
                         pass
-            
-                #status_onewire_lock = t4.onewire_lock_file(ds_info = pin)
-                status_onewire_lock is True
-            """
+                    status_onewire_lock = True                    
+            elif t4.onewire_lock_type == 'ram':
+                status_onewire_lock = t4.onewire_lock_ram(ds_info = pin)
 
-            # if status_onewire_lock == True:
-            if not path.exists(t4.onewire_lock_file):
-                with open(t4.onewire_lock_file, 'w') as f:
-                    pass
+            if status_onewire_lock is True:
+            #if not path.exists(t4.onewire_lock_file):
+            #    with open(t4.onewire_lock_file, 'w') as f:
+            #        pass
                 
                 # INHIBIT_one_wire_DS
                 inhibit_set()
@@ -635,6 +627,7 @@ if __name__ == "__main__":
     # TASK for CRON encoder
     if conf_dict['task_status'] == 'True':
         print('TASK_STATUS: {} / we measure'.format(conf_dict['task_status']))
+
         # DEBUG_TEST
         dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] is True]
         create_task_file(pin=dq_pin_numbers)
