@@ -1,5 +1,5 @@
 from datetime import datetime
-from time import sleep
+from time import sleep, time_ns
 from os import makedirs, system, path, getcwd, listdir
 import sys
 
@@ -7,15 +7,17 @@ import sys
 def ts(time_and_date, precision='ms'):
     """
     datetime to timestamp
-
-    1 sec = 1 000         ms / mili sec
-    1 sec = 1 000 000     us / micro sec
-    1 sec = 1 000 000 000 ns / nano sec
+                                                               / len()
+    1 sec = 1 000         ms / mili sec  / 1634383505081       / 13
+    1 sec = 1 000 000     us / micro sec / 1634317441300473    / 16
+    1 sec = 1 000 000 000 ns / nano sec  / 1634384282069377967 / 19 
     """
 
-    power = 3  # ms format
+    power = 3  # ms
     if precision == 'us':
-        power = 6
+        power = 6 # us 
+    elif precision == 'ns': # ns
+        return time_ns()
     
     ts = int(datetime.timestamp(time_and_date) * pow(10, power))
     
