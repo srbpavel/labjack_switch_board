@@ -53,6 +53,13 @@ CRON:
 */5 * * * * /usr/bin/python3 /home/conan/soft/labjack_switch_board/t4_ds.py --config /home/conan/soft/labjack_switch_board/t4_ds_config_pin_14.py --task False 1>/home/conan/soft/labjack_switch_board/1_cron_ds_14.log 2>/home/conan/soft/labjack_switch_board/2_cron_ds_14.log
 ```
 
+
+TERMINAL:
+```
+$python3 -i t4_battery.py --config /home/conan/soft/labjack_switch_board/t4_battery_config.py --task True
+```
+
+
 OBSERVER:
 ```
 $python3 observer.py --config t4_ds_config_pin_8.py --task False
@@ -66,6 +73,10 @@ created 2021-10-18 12:10:12.066373 >>> /home/conan/soft/labjack_switch_board/req
  deleted 2021-10-18 12:10:12.066719 >>> /home/conan/soft/labjack_switch_board/requests/1634551801655408147_8
  deleted 2021-10-18 12:10:12.067754 >>> /home/conan/soft/labjack_switch_board/requests/1634551801655446278_14
 ```
+
+
+SYSTEMD:
+```todo```
 
 
  * positive temperature
