@@ -183,7 +183,8 @@ class T4():
         # WRITE
         util.write_file(g=self.onewire_lock_file,
                         mode='w',
-                        data=data_to_write)
+                        data=data_to_write,
+                        debug=False)
         
         # READ
         if self.debug_onewire_lock:

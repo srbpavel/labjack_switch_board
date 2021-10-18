@@ -22,15 +22,11 @@ def ts(time_and_date, precision='ms'):
     return int(datetime.timestamp(time_and_date) * pow(10, power))
 
 
-def write_file(g=None, mode='w', data=None):
+def write_file(g=None, mode='w', data=None, debug=False):
     """write data = [] to file by lines (add's \n)"""
 
-    """
-    print('\ndata write to: {} / {}'.format(
-        g,
-        datetime.timestamp(datetime.now())
-    ))
-    """
+    if debug:
+        print('\ndata write to: {} / {}'.format(g))
 
     with open(g, mode) as ggg:  # mode: 'w' 'a'
         for line in data:
