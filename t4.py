@@ -98,23 +98,14 @@ class T4():
 
         true -> unlock
         false -> lock
-        
-        #one line version / but this one is NOT CLOSING
-        lock_list = [line.strip() for line in open(lock_file)]
-
-        #IS CLOSING
-        with open('flux_query.txt') as f:
-         lines = [line.strip() for line in f]
-        
-        len(lines)
-        224
-        >>> lines[:5]
-        ['###########', '###12V goowei', '', 'from(bucket: "bat_test")', '|> range(start: v.timeRangeStart, stop: v.timeRangeStop)']
         """
 
-        f = open(self.onewire_lock_file, 'r')
-        fff = f.readlines()
-        f.close()
+        # f = open(self.onewire_lock_file, 'r')
+        # fff = f.readlines()
+        # f.close()
+
+        with open(self.onewire_lock_file) as f:
+            fff = f.readlines()
 
         return fff
 

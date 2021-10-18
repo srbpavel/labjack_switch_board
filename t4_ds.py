@@ -1,5 +1,4 @@
 # FORKED https://github.com/labjack/labjack-ljm-python/blob/master/Examples/More/1-Wire/1_wire.py
-#
 from labjack import ljm
 from t4 import T4
 import sys
@@ -348,7 +347,7 @@ class DS():
             measurement=self.influx_measurement,
             host=self.influx_host,  # TAG: str
             machine_id=self.influx_machine_id,  # TAG: str
-            ds_id=d['rom'],  # TAG: str(int()) !!! not hex
+            ds_id=d['rom'],  # TAG: str(int()) !!! not hex as for ESP32
             ds_carrier=self.influx_ds_carrier,  # TAG: str
             ds_valid=self.influx_ds_valid,  # TAG: str [true/false]
             ds_pin=self.dqPin,  # TAG: str(int())
@@ -377,7 +376,7 @@ class DS():
             measurement=self.influx_measurement,
             host=self.influx_host,  # TAG: str
             machine_id=self.influx_machine_id,  # TAG: str
-            ds_id=d['rom'],  # TAG: str(int()) !!! not hex
+            ds_id=d['rom'],  # TAG: str(int()) !!! not hex as for ESP32
             ds_carrier=b['INFLUX_DEFAULT_CARRIER'],  # TAG: str
             ds_valid=b['INFLUX_DEFAULT_VALID_STATUS'],  # TAG: str [true/false]
             ds_pin=self.dqPin,  # TAG: str(int())
