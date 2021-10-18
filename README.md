@@ -44,7 +44,27 @@ DEMO mode [no HW required]:
 
 CRON:
 ```
+#default
+# --task True
+*/5 * * * * /usr/bin/python3 /home/conan/soft/labjack_switch_board/t4_ds.py --config /home/conan/soft/labjack_switch_board/t4_ds_config_pin_14.py --task True 1>/home/conan/soft/labjack_switch_board/1_cron_ds_14.log 2>/home/conan/soft/labjack_switch_board/2_cron_ds_14.log
+
+# create TS file for watchdog_observer 
+# --task False
 */5 * * * * /usr/bin/python3 /home/conan/soft/labjack_switch_board/t4_ds.py --config /home/conan/soft/labjack_switch_board/t4_ds_config_pin_14.py --task False 1>/home/conan/soft/labjack_switch_board/1_cron_ds_14.log 2>/home/conan/soft/labjack_switch_board/2_cron_ds_14.log
+```
+
+OBSERVER:
+```
+$python3 observer.py --config t4_ds_config_pin_8.py --task False
+
+CONFIG_FILE: t4_ds_config_pin_8.py
+START observer: 2021-10-18 12:05:24.832225 /home/conan/soft/labjack_switch_board/requests
+ACTUAL_FILES: []
+
+created 2021-10-18 12:10:01.658249 >>> /home/conan/soft/labjack_switch_board/requests/1634551801655408147_8
+created 2021-10-18 12:10:12.066373 >>> /home/conan/soft/labjack_switch_board/requests/1634551801655446278_14
+ deleted 2021-10-18 12:10:12.066719 >>> /home/conan/soft/labjack_switch_board/requests/1634551801655408147_8
+ deleted 2021-10-18 12:10:12.067754 >>> /home/conan/soft/labjack_switch_board/requests/1634551801655446278_14
 ```
 
 
