@@ -19,9 +19,7 @@ def ts(time_and_date, precision='ms'):
     elif precision == 'ns': # ns
         return time_ns()
     
-    ts = int(datetime.timestamp(time_and_date) * pow(10, power))
-    
-    return ts
+    return int(datetime.timestamp(time_and_date) * pow(10, power))
 
 
 def write_file(g=None, mode='w', data=None):
@@ -34,18 +32,7 @@ def write_file(g=None, mode='w', data=None):
     ))
     """
 
-    # OLD_way
-    """
-    ggg = open(g, mode) # 'w' 'a'
-
-    for line in data:
-        ggg.write('{}\n'.format(line))
-
-    ggg.close()
-    """
-
-    # NEW
-    with open(g, mode) as ggg:  # 'w' 'a'
+    with open(g, mode) as ggg:  # mode: 'w' 'a'
         for line in data:
             ggg.write('{}\n'.format(line))
 
@@ -74,19 +61,7 @@ def get_argv_num(pattern=None, size=0):
         if sys.argv[r] in pattern:
             return r
 
-        
-def create_task_file(self):
-    util.create_dir(self.concurent_dir)
-    
-    ts = util.ts(datetime.now(), precision='us')
-    
-    ts_full_path_filename = path.join(self.concurent_dir, str(ts))
 
-    util.write_file(g=ts_full_path_filename,
-                    mode='w',
-                    data=[' '.join(sys.argv)])
-        
-    
 def verify_config():
     """read cmd arguments and test config path"""
 

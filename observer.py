@@ -34,10 +34,10 @@ class Ts_Watch_Dog():
         """variables + setup dir's"""
         
         self.config = config
-        self.config_name = self.config.CONFIG_NAME
-        self.python_path = self.config.PYTHON_PATH
-        self.flag_debug_observer = self.config.FLAG_DEBUG_OBSERVER
-        self.observer_backup_type = self.config.OBSERVER_BACKUP_TYPE
+        self.config_name = config.CONFIG_NAME
+        self.python_path = config.PYTHON_PATH
+        self.flag_debug_observer = config.FLAG_DEBUG_OBSERVER
+        self.observer_backup_type = config.OBSERVER_BACKUP_TYPE
         
         self.work_dir = config.WORK_DIR
 
@@ -147,6 +147,6 @@ if __name__ == "__main__":
     conf_dict = util.prepare_config()
     config = __import__(conf_dict['module_name'])
 
-    # OBESERVER
+    # OBSERVER
     ts_watch_dog = Ts_Watch_Dog(config=config)
     ts_watch_dog.start()

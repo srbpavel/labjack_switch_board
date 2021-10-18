@@ -610,7 +610,7 @@ def create_task_file(pin=None):
 
     util.create_dir(concurent_dir)
 
-    ts = util.ts(datetime.now(), precision='ns')  # 'us'
+    ts = util.ts(datetime.now(), precision='ns')
     
     ts_full_path_filename = path.join(concurent_dir, '{}_{}'.format(ts, pins))
 
@@ -630,12 +630,6 @@ if __name__ == "__main__":
     # TASK for CRON encoder
     if conf_dict['task_status'] == 'True':
         print('TASK_STATUS: {} / we measure'.format(conf_dict['task_status']))
-
-        #"""
-        # DEBUG_TEST pac me zajima jak casto se to potka, a fakt ze casto !!!
-        #dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] is True]
-        #create_task_file(pin=dq_pin_numbers)
-        #"""
     elif conf_dict['task_status'] == 'False':
         print('TASK_STATUS: {} / create TS file for CRON encoder'.format(conf_dict['task_status']))
 

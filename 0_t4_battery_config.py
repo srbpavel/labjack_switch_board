@@ -47,6 +47,19 @@ INFLUX_PRECISION = 'ms'
 INFLUX_DEFAULT_CARRIER = 'labjack'
 INFLUX_DEFAULT_VALID_STATUS = 'true'
 
+#BACKUP_INFLUX_MACHINE
+BACKUP_INFLUX = {
+    'STATUS': False,
+    'INFLUX_SERVER' : '',
+    'INFLUX_PORT' : '',
+    'INFLUX_BUCKET' : '',
+    'INFLUX_TOKEN' : '',
+    'INFLUX_ORG' : '',
+    'INFLUX_PRECISION' : 'ms',
+    'INFLUX_DEFAULT_CARRIER' : 'labjack',
+    'INFLUX_DEFAULT_VALID_STATUS' : 'true',
+}
+
 HOST = ''
 
 TEMPLATE_CSV_HEADER = 'measurement,host,Machine,BatId,BatAddress,BatCarrier,BatValid,BatDecimal,ts'
