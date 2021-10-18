@@ -1,6 +1,6 @@
 **labjack_switch_board:: [T4](https://labjack.com/products/t4)**
-* analog input: battery voltage
-* digital input: one wire dallas temperature sensors --> *watchdog_observer for multiple pins reading (no race conditions)*
+* analog input: battery voltage --> *do not forget voltage divider !!!*
+* digital input: one_wire dallas temperature sensors --> *watchdog_observer for multiple pins reading (no race conditions)*
 * not yet - wheatstone bridge
 
 
