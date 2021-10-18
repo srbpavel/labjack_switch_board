@@ -1,6 +1,6 @@
 **labjack_switch_board:: [T4](https://labjack.com/products/t4)**
 * analog input: battery voltage
-* digital input: one wire dallas temperature sensors + watchdog_observer (no race conditions)
+* digital input: one wire dallas temperature sensors --> *watchdog_observer for multiple pins reading (no race conditions)*
 * not yet - wheatstone bridge
 
 
@@ -34,40 +34,17 @@ MACHINE:
 ![t4](pic/t4_scale.jpg)
 
 
-TODO:
- - dodelat taky jako service + sig_term pro ljm.close(handler) at to nekilluju na hulvata
- - otestovat influx schema na rpi_zero fotopastech
- - zaroven zapisovat battery 12v/5v data z rpi camera vystupu do jinyho measurementu (ale asi jiny repo?)
- - otestovat import z backup csv
- - zjistit proc me nejede CLI po docker restartu
-
-
-DONE:
- - negative temperature
- - ONEWIRE_LOCK nestaci obcas se to proste potka, takze hlidam jestli sedej ROM's z configu s nalezenejma, jeste se nad tim zamyslet
- - async mereni ruznych portu / ale pres ONEWIRE_LOCK file protoze T4 je potreba hlidat pro nastaveni sbernice/pin jinak meri co nechce
- - DS hledani vice ROM
- - DS pro vice pinu
- - 1-wire ds teplomery rozmakat 
- - util pro sdilenou cast
- - terminal: sleep [forever] / cron: open|close [once]
- - demo config to test code with no hw available 
- - `$python3 t4_battery.py --config t4_battery_config_demo.py`
- - various config for multi read
- - git / config / csv + influx 
-
+DEMO mode [no HW required]:  
+ ```
+ >>> ljm.openS("ANY", "ANY", "-2")
+ 
+ $python3 t4_battery.py --config t4_battery_config_demo.py
+ ```
+ 
 
 CRON:
-
 ```
-*/10 * * * * /usr/bin/python3 /home/conan/soft/labjack_switch_board/t4_battery.py --config /home/conan/soft/labjack_switch_board/t4_battery_config_first.py 1>/home/conan/soft/labjack_switch_board/1_cron_first.log 2>/home/conan/soft/labjack_switch_board/2_cron_first.log
-```
-
-ONEWIRE_LOCK:
-```
-$watch -n0.1 'cat -n onewire_dict.lock'
-$python3 -i t4_ds.py --config t4_ds_config_pin_8.py
-$python3 -i t4_ds.py --config t4_ds_config_pin_14.py
+*/5 * * * * /usr/bin/python3 /home/conan/soft/labjack_switch_board/t4_ds.py --config /home/conan/soft/labjack_switch_board/t4_ds_config_pin_14.py --task False 1>/home/conan/soft/labjack_switch_board/1_cron_ds_14.log 2>/home/conan/soft/labjack_switch_board/2_cron_ds_14.log
 ```
 
 
