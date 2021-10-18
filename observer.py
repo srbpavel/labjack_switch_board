@@ -9,22 +9,30 @@ import os
 class Ts_Handler(FileSystemEventHandler):
     """ts handler"""
 
+    create_template = '{} {} >>> {}'
+    delete_template = ' {} {} >>> {}'
+    
     def on_any_event(self, event):
         """
         types = ['created', 'deleted', 'modified', 'moved', 'closed']
         """
 
         if event.event_type == 'created':
-            self.print_status(event)
+            self.create_status(event)
             ts_watch_dog.run_ts_files()
         elif event.event_type == 'deleted':
-            self.print_status(event)
+            self.delete_status(event)
 
 
-    def print_status(self, event):
-        print('{} {} >>> {}'.format(event.event_type,
-                                    datetime.now(),
-                                    event.src_path))
+    def create_status(self, event):
+        print(self.create_template.format(event.event_type,
+                                          datetime.now(),
+                                          event.src_path))
+
+    def delete_status(self, event):
+        print(self.delete_template.format(event.event_type,
+                                          datetime.now(),
+                                          event.src_path))
 
 
 class Ts_Watch_Dog():
