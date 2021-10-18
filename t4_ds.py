@@ -273,7 +273,7 @@ class DS():
                     str(sensor)
                 ),
             debug=False,
-            machine='ruth + T4',
+            machine='T4',
             sms=False)
 
                 
@@ -441,21 +441,7 @@ def run_single_ds_object(single_ds=None,
                 print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
 
             # ONEWIRE_LOCK
-            """ #TOHLE SE POTKAVA !!!
-            status_onewire_lock = False
-            if t4.onewire_lock_type == 'file':  #S TIMHLE SE POTKAVAJ !!!
-                #status_onewire_lock = t4.onewire_lock_file(ds_info = pin)
-                if not path.exists(t4.onewire_lock_file):
-                    with open(t4.onewire_lock_file, 'w') as f:
-                        pass
-                    status_onewire_lock = True                    
-            elif t4.onewire_lock_type == 'ram':
-                status_onewire_lock = t4.onewire_lock_ram(ds_info = pin)
-
-            if status_onewire_lock is True:
-            """
-
-            if not path.exists(t4.onewire_lock_file): #taky se obcas potka kua !
+            if not path.exists(t4.onewire_lock_file):
                 with open(t4.onewire_lock_file, 'w') as f:
                     pass
                 

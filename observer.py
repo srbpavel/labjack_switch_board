@@ -10,7 +10,7 @@ class Ts_Handler(FileSystemEventHandler):
     """ts handler"""
 
     create_template = '{} {} >>> {}'
-    delete_template = ' {} {} >>> {}'
+    delete_template = '{}{}'.format(' ', create_template)
     
     def on_any_event(self, event):
         """

@@ -42,9 +42,6 @@ class T4():
                                  self.config.LABJACK_PROTOCOL,
                                  self.config.LABJACK_NAME)
         
-        # LED OFF
-        # ljm.eWriteName(self.handler, 'POWER_LED', 0)
-
         self.origin = self.config.ORIGIN
 
         self.work_dir = self.config.WORK_DIR
@@ -73,13 +70,20 @@ class T4():
                                                       self.info,
                                                       self.ip))
 
+        # LED OFF
+        # ljm.eWriteName(self.handler, 'POWER_LED', 0)
+        # ljm.eWriteName(t4.handler, 'POWER_LED', 1)
+        # ljm.eWriteName(t4.handler, 'POWER_LED', 4)
+        #
+        # ljm.eWriteName(t4.handler, 'LED_COMM', 0)
+        # ljm.eWriteName(t4.handler, 'LED_STATUS', 0)
 
+        
     def read_onewire_lock_ram(self):
         """
         one_wire read LOCK status: RAM
         """
 
-        # aAddresses = [46080 ,46082, 46084 ,46086]
         aAddresses = self.onewire_lock_ram_a
         read_info = self.read_ram_a(addresses=aAddresses)
 
@@ -147,7 +151,6 @@ class T4():
             ts))
         """
             
-        # aAddresses = [46080 ,46082, 46084 ,46086]
         aAddresses = self.onewire_lock_ram_a
         aValues = [status_new,
                    ds_info,
@@ -207,9 +210,6 @@ class T4():
         if self.debug_onewire_lock:
             print('          RAM: {}'.format(lock_dict_ram))
 
-        if self.debug_onewire_lock:
-            print('           RAM: {}'.format(lock_dict_ram))
-
         if lock_dict_ram['status'] is True:
             if self.debug_onewire_lock:
                 print('         RAM >>> lock is open: {} / should lock now'.format(rrr))
@@ -230,6 +230,7 @@ class T4():
 
             return False
 
+        
     def onewire_lock_file(self, ds_info):
         try:
             fff = self.read_onewire_lock()
@@ -587,21 +588,3 @@ class T4():
         d['datetime'] = datetime.fromtimestamp(d['ts'])
         
         return d
-
-
-"""
-https://labjack.com/support/datasheets/t-series/leds
-
->>> ljm.eWriteName(t4.handler, 'POWER_LED', 0)
->>> ljm.eWriteName(t4.handler, 'POWER_LED', 1)
->>> ljm.eWriteName(t4.handler, 'POWER_LED', 4)
-
->>> ljm.eReadName(t4.handler, 'POWER_LED')
-4.0
->>> ljm.eWriteName(t4.handler, 'LED_COMM', 0)
->>> ljm.eWriteName(t4.handler, 'LED_STATUS', 0)
->>> 
->>> ljm.eWriteName(t4.handler, 'POWER_LED', 0)
->>> ljm.eReadName(t4.handler, 'POWER_LED')
-0.0
-"""
