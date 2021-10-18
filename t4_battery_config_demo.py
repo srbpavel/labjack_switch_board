@@ -1,13 +1,25 @@
-CONFIG_NAME = 'demo_mode'
+PYTHON_PATH = '/usr/bin/python3'
+CONFIG_NAME = 'demo_mode_battery'
 
 WORK_DIR = '/home/conan/soft/labjack_switch_board'
 BACKUP_DIR = 'csv'
-ONEWIRE_LOCK_FILE = 'onewire_dict.lock'
+
+OBSERVER_BACKUP_TYPE = 'rm' # 'mv'
+CONCURENT_DIR = 'requests'
+CONCURENT_BACKUP_DIR = 'requests_backup'
 
 ORIGIN = 'TERMINAL' #CRON / TERMINAL / SERVICE / python APP
 
+ONEWIRE_LOCK_TYPE = 'file' #'ram' 
+ONEWIRE_LOCK_FILE = '/tmp/onewire_dict.lock' #absolute path
+ONEWIRE_LOCK_RAM_A = [46080 ,46082, 46084 ,46086]
+ONEWIRE_LOCK_RAM_N = ['USER_RAM0_I32',
+                      'USER_RAM1_I32',
+                      'USER_RAM2_I32',
+                      'USER_RAM3_I32']
+
 LABJACK_MODEL = 'T4' # T4 / T7 / ANY
-LABJACK_PROTOCOL = 'UDP' #USB / ANY
+LABJACK_PROTOCOL = 'UDP' #TCP USB / ANY
 LABJACK_NAME = '-2' #srbp_t4' #ANY
 #SERIAL >> 440010664
 #ETH_MAC >> 90:2e:87:00:41:ea
