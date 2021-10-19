@@ -23,12 +23,12 @@ MACHINE:
  - [digital-io / one_wire](https://labjack.com/support/datasheets/t-series/digital-io/1-wire)
  - [app_notes / one_wire](https://labjack.com/support/app-notes/1-wire)
  -
- - [tutorial: Data acquisition and automation with LabJack](https://techexplorations.com/so/labjack/)
+ - *techexplorations* [tutorial: Data acquisition and automation with LabJack](https://techexplorations.com/so/labjack/)
  -
  - [labjack/ljm](https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/ljm.py)
  - [labjack/constants](https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/constants.py)
  - [one_wire](https://github.com/labjack/labjack-ljm-python/blob/master/Examples/More/1-Wire/1_wire.py)
- - [DS18B20](https://www.maximintegrated.com/en/products/sensors/DS18B20.html?intcid=para) -> [pdf](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)
+ - *maxi_mintegrated* [DS18B20](https://www.maximintegrated.com/en/products/sensors/DS18B20.html?intcid=para) --> [pdf](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)
 
 
 ![t4](pic/t4_scale.jpg)
