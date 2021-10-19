@@ -121,7 +121,7 @@ class Ts_Watch_Dog():
         if back_up_type == 'rm':
             cmd_backup = 'rm {}'.format(filename)
 
-        print(' procces: {}'.format(ds_name))
+        print(' process: {}'.format(ds_name))
             
         if debug:
             print('CMD_RUN >>> {}'.format(cmd_run))
