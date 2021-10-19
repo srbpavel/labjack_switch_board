@@ -65,15 +65,16 @@ $python3 -i t4_battery.py --config /home/conan/soft/labjack_switch_board/t4_batt
 OBSERVER:
 ```
 $python3 observer.py --config t4_ds_config_pin_8.py --task False
-
 CONFIG_FILE: t4_ds_config_pin_8.py
-START observer: 2021-10-18 12:05:24.832225 /home/conan/soft/labjack_switch_board/requests
+START observer: 2021-10-19 08:48:43.262275 /home/conan/soft/labjack_switch_board/requests
 ACTUAL_FILES: []
 
-created 2021-10-18 12:10:01.658249 >>> /home/conan/soft/labjack_switch_board/requests/1634551801655408147_8
-created 2021-10-18 12:10:12.066373 >>> /home/conan/soft/labjack_switch_board/requests/1634551801655446278_14
- deleted 2021-10-18 12:10:12.066719 >>> /home/conan/soft/labjack_switch_board/requests/1634551801655408147_8
- deleted 2021-10-18 12:10:12.067754 >>> /home/conan/soft/labjack_switch_board/requests/1634551801655446278_14
+created: 2021-10-19 08:50:01.755565 >>> /home/conan/soft/labjack_switch_board/requests/1634626201752948016_8
+ procces: ds_sensor_8
+created: 2021-10-19 08:50:06.578097 >>> /home/conan/soft/labjack_switch_board/requests/1634626201766960053_14
+ procces: ds_sensor_14
+  deleted: 2021-10-19 08:50:12.159307 >>> /home/conan/soft/labjack_switch_board/requests/1634626201752948016_8
+  deleted: 2021-10-19 08:50:12.159440 >>> /home/conan/soft/labjack_switch_board/requests/1634626201766960053_14
 ```
 
 
