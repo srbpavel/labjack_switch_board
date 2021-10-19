@@ -257,7 +257,7 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
         util.write_file(g=full_path_file_name,
                         mode='a',
                         data=record_list,
-                        debug=False)
+                        debug=False)  # dat do configu
 
         #ONCE or FOREVER
         origin_result = util.origin_info(origin,

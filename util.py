@@ -26,7 +26,7 @@ def write_file(g=None, mode='w', data=None, debug=False):
     """write data = [] to file by lines (add's \n)"""
 
     if debug:
-        print('\ndata write to: {} / {}'.format(g))
+        print('\ndata write to: {}'.format(g))
 
     with open(g, mode) as ggg:  # mode: 'w' 'a'
         for line in data:

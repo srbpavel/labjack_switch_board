@@ -1,7 +1,8 @@
 PYTHON_PATH = '/usr/bin/python3'
 CONFIG_NAME = 'demo_mode_battery'
 
-WORK_DIR = '/home/conan/soft/labjack_switch_board'
+#WORK_DIR = '/home/conan/soft/labjack_switch_board'
+WORK_DIR = '/home/conan/soft/labjack/labjack_switch_board'
 BACKUP_DIR = 'csv'
 
 OBSERVER_BACKUP_TYPE = 'rm' # 'mv'
@@ -36,6 +37,8 @@ SAMPLES = 10
 #CYCLE sec * min: 1*1 / 10*1 / 60*5
 DELAY_SECONDS = 30 #1
 DELAY_MINUTES = 1 #1
+DELAY_ONEWIRE_LOCK = 1 #sec 
+DELAY_ONEWIRE_DS_CONVERT = 0.5 #sec
 
 #INFLUX
 INFLUX_SERVER = ''
@@ -58,8 +61,6 @@ TEMPLATE_CSV = '{measurement},{host},{machine},{bat_id},{bat_address},{bat_carri
 #FIELD: BatDecimal
 
 TEMPLATE_CURL = 'curl -k --request POST "https://{server}:{port}/api/v2/write?org={org}&bucket={bucket}&precision={precision}" --header "Authorization: Token {token}" --data-raw "{measurement},host={host},Machine={machine_id},BatId={bat_id},BatCarrier={bat_carrier},BatValid={bat_valid},BatAddress={bat_address} BatDecimal={bat_decimal} {ts}"'
-
-#curl -k --request POST "https://ruth:8086/api/v2/write?org=foookin_paavel&bucket=bat_test&precision=ms" --header "Authorization: Token ..." --data-raw "rpi,host=spongebob,Machine=rpi_zero_006,BatId=004_20Ah,BatCarrier=labjack,BatValid=true,BatAddress=6 BatDecimal=13.0282 1632832989983"
 
 #LIST OF DICTS
 #ALL_BATTERIES = [
