@@ -45,7 +45,7 @@ DEMO mode: no HW required
  
  >>> ljm.openS("ANY", "UDP", "-2")
  
- $python3 t4_battery.py --config t4_battery_config_demo.py
+ $python3 -i t4_battery.py --config t4_battery_config_demo.py --task False
  ```
  
 
