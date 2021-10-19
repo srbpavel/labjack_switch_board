@@ -9,8 +9,8 @@ import os
 class Ts_Handler(FileSystemEventHandler):
     """ts handler"""
 
-    create_template = '{} {} >>> {}'
-    delete_template = '{}{}'.format(' ', create_template)
+    create_template = '{}: {} >>> {}'
+    delete_template = '{}{}'.format('  ', create_template)
     
     def on_any_event(self, event):
         """
@@ -102,10 +102,12 @@ class Ts_Watch_Dog():
                   'rm' -> delete
         """
 
+        ds_name = '{}_{}'.format(self.config_name,
+                                 data[1])
+        
         cmd_log = '{}'.format(os.path.join(
             self.work_dir,
-            'STD_observer_{}_{}.log'.format(self.config_name,
-                                            data[1])))
+            'STD_observer_{}.log'.format(ds_name)))
     
         cmd_run = '{} {} 1>{} 2>{}'.format(
             self.python_path,
@@ -118,7 +120,9 @@ class Ts_Watch_Dog():
     
         if back_up_type == 'rm':
             cmd_backup = 'rm {}'.format(filename)
-        
+
+        print(' procces: {}'.format(ds_name))
+            
         if debug:
             print('CMD_RUN >>> {}'.format(cmd_run))
             print('BACKUP >>> {}\n'.format(cmd_backup))        

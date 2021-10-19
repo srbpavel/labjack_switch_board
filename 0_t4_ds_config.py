@@ -70,8 +70,6 @@ TEMPLATE_CSV = '{measurement},{host},{machine},{ds_id},{ds_pin},{ds_carrier},{ds
 
 TEMPLATE_CURL = 'curl -k --request POST "https://{server}:{port}/api/v2/write?org={org}&bucket={bucket}&precision={precision}" --header "Authorization: Token {token}" --data-raw "{measurement},host={host},Machine={machine_id},DsId={ds_id},DsCarrier={ds_carrier},DsValid={ds_valid},DsPin={ds_pin} DsDecimal={ds_decimal} {ts}"'
 
-#curl -k --request POST "https://ruth:8086/api/v2/write?org=foookin_paavel&bucket=ds_test&precision=ms" --header "Authorization: Token ..." --data-raw "dallas,host=ruth,Machine=hrnecek_s_ledem,DsId=841704586024,DsCarrier=labjack,DsValid=true,DsPin=8 DsDecimal=21.125 1633248964923"
-
 #LIST OF DICTS
 ALL_DS = [
     #DS_1
