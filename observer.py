@@ -60,8 +60,11 @@ class Ts_Watch_Dog():
 
     def start(self):
         """start event handler and observer"""
-        
+
+        # HANDLER
         self.event_handler = Ts_Handler()
+
+        # OBSERVER
         self.observer = Observer()
 
         self.observer.schedule(self.event_handler,
