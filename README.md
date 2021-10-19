@@ -36,15 +36,20 @@ MACHINE:
 ![t4](pic/t4_scale.jpg)
 
 
-DEMO mode [no HW required]:  
+DEMO mode: no HW required
  ```
- >>> ljm.openS("ANY", "ANY", "-2")
+ config_demo.py: 
+  LABJACK_MODEL = 'ANY'
+  LABJACK_PROTOCOL = 'UDP'
+  LABJACK_NAME = '-2'
+ 
+ >>> ljm.openS("ANY", "UDP", "-2")
  
  $python3 t4_battery.py --config t4_battery_config_demo.py
  ```
  
 
-CRON:
+CRON: close T4 handler connection
 ```
 #default
 # --task True
@@ -56,7 +61,7 @@ CRON:
 ```
 
 
-TERMINAL:
+TERMINAL: keep T4 handler connection open [ for example fast data measuring every 5sec just for 15minutes ] 
 ```
 $python3 -i t4_battery.py --config /home/conan/soft/labjack_switch_board/t4_battery_config.py --task True
 ```
