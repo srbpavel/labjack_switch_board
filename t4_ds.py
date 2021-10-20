@@ -2,6 +2,7 @@
 from labjack import ljm
 from t4 import T4
 import sys
+import os
 from os import system, path, listdir
 from time import sleep
 from datetime import datetime
@@ -37,6 +38,8 @@ class DS():
         self.flag_csv = flag_csv
         self.flag_influx = flag_influx
         self.flag_debug_influx = flag_debug_influx
+        self.flag_email_warning_temperature = t4_conf.FLAG_EMAIL_WARNING_TEMPERATURE
+        self.flag_email_warning_roms = t4_conf.FLAG_EMAIL_WARNING_ROMS
         
         self.influx_server = t4_conf.INFLUX_SERVER
         self.influx_port = t4_conf.INFLUX_PORT
@@ -260,20 +263,23 @@ class DS():
         # if sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
         # if sensor['temperature_decimal'] < 20:
         if sensor['temperature_decimal'] in (0, -self.const_12bit_resolution) or sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
-            print('EMAIL WARNING: temperature {}'.format(sensor['temperature_decimal']))
+            if self.flag_email_warning_temperature:
+                print('EMAIL WARNING: temperature {}'.format(sensor['temperature_decimal']))
 
-            easy_email.send_email(
-                msg_subject=easy_email.templates['temperature_zero']['sub'].format(
-                    sensor['pin'],
-                    sensor['temperature_decimal']
-                ),
-                msg_body=easy_email.templates['temperature_zero']['body'].format(
-                    datetime.now(),
-                    str(sensor)
-                ),
-            debug=False,
-            machine='T4',
-            sms=False)
+                easy_email.send_email(
+                    msg_subject=easy_email.templates['temperature_zero']['sub'].format(
+                        sensor['pin'],
+                        sensor['temperature_decimal']
+                    ),
+                    msg_body=easy_email.templates['temperature_zero']['body'].format(
+                        datetime.now(),
+                        str(sensor)
+                    ),
+                    debug=False,
+                    machine='T4',
+                    sms=False)
+            else:
+                print('EMAIL WARNING: temperature / disabled')
 
                 
     def measure(self, sensor=None):
@@ -440,9 +446,13 @@ def run_single_ds_object(single_ds=None,
                 print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
 
             # ONEWIRE_LOCK
+            """
             if not path.exists(t4.onewire_lock_file):
                 with open(t4.onewire_lock_file, 'w') as f:
                     pass
+            """
+            try:
+                os.open('/tmp/onewire_dict.lock',  os.O_CREAT | os.O_EXCL)
                 
                 # INHIBIT_one_wire_DS
                 inhibit_set()
@@ -491,18 +501,21 @@ def run_single_ds_object(single_ds=None,
                 # REPEAT OBJECT CALL + ONEWIRE free LOCK
                 if True in repeat_object_call:
                     # EMAIL rom WARNING
-                    print('EMAIL WARNING: rom WRONG BUS')
+                    if d[name].flag_email_warning_roms:
+                        print('EMAIL WARNING: rom WRONG BUS')
 
-                    easy_email.send_email(
-                        msg_subject=easy_email.templates['rom']['sub'].format(name),
-                        msg_body=easy_email.templates['rom']['body'].format(
-                            datetime.now(),
-                            '{}\n{}'.format(check_roms_msg,
-                                            d[name].all_sensors)
-                        ),
-                        debug=False,
-                        machine='ruth + T4',
-                        sms=False)
+                        easy_email.send_email(
+                            msg_subject=easy_email.templates['rom']['sub'].format(name),
+                            msg_body=easy_email.templates['rom']['body'].format(
+                                datetime.now(),
+                                '{}\n{}'.format(check_roms_msg,
+                                                d[name].all_sensors)
+                            ),
+                            debug=False,
+                            machine='ruth + T4',
+                            sms=False)
+                    else:
+                        print('EMAIL WARNING: ROM / disabled')
 
                     sleep(5)  # LET's give parallel call time to finish and free bus/pin
 
@@ -516,8 +529,9 @@ def run_single_ds_object(single_ds=None,
                 # t4.write_onewire_lock_ram(ds_info=pin, status=True)  # RAM
                 system('rm {}'.format(t4.onewire_lock_file))  #FILE empty
                 flag_lock_cycle = False
-                        
-            else:
+
+            #else:
+            except:
                 print('ONEWIRE_LOCK >>> block, WAIT {}'.format(datetime.now()))                    
 
                 sleep(t4.delay_onewire_lock)
