@@ -67,6 +67,8 @@ class DS():
         self.dpuPin = 0  # Not used
         self.options = 0  # bit 2 = 0 (DPU disabled), bit 3 = 0 (DPU polarity low, ignored)
 
+        self.all_sensors = []  # DEBUG all temperature data at one place
+        
         aNames = ["ONEWIRE_DQ_DIONUM",
                   "ONEWIRE_DPU_DIONUM",
                   "ONEWIRE_OPTIONS"]
@@ -518,7 +520,6 @@ def run_single_ds_object(single_ds,
                 print('>>> OBJECT: {}\n'.format(name))
                         
                 # INITIAL SEARCH
-                d[name].all_sensors = []  # DEBUG all temperature data at one place
                 d[name].search_init()
                         
                 # SEARCH FOR ROM's via BRANCHES
