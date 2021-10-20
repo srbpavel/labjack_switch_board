@@ -126,7 +126,7 @@ def origin_info(origin,
         origin_msg = 'once'
         print(loop_msg.format(origin, origin_msg))
         t4_obj.close_handler()
-    elif origin in ('TERMINAL', 'SERVICE'):
+    elif origin in ['TERMINAL', 'SERVICE']:
         origin_msg = 'sleeping'
         print(loop_msg.format(origin, origin_msg))
         # SLEEP

@@ -135,20 +135,20 @@ class DS():
         return aValues
 
     
-    def search(self, i=0, branch=0):
+    def search(self, rom_counter=0, last_branch=0):
         """rom search loop for 0xFO"""
 
-        i += 1
+        rom_counter += 1
         result_values = self.search_path()
         branch_found = result_values[3]  # ONEWIRE_ROM_BRANCHS_FOUND_L
     
-        if branch_found not in (0, branch):
+        if branch_found not in [0, last_branch]:
             # SET NEW BRANCH
             self.set_onewire_path_l(branch_found)
 
             # and SEARCH AGAIN
-            self.search(i=i,
-                        branch=branch_found)
+            self.search(rom_counter=rom_counter,
+                        last_branch=branch_found)
         else:
             self.set_onewire_path_l(0)
 
@@ -262,7 +262,7 @@ class DS():
         # DEBUG
         # if sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
         # if sensor['temperature_decimal'] < 20:
-        if sensor['temperature_decimal'] in (0, -self.const_12bit_resolution) or sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
+        if sensor['temperature_decimal'] in [0, -self.const_12bit_resolution] or sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
             if self.flag_email_warning_temperature:
                 print('EMAIL WARNING: temperature {}'.format(sensor['temperature_decimal']))
 
@@ -397,14 +397,14 @@ class DS():
         
 
 # GLOBAL
-def t4_header_info(i=0, delay=10):
+def t4_header_info(counter=0, delay=10):
     temperature_str = ''
     if t4_conf.FLAG_TEMPERATURE:
         temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature())
         
     print('{}\ni: {} / cycle_delay: {}s{} {}'.format(
         50 * '#',
-        i,
+        counter,
         delay,
         temperature_str,
         datetime.now()))
@@ -426,7 +426,21 @@ def show_record_list(data):
     for record in data:
         print(record)
 
+
+def measure_sensor_temperature(ds_bus,
+                               record_list):
+    """measure and verify roms"""
     
+    for single_sensor in ds_bus.all_sensors:
+        if single_sensor['rom_hex'] in ds_bus.pin_roms:
+            ds_bus.measure(sensor=single_sensor)  # + INFLUX WRITE
+            ds_bus.repeat_object_call.append(False)
+            record_list.append(ds_bus.record)
+        else:
+            print('ROMS {} error @@@@@ WRONG BUS @@@@@ -> repeat object call'.format(single_sensor['rom_hex']))
+            ds_bus.repeat_object_call.append(True)
+    
+
 def run_single_ds_object(single_ds,
                          origin,
                          record_list,
@@ -472,29 +486,25 @@ def run_single_ds_object(single_ds,
                 d[name].search_init()
                         
                 # SEARCH FOR ROM's via BRANCHES
-                rom_counter = 0
-                last_branch = 0
-                d[name].search(i=rom_counter, branch=last_branch)
+                d[name].search(rom_counter=0, last_branch=0)
 
                 # CHECK ROM's
-                pin_roms = single_ds['ROMS']
-                found_roms = [s.get('rom_hex') for s in d[name].all_sensors]
-                check_roms_msg = '@@@ config_ROMs: {} found_ROMs: {}\n'.format(pin_roms, found_roms)
+                d[name].pin_roms = single_ds['ROMS']
+                d[name].found_roms = [s.get('rom_hex') for s in d[name].all_sensors]
+                check_roms_msg = '@@@ config_ROMs: {} found_ROMs: {}\n'.format(
+                    d[name].pin_roms,
+                    d[name].found_roms)
+                
                 print(check_roms_msg)
                         
-                # MEASURE temperature from ALL_SENSORS
-                repeat_object_call = []
-                for single_sensor in d[name].all_sensors:
-                    if single_sensor['rom_hex'] in pin_roms:
-                        d[name].measure(sensor=single_sensor)  # + INFLUX WRITE
-                        repeat_object_call.append(False)
-                        record_list.append(d[name].record)
-                    else:
-                        print('ROMS {} error @@@@@ WRONG BUS @@@@@ -> repeat object call'.format(single_sensor['rom_hex']))
-                        repeat_object_call.append(True)
+                # MEASURE temperature from ALL_SENSORS and verify ROMS
+                d[name].repeat_object_call = []
+
+                measure_sensor_temperature(ds_bus=d[name],
+                                           record_list=record_list)
 
                 # REPEAT OBJECT CALL + ONEWIRE free LOCK
-                if True in repeat_object_call:
+                if True in d[name].repeat_object_call:
                     # EMAIL rom WARNING
                     if d[name].flag_email_warning_roms:
                         print('EMAIL WARNING: rom WRONG BUS')
@@ -532,11 +542,9 @@ def run_single_ds_object(single_ds,
                 print(e)
                 
 
-def run_all_ds(origin, seconds=10, minutes=1):
+def run_all_ds(origin, delay=10):
     """filter config for active temperature sensors and measure"""
 
-    delay = seconds * minutes
-    
     # CSV_PATH
     util.create_dir(t4.backup_dir)
             
@@ -546,7 +554,7 @@ def run_all_ds(origin, seconds=10, minutes=1):
         i += 1
 
         # T4 HEADER info
-        t4_header_info(i=i, delay=delay)
+        t4_header_info(counter=i, delay=delay)
         
         # OBJECTS
         record_list = []
@@ -638,6 +646,5 @@ if __name__ == "__main__":
     t4 = T4(config=conf_dict['module_name'])
     
     # CRON once or TERMINAL/SERVICE loop
-    run_all_ds(seconds=t4_conf.DELAY_SECONDS,
-               minutes=t4_conf.DELAY_MINUTES,
+    run_all_ds(delay=t4_conf.DELAY_SECONDS * t4_conf.DELAY_MINUTES,
                origin=t4.origin)
