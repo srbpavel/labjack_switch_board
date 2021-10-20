@@ -441,6 +441,42 @@ def measure_sensor_temperature(ds_bus,
             ds_bus.repeat_object_call.append(True)
     
 
+def repeat_object_call(ds_bus,
+                       name,
+                       check_roms_msg,
+                       single_ds,
+                       delay,
+                       origin,
+                       record_list):
+    """rom's error so repeat object call"""
+
+    # EMAIL rom WARNING
+    if ds_bus.flag_email_warning_roms:
+        print('EMAIL WARNING: rom WRONG BUS')
+
+        easy_email.send_email(
+            msg_subject=easy_email.templates['rom']['sub'].format(bus_name=name),
+            msg_body=easy_email.templates['rom']['body'].format(
+                datetime=datetime.now(),
+                roms_data='{}\n{}'.format(check_roms_msg,
+                                          ds_bus.all_sensors)
+            ),
+            debug=False,
+            machine='ruth + T4', # machine z CONFIGU dodelat
+            sms=False) # sms flag dodelat z CONFIGU
+    else:
+        print('EMAIL WARNING: ROM / disabled')
+
+    # LET's give parallel call time to finish and free bus/pin
+    sleep(5)
+
+    # REPEAT OBJECT CALL
+    run_single_ds_object(single_ds=single_ds,
+                         delay=delay,
+                         origin=origin,
+                         record_list=record_list)
+    
+            
 def run_single_ds_object(single_ds,
                          origin,
                          record_list,
@@ -503,31 +539,15 @@ def run_single_ds_object(single_ds,
                 measure_sensor_temperature(ds_bus=d[name],
                                            record_list=record_list)
 
-                # REPEAT OBJECT CALL + ONEWIRE free LOCK
+                # REPEAT OBJECT CALL
                 if True in d[name].repeat_object_call:
-                    # EMAIL rom WARNING
-                    if d[name].flag_email_warning_roms:
-                        print('EMAIL WARNING: rom WRONG BUS')
-
-                        easy_email.send_email(
-                            msg_subject=easy_email.templates['rom']['sub'].format(bus_name=name),
-                            msg_body=easy_email.templates['rom']['body'].format(
-                                datetime=datetime.now(),
-                                roms_data='{}\n{}'.format(check_roms_msg,
-                                                          d[name].all_sensors)
-                            ),
-                            debug=False,
-                            machine='ruth + T4',
-                            sms=False)
-                    else:
-                        print('EMAIL WARNING: ROM / disabled')
-
-                    sleep(5)  # LET's give parallel call time to finish and free bus/pin
-
-                    run_single_ds_object(single_ds=single_ds,
-                                         delay=delay,
-                                         origin=origin,
-                                         record_list=record_list)
+                    repeat_object_call(ds_bus=d[name],
+                                       name=name,
+                                       check_roms_msg=check_roms_msg,
+                                       single_ds=single_ds,
+                                       delay=delay,
+                                       origin=origin,
+                                       record_list=record_list)
                         
                 # ONEWIRE free LOCK
                 system('rm {}'.format(t4.onewire_lock_file))  #FILE empty
