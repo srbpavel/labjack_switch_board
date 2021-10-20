@@ -446,11 +446,6 @@ def run_single_ds_object(single_ds=None,
                 print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
 
             # ONEWIRE_LOCK
-            """
-            if not path.exists(t4.onewire_lock_file):
-                with open(t4.onewire_lock_file, 'w') as f:
-                    pass
-            """
             try:
                 os.open('/tmp/onewire_dict.lock',  os.O_CREAT | os.O_EXCL)
                 
@@ -525,17 +520,17 @@ def run_single_ds_object(single_ds=None,
                                          record_list=record_list)
                         
                 # ONEWIRE free LOCK
-                # t4.write_onewire_lock(ds_info=pin, status=True)  #FILE with data
-                # t4.write_onewire_lock_ram(ds_info=pin, status=True)  # RAM
                 system('rm {}'.format(t4.onewire_lock_file))  #FILE empty
                 flag_lock_cycle = False
 
-            #else:
-            except:
+            except FileExistsError:
                 print('ONEWIRE_LOCK >>> block, WAIT {}'.format(datetime.now()))                    
 
                 sleep(t4.delay_onewire_lock)
 
+            except Exception as e:
+                print(e)
+                
 
 def run_all_ds(seconds=10, minutes=1, origin=None):
     """filter config for active temperature sensors and measure"""

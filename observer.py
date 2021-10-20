@@ -155,7 +155,7 @@ class Ts_Watch_Dog():
 
 if __name__ == "__main__":
     """
-    python3 observer.py --config testing_t4_ds_config_pin_8.py --task False
+    python3 observer.py --config t4_ds_config_pin_8.py --task False
     """
 
     # CONFIG
