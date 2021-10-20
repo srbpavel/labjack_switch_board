@@ -18,14 +18,14 @@ class DS():
     """
     
     def __init__(self,
-                 pin=None,
-                 handler=None,
+                 pin,
+                 handler,
+                 measurement,
+                 machine_id,
                  delay=10,
                  flag_csv=True,
                  flag_influx=False,
-                 flag_debug_influx=False,
-                 measurement=None,
-                 machine_id=None):
+                 flag_debug_influx=False):
         """create ds instance as per config"""
 
         self.pin = pin
@@ -163,7 +163,7 @@ class DS():
         ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
 
 
-    def setup_bin_temp(self, sensor=None):
+    def setup_bin_temp(self, sensor):
         """prepare bin temperature for exact rom"""
 
         function = 0x55  # MATCH
@@ -195,7 +195,7 @@ class DS():
         sleep(self.convert_delay)
 
 
-    def read_bin_temp(self, sensor=None):
+    def read_bin_temp(self, sensor):
         """read bin temperature from scratchpad"""
 
         function = 0x55  # MATCH
@@ -224,7 +224,7 @@ class DS():
         ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
 
 
-    def temperature(self, sensor=None):
+    def temperature(self, sensor):
         """
         DS18B20 
 
@@ -268,12 +268,12 @@ class DS():
 
                 easy_email.send_email(
                     msg_subject=easy_email.templates['temperature_zero']['sub'].format(
-                        sensor['pin'],
-                        sensor['temperature_decimal']
+                        dq_pin=sensor['pin'],
+                        temperature=sensor['temperature_decimal']
                     ),
                     msg_body=easy_email.templates['temperature_zero']['body'].format(
-                        datetime.now(),
-                        str(sensor)
+                        datetime=datetime.now(),
+                        sensor=str(sensor)
                     ),
                     debug=False,
                     machine='T4',
@@ -282,7 +282,7 @@ class DS():
                 print('EMAIL WARNING: temperature / disabled')
 
                 
-    def measure(self, sensor=None):
+    def measure(self, sensor):
         self.last_measure_time = datetime.now()
         self.last_measure_time_ts = util.ts(self.last_measure_time, precision='ms')
         
@@ -313,7 +313,7 @@ class DS():
                 self.write_backup_influx(d=sensor)
 
                 
-    def write_csv(self, d=None):
+    def write_csv(self, d):
         """
         prepare csv backup record
 
@@ -335,7 +335,7 @@ class DS():
             ts=self.last_measure_time_ts)  # timestamp [ms]
 
 
-    def write_influx(self, d=None):
+    def write_influx(self, d):
         """construct influx call and write data
         #TAG: host / Machine / DsId / DsPin / DsCarrier / DsValid
         #FIELD: DsDecimal
@@ -367,7 +367,7 @@ class DS():
         system(cmd)  # via requests in future
 
 
-    def write_backup_influx(self, d=None):
+    def write_backup_influx(self, d):
         """backup influx machine"""
 
         b = self.backup_influx
@@ -410,7 +410,7 @@ def t4_header_info(i=0, delay=10):
         datetime.now()))
         
 
-def csv_data_to_file(data=None):
+def csv_data_to_file(data):
     file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
                                    t4_conf.CONFIG_NAME)
     
@@ -421,16 +421,16 @@ def csv_data_to_file(data=None):
                     debug=False)
     
 
-def show_record_list(data=None):
+def show_record_list(data):
     print('\n{}'.format(t4_conf.TEMPLATE_CSV_HEADER))
     for record in data:
         print(record)
 
     
-def run_single_ds_object(single_ds=None,
-                         delay=0,
-                         origin=None,
-                         record_list=None):
+def run_single_ds_object(single_ds,
+                         origin,
+                         record_list,
+                         delay=0):
     """single dallas object"""
     
     if single_ds['FLAG'] is True:
@@ -500,11 +500,11 @@ def run_single_ds_object(single_ds=None,
                         print('EMAIL WARNING: rom WRONG BUS')
 
                         easy_email.send_email(
-                            msg_subject=easy_email.templates['rom']['sub'].format(name),
+                            msg_subject=easy_email.templates['rom']['sub'].format(bus_name=name),
                             msg_body=easy_email.templates['rom']['body'].format(
-                                datetime.now(),
-                                '{}\n{}'.format(check_roms_msg,
-                                                d[name].all_sensors)
+                                datetime=datetime.now(),
+                                roms_data='{}\n{}'.format(check_roms_msg,
+                                                          d[name].all_sensors)
                             ),
                             debug=False,
                             machine='ruth + T4',
@@ -532,7 +532,7 @@ def run_single_ds_object(single_ds=None,
                 print(e)
                 
 
-def run_all_ds(seconds=10, minutes=1, origin=None):
+def run_all_ds(origin, seconds=10, minutes=1):
     """filter config for active temperature sensors and measure"""
 
     delay = seconds * minutes
@@ -565,9 +565,9 @@ def run_all_ds(seconds=10, minutes=1, origin=None):
         csv_data_to_file(data=record_list)
 
         # ONCE or FOREVER
-        origin_result = util.origin_info(origin,
-                                         delay,
-                                         t4_obj=t4)
+        origin_result = util.origin_info(origin=origin,
+                                         t4_obj=t4,
+                                         delay=delay)
         
         flag_loop = origin_result.get('flag_loop', False)
     
@@ -594,7 +594,7 @@ def inhibit_set():
     
         
 
-def create_task_file(pin=None):
+def create_task_file(pin):
     """ts task file for cron / instead of one_wire lock"""
 
     pins = '_'.join(str(p) for p in pin)

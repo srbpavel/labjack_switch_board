@@ -97,7 +97,7 @@ class T4():
         return temperature_celsius
 
 
-    def set_dio_inhibit(self, value=1, pins=None):
+    def set_dio_inhibit(self, pins, value=1):
         """
         TURN ON/OFF always auto-configured AIN4-AIN11 https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
 
@@ -163,7 +163,7 @@ class T4():
             self.read_dio_inhibit()
 
         
-    def set_dio_analog(self, pins=None, value=1):
+    def set_dio_analog(self, pins, value=1):
         """
         FLEXIBLE I/O -> DIO4-DIO11 --> fixed I/O lines ---> can be configured for ANALOG input/output
                         DIO12-DIO19 --> dedicated (digital only) I/O lines  
@@ -211,7 +211,7 @@ class T4():
             self.read_dio_analog_enable()
 
 
-    def set_dio_direction(self, pins=None, value=1):
+    def set_dio_direction(self, pins, value=1):
         """
         DIO_DIRECTION / 0 as input / 1 as ouput
         https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
@@ -250,9 +250,9 @@ class T4():
 
         
     def show_bin_ruler(self,
+                       new_line,
                        bin_str='',
-                       space_count=0,
-                       new_line=None):
+                       space_count=0):
         """
         ruler to help identify bit possition
 
@@ -276,7 +276,7 @@ class T4():
                                    line_end)  # '' OR '\n'
 
     
-    def read_ram_n(self, names=None):
+    def read_ram_n(self, names):
         """
         read user_ram via NAME
         
@@ -288,7 +288,7 @@ class T4():
                               names)
 
 
-    def read_ram_a(self, addresses=None):
+    def read_ram_a(self, addresses):
         """
         read user_ram via ADDRESS
 
@@ -305,8 +305,8 @@ class T4():
 
 
     def write_ram_n(self,
-                    names=None,
-                    values=None):
+                    names,
+                    values):
         """
         write user_ram via NAME
         
@@ -330,8 +330,8 @@ class T4():
 
 
     def write_ram_a(self,
-                    addresses=None,
-                    values=None):
+                    addresses,
+                    values):
         """
         write user_ram via ADDRESS
             

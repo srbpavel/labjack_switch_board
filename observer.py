@@ -94,8 +94,8 @@ class Ts_Watch_Dog():
         
         
     def cmd_process(self,
-                    data=None,
-                    filename=None,
+                    data,
+                    filename,
                     debug=False,
                     back_up_type='mv'):
         """prepare cmd call

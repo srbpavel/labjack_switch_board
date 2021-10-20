@@ -22,7 +22,7 @@ def ts(time_and_date, precision='ms'):
     return int(datetime.timestamp(time_and_date) * pow(10, power))
 
 
-def write_file(g=None, mode='w', data=None, debug=False):
+def write_file(g, data, mode='w', debug=False):
     """write data = [] to file by lines (add's \n)"""
 
     if debug:
@@ -52,7 +52,7 @@ def create_dir(directory):
         pass
 
     
-def get_argv_num(pattern=None, size=0):
+def get_argv_num(pattern, size=0):
     for r in range(size):
         if sys.argv[r] in pattern:
             return r
@@ -110,9 +110,9 @@ def prepare_config():
     return config_result
 
 
-def origin_info(origin=None,
-                delay=10,
-                t4_obj=None):
+def origin_info(origin,
+                t4_obj,
+                delay=10):
     """parse origin for program flow"""
 
     origin_msg = None

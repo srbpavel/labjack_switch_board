@@ -22,9 +22,9 @@ templates = TEMPLATES
 
 def send_email(msg_subject,
                msg_body,
-               debug=False,
-               machine=None,
-               sms=None):
+               machine,
+               sms,
+               debug=False):
     
     context = create_default_context()
     server = SMTP(smtp_server, port)

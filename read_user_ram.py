@@ -4,7 +4,7 @@ import util
 from datetime import datetime
 
 
-def read_ram_n(names=None):
+def read_ram_n(names):
     """
     read user_ram via NAME
 
@@ -16,7 +16,7 @@ def read_ram_n(names=None):
                           names)
 
 
-def read_ram_a(addresses=None):
+def read_ram_a(addresses):
     """
     read user_ram via ADDRESS
 
@@ -32,8 +32,8 @@ def read_ram_a(addresses=None):
                               datatypes)
 
 
-def write_ram_n(names=None,
-                values=None):
+def write_ram_n(names,
+                values):
     """
     write user_ram via NAME
 
@@ -52,8 +52,8 @@ def write_ram_n(names=None,
     print('after[n]: {}'.format(read_info))
 
 
-def write_ram_a(addresses=None,
-                values=None):
+def write_ram_a(addresses,
+                values):
     """
     write user_ram via ADDRESS
     
@@ -88,7 +88,7 @@ def quick_write():
                    values=[0, 0, 0, 0])
     
 
-def parse_ram_data(data=None):
+def parse_ram_data(data):
     """create dict data + timestamp work"""
 
     d = {'status': data[0],
