@@ -1,6 +1,6 @@
 from datetime import datetime
 from time import sleep, time_ns
-from os import makedirs, system, path, getcwd, listdir
+import os
 import sys
 
 
@@ -47,7 +47,7 @@ def create_dir(directory):
     """create dir for full_path"""
 
     try:
-        makedirs(directory)
+        os.makedirs(directory)
     except OSError as error:
         pass
 
@@ -71,14 +71,14 @@ def verify_config():
 
     if position_config:
         config_file = sys.argv[position_config + 1].lower()
-        work_dir = getcwd()
+        work_dir = os.getcwd()
 
         if '/' in config_file:
             print('FULL PATH ARGUMENT: {}'.format(config_file))
-            work_dir = path.dirname(config_file)
-            config_file = path.basename(config_file)
+            work_dir = os.path.dirname(config_file)
+            config_file = os.path.basename(config_file)
 
-        list_dir = listdir(work_dir)
+        list_dir = os.listdir(work_dir)
 
         if config_file in list_dir:
             d['config_file'] = config_file

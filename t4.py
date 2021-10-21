@@ -1,5 +1,5 @@
 from labjack import ljm
-from os import path
+import os
 from datetime import datetime
 from time import sleep
 import util
@@ -46,11 +46,11 @@ class T4():
         self.origin = self.config.ORIGIN
 
         self.work_dir = self.config.WORK_DIR
-        self.backup_dir = path.join(self.work_dir,
-                                    self.config.BACKUP_DIR)
+        self.backup_dir = os.path.join(self.work_dir,
+                                       self.config.BACKUP_DIR)
 
-        self.concurent_dir = path.join(self.work_dir,
-                                       self.config.CONCURENT_DIR)
+        self.concurent_dir = os.path.join(self.work_dir,
+                                          self.config.CONCURENT_DIR)
 
         self.flag_temperature = self.config.FLAG_TEMPERATURE
         self.debug_onewire_lock = self.config.FLAG_DEBUG_ONEWIRE_LOCK #FLAG +

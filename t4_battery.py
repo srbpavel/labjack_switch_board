@@ -2,7 +2,7 @@ from labjack import ljm
 from t4 import T4
 from time import sleep
 from datetime import datetime
-from os import system, path 
+import os
 import util
 
 
@@ -192,7 +192,7 @@ class Battery():
         if self.flag_debug_influx:
             print('\n{}'.format(cmd.replace(self.influx_token, '...')))
 
-        system(cmd) #test via requests
+        os.system(cmd) #test via requests
 
         
 ###GLOBAL
@@ -253,7 +253,7 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
         file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
                                        t4_conf.CONFIG_NAME)
 
-        full_path_file_name = path.join(t4.backup_dir, file_name)
+        full_path_file_name = os.path.join(t4.backup_dir, file_name)
         util.write_file(g=full_path_file_name,
                         mode='a',
                         data=record_list,

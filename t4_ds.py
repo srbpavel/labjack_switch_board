@@ -3,7 +3,6 @@ from labjack import ljm
 from t4 import T4
 import sys
 import os
-from os import system, path, listdir
 from time import sleep
 from datetime import datetime
 import util
@@ -144,7 +143,7 @@ class All_Ds():
                                            delay=delay)
                         
                     # ONEWIRE free LOCK
-                    system('rm {}'.format(t4.onewire_lock_file))  #FILE empty
+                    os.system('rm {}'.format(t4.onewire_lock_file))  #FILE empty
                     flag_lock_cycle = False
 
                 except FileExistsError:
@@ -232,7 +231,7 @@ class All_Ds():
         file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
                                        t4.config_name)
     
-        full_path_file_name = path.join(t4.backup_dir, file_name)
+        full_path_file_name = os.path.join(t4.backup_dir, file_name)
         util.write_file(g=full_path_file_name,
                         mode='a',
                         data=self.record_list,
@@ -595,7 +594,7 @@ class Ds():
             print('\n{}'.format(cmd.replace(self.influx_token, '...')))
 
         #
-        system(cmd)  # via requests in future
+        os.system(cmd)  # via requests in future
 
 
     def write_backup_influx(self, d):
@@ -624,7 +623,7 @@ class Ds():
             print('\nbackup_influx{}'.format(b_cmd.replace(self.influx_token, '...')))
 
         print('   + backup_influx')
-        system(b_cmd)
+        os.system(b_cmd)
 
 
 # GLOBAL
@@ -633,13 +632,13 @@ def create_task_file(pin):
 
     pins = '_'.join(str(p) for p in pin)
     work_dir = t4_conf.WORK_DIR
-    concurent_dir = path.join(work_dir, t4_conf.CONCURENT_DIR)
+    concurent_dir = os.path.join(work_dir, t4_conf.CONCURENT_DIR)
 
     util.create_dir(concurent_dir)
 
     ts = util.ts(datetime.now(), precision='ns')
     
-    ts_full_path_filename = path.join(concurent_dir, '{}_{}'.format(ts, pins))
+    ts_full_path_filename = os.path.join(concurent_dir, '{}_{}'.format(ts, pins))
 
     util.write_file(g=ts_full_path_filename,
                     mode='w',
