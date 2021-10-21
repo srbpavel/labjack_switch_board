@@ -13,6 +13,7 @@ MACHINE:
  - ```$tar -zvxf labjack_ljm_software_2019_07_16_x86_64.tar.gz```
  - ```#./labjack_ljm_installer.run```
  - ```$whereis labjack_kipling``` labjack_kipling: /usr/local/bin/labjack_kipling
+ - *be sure to turn off kipling and not run it when active registers in matrix*
  - 
  - [LJM python](https://labjack.com/support/software/examples/ljm/python)
  - ```#pip3 install labjack-ljm```
