@@ -26,8 +26,12 @@ class All_Ds():
         temperature_str = ''
         if t4.flag_temperature:
             temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature())
-        
-        print('{}\ni: {} / cycle_delay: {}s{} {}'.format(
+
+        delay = '{}s'.format(delay)
+        if t4.origin == 'CRON':
+            delay = 'see {}'.format(t4.origin)
+            
+        print('{}\ni: {} / cycle_delay: {}{} / {}'.format(
             50 * '#',
             counter,
             delay,
@@ -92,8 +96,8 @@ class All_Ds():
                 if t4.debug_onewire_lock:
                     print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
 
-                # ONEWIRE_LOCK
                 try:
+                    # ONEWIRE block LOCK
                     os.open('/tmp/onewire_dict.lock',  os.O_CREAT | os.O_EXCL)
                 
                     # INHIBIT_one_wire_DS
@@ -143,7 +147,7 @@ class All_Ds():
                                            delay=delay)
                         
                     # ONEWIRE free LOCK
-                    os.system('rm {}'.format(t4.onewire_lock_file))  #FILE empty
+                    os.system('rm {}'.format(t4.onewire_lock_file))
                     flag_lock_cycle = False
 
                 except FileExistsError:
@@ -212,8 +216,8 @@ class All_Ds():
                                               ds_bus.all_sensors)
                 ),
                 debug=False,
-                machine='ruth + T4', # machine z CONFIGU dodelat
-                sms=False) # sms flag dodelat z CONFIGU
+                machine=t4.host,
+                sms=self.flag_sms_warning_roms)
         else:
             print('EMAIL WARNING: ROM / disabled')
 
@@ -268,6 +272,9 @@ class Ds():
         self.flag_debug_influx = flag_debug_influx
         self.flag_email_warning_temperature = t4_conf.FLAG_EMAIL_WARNING_TEMPERATURE
         self.flag_email_warning_roms = t4_conf.FLAG_EMAIL_WARNING_ROMS
+
+        self.flag_sms_warning_temperature = t4_conf.FLAG_SMS_WARNING_TEMPERATURE
+        self.flag_sms_warning_roms = t4_conf.FLAG_SMS_WARNING_ROMS
         
         self.influx_server = t4_conf.INFLUX_SERVER
         self.influx_port = t4_conf.INFLUX_PORT
@@ -421,7 +428,7 @@ class Ds():
         ljm.eWriteNameByteArray(t4.handler, "ONEWIRE_DATA_TX", numTX, dataTX)
         ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
 
-        # convert delay
+        # convert delay as per dallas datasheet
         sleep(self.convert_delay)
 
 
@@ -491,7 +498,8 @@ class Ds():
         # EMAIL temperature WARNING
         # DEBUG
         # if sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
-        # if sensor['temperature_decimal'] < 20:
+        # if sensor['temperature_decimal'] > 23.0:
+        # _
         if sensor['temperature_decimal'] in [0, -self.const_12bit_resolution] or sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
             if self.flag_email_warning_temperature:
                 print('EMAIL WARNING: temperature {}'.format(sensor['temperature_decimal']))
@@ -506,8 +514,8 @@ class Ds():
                         sensor=str(sensor)
                     ),
                     debug=False,
-                    machine='T4',
-                    sms=False)
+                    machine=t4.host,
+                    sms=self.flag_sms_warning_temperature)
             else:
                 print('EMAIL WARNING: temperature / disabled')
 
@@ -658,7 +666,7 @@ if __name__ == "__main__":
     if conf_dict['task_status'] == 'True':
         print('TASK_STATUS: {} / we measure'.format(conf_dict['task_status']))
     elif conf_dict['task_status'] == 'False':
-        print('TASK_STATUS: {} / create TS file for CRON encoder'.format(conf_dict['task_status']))
+        print('TASK_STATUS: {} / create TS file for OBSERVER'.format(conf_dict['task_status']))
 
         # DQ_PINS
         dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] is True]

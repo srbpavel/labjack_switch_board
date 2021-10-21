@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 from time import sleep
 import util
-import json
 
 
 # LABJACK
@@ -44,7 +43,8 @@ class T4():
                                  self.config.LABJACK_NAME)
         
         self.origin = self.config.ORIGIN
-
+        self.host = self.config.HOST
+        
         self.work_dir = self.config.WORK_DIR
         self.backup_dir = os.path.join(self.work_dir,
                                        self.config.BACKUP_DIR)

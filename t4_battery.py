@@ -28,18 +28,17 @@ class Battery():
     """
 
     def __init__(self,
-                 address = None,
-                 handler = None,
+                 address,
+                 handler,
+                 measurement,
+                 machine_id,
+                 bat_id,
                  delay = 10,
                  ratio = 1,
                  offset = 0,
                  flag_csv = True,
                  flag_influx = False,
-                 flag_debug_influx = False,
-                 measurement = None,
-                 machine_id = None,
-                 bat_id = None,
-                 ):
+                 flag_debug_influx = False):
         """create battery instance as per config"""
         
         self.address = address
@@ -196,7 +195,7 @@ class Battery():
 
         
 ###GLOBAL
-def run_all_batteries(seconds = 10, minutes = 1, origin = None):
+def run_all_batteries(origin, seconds=10, minutes=1):
     """filter config for active batteries and measure"""
 
     #OBJECTS
@@ -260,8 +259,7 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
                         debug=False)  # dat do configu
 
         #ONCE or FOREVER
-        origin_result = util.origin_info(origin=origin,
-                                         delay=seconds * minutes,
+        origin_result = util.origin_info(delay=seconds * minutes,
                                          t4_obj=t4)
         
         flag_loop = origin_result.get('flag_loop', False)
