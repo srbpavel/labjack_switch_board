@@ -110,8 +110,7 @@ def prepare_config():
     return config_result
 
 
-def origin_info(origin,
-                t4_obj,
+def origin_info(t4_obj,
                 delay=10):
     """parse origin for program flow"""
 
@@ -121,20 +120,20 @@ def origin_info(origin,
     d = {'flag_loop': True,
          'break': False}
 
-    if origin == 'CRON':
+    if t4_obj.origin == 'CRON':
         d['flag_loop'] = False
         origin_msg = 'once'
-        print(loop_msg.format(origin, origin_msg))
+        print(loop_msg.format(t4_obj.origin, origin_msg))
         t4_obj.close_handler()
-    elif origin in ['TERMINAL', 'SERVICE']:
+    elif t4_obj.origin in ['TERMINAL', 'SERVICE']:
         origin_msg = 'sleeping'
-        print(loop_msg.format(origin, origin_msg))
+        print(loop_msg.format(t4_obj.origin, origin_msg))
         # SLEEP
         sleep(delay)
-    elif origin == 'APP':
+    elif t4_obj.origin == 'APP':
         d['flag_loop'] = False
         origin_msg = 'various'
-        print(loop_msg.format(origin, origin_msg))
+        print(loop_msg.format(t4_obj.origin, origin_msg))
         t4_obj.close_handler()
     else:
         print('\nloop error')

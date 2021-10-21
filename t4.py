@@ -37,6 +37,7 @@ class T4():
         """
 
         self.config = __import__(config)
+        self.config_name = self.config.CONFIG_NAME
         
         self.handler = ljm.openS(self.config.LABJACK_MODEL,
                                  self.config.LABJACK_PROTOCOL,
@@ -51,11 +52,16 @@ class T4():
         self.concurent_dir = path.join(self.work_dir,
                                        self.config.CONCURENT_DIR)
 
+        self.flag_temperature = self.config.FLAG_TEMPERATURE
+        self.debug_onewire_lock = self.config.FLAG_DEBUG_ONEWIRE_LOCK #FLAG +
+        
         self.onewire_lock_type = self.config.ONEWIRE_LOCK_TYPE
         self.delay_onewire_lock = self.config.DELAY_ONEWIRE_LOCK
 
+        self.delay_seconds = self.config.DELAY_SECONDS
+        self.delay_minutes = self.config.DELAY_MINUTES
+        
         self.onewire_lock_file = self.config.ONEWIRE_LOCK_FILE  # always absolute path
-
         self.onewire_lock_ram_a = self.config.ONEWIRE_LOCK_RAM_A
         
         self.info = ljm.getHandleInfo(self.handler)
@@ -64,8 +70,8 @@ class T4():
         self.const_kelvin = 273.15
         self.bin_ruler = ''.join([str(r) for r in range(9, -1, -1)]) * 3  # 9876543210
         
-        self.debug_onewire_lock = self.config.FLAG_DEBUG_ONEWIRE_LOCK
-        
+        self.template_csv_header = self.config.TEMPLATE_CSV_HEADER
+
         print('origin: {} \ninfo: {}\nip:{}\n'.format(self.origin,
                                                       self.info,
                                                       self.ip))

@@ -10,7 +10,236 @@ import util
 import easy_email
 
 
-class DS():
+class All_Ds():
+    """all_ds objects from multiple bus/pin"""
+
+    def __init__(self, t4_conf):
+        self.all_ds = t4_conf.ALL_DS
+
+        self.run_all_ds(delay=t4.delay_seconds * t4.delay_minutes)
+        
+
+    def t4_header_info(self,
+                       counter=0,
+                       delay=10):
+        """t4 header info """
+        
+        temperature_str = ''
+        if t4.flag_temperature:
+            temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature())
+        
+        print('{}\ni: {} / cycle_delay: {}s{} {}'.format(
+            50 * '#',
+            counter,
+            delay,
+            temperature_str,
+            datetime.now()))
+        
+        
+    def run_all_ds(self,
+                   delay=10):
+            """filter config for active temperature sensors and measure"""
+
+            # CSV_PATH
+            util.create_dir(t4.backup_dir)
+            
+            flag_loop = True
+            i = 0
+            while flag_loop:
+                i += 1
+
+                # T4 HEADER info
+                self.t4_header_info(counter=i, delay=delay)
+        
+                # OBJECTS
+                self.record_list = []
+                for single_ds in self.all_ds:
+
+                    # SINGLE OBJECT
+                    self.run_single_ds_object(single_ds=single_ds,
+                                              delay=delay)
+
+                # DEBUG records from ALL ds_objects
+                self.show_record_list()
+        
+                # CSV
+                self.csv_data_to_file()
+
+                # ONCE or FOREVER
+                origin_result = util.origin_info(t4_obj=t4,
+                                                 delay=delay)
+        
+                flag_loop = origin_result.get('flag_loop', False)
+    
+                if origin_result.get('break', False) is True:
+                    print('break')
+                    break
+
+            
+    def run_single_ds_object(self,
+                             single_ds,
+                             delay=0):
+        """single dallas object"""
+    
+        if single_ds['FLAG'] is True:
+            pin = single_ds['DQ_PIN']
+            name = 'ds_pin_{}'.format(pin)
+                    
+            flag_lock_cycle = True
+            counter_lock_cycle = 0                
+            while flag_lock_cycle:
+                counter_lock_cycle += 1
+
+                if t4.debug_onewire_lock:
+                    print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
+
+                # ONEWIRE_LOCK
+                try:
+                    os.open('/tmp/onewire_dict.lock',  os.O_CREAT | os.O_EXCL)
+                
+                    # INHIBIT_one_wire_DS
+                    self.inhibit_set()
+
+                    if t4.debug_onewire_lock:
+                        print('        LOCK >>> start DS object')
+
+                    d = {}
+                    d[name] = Ds(pin=pin,
+                                 handler=t4.handler,
+                                 delay=delay,  # future_use
+                                 flag_csv=single_ds['FLAG_CSV'],
+                                 flag_influx=single_ds['FLAG_INFLUX'],
+                                 flag_debug_influx=single_ds['FLAG_DEBUG_INFLUX'],
+                                 measurement=single_ds['MEASUREMENT'],
+                                 machine_id=single_ds['MACHINE'])
+
+                    print('>>> OBJECT: {}\n'.format(name))
+                        
+                    # INITIAL SEARCH
+                    d[name].search_init()
+                        
+                    # SEARCH FOR ROM's via BRANCHES
+                    d[name].search(rom_counter=0, last_branch=0)
+
+                    # CHECK ROM's
+                    d[name].pin_roms = single_ds['ROMS']
+                    d[name].found_roms = [s.get('rom_hex') for s in d[name].all_sensors]
+                    check_roms_msg = '@@@ config_ROMs: {} found_ROMs: {}\n'.format(
+                        d[name].pin_roms,
+                        d[name].found_roms)
+                
+                    print(check_roms_msg)
+                        
+                    # MEASURE temperature from ALL_SENSORS and verify ROMS
+                    d[name].repeat_object_call = []
+
+                    self.measure_sensor_temperature(ds_bus=d[name])
+
+                    # REPEAT OBJECT CALL
+                    if True in d[name].repeat_object_call:
+                        repeat_object_call(ds_bus=d[name],
+                                           name=name,
+                                           check_roms_msg=check_roms_msg,
+                                           single_ds=single_ds,
+                                           delay=delay)
+                        
+                    # ONEWIRE free LOCK
+                    system('rm {}'.format(t4.onewire_lock_file))  #FILE empty
+                    flag_lock_cycle = False
+
+                except FileExistsError:
+                    print('ONEWIRE_LOCK >>> block, WAIT {}'.format(datetime.now()))                    
+
+                    sleep(t4.delay_onewire_lock)
+
+                except Exception as e:
+                    print(e)
+
+                    
+    def inhibit_set(self):
+        """inhibit call's"""
+
+        # DQ_PINS
+        dq_pin_numbers = [pin.get('DQ_PIN') for pin in self.all_ds if pin['FLAG'] is True]
+                
+        # DIO_INHIBIT
+        t4.set_dio_inhibit(pins=dq_pin_numbers,
+                           value=1)
+        # DIO_ANALOG_ENABLE
+        t4.set_dio_analog(pins=dq_pin_numbers,  # [0],
+                          value=0)  # dq_pin_numbers / DAT DO CONFIGU
+        # DIO_DIRECTION
+        t4.set_dio_direction(pins=dq_pin_numbers,
+                             value=1)
+
+
+    def measure_sensor_temperature(self,
+                                   ds_bus):
+        """measure and verify roms"""
+    
+        for single_sensor in ds_bus.all_sensors:
+            if single_sensor['rom_hex'] in ds_bus.pin_roms:
+                ds_bus.measure(sensor=single_sensor)  # + INFLUX WRITE
+                ds_bus.repeat_object_call.append(False)
+                self.record_list.append(ds_bus.record)
+            else:
+                print('ROMS {} error @@@@@ WRONG BUS @@@@@ -> repeat object call'.format(single_sensor['rom_hex']))
+                ds_bus.repeat_object_call.append(True)
+
+
+    def show_record_list(self):
+        print('\n{}'.format(t4.template_csv_header))
+        for record in self.record_list:
+            print(record)
+
+
+    def repeat_object_call(self,
+                           ds_bus,
+                           name,
+                           check_roms_msg,
+                           single_ds,
+                           delay):
+        """rom's error so repeat object call"""
+
+        # EMAIL rom WARNING
+        if ds_bus.flag_email_warning_roms:
+            print('EMAIL WARNING: rom WRONG BUS')
+
+            easy_email.send_email(
+                msg_subject=easy_email.templates['rom']['sub'].format(bus_name=name),
+                msg_body=easy_email.templates['rom']['body'].format(
+                    datetime=datetime.now(),
+                    roms_data='{}\n{}'.format(check_roms_msg,
+                                              ds_bus.all_sensors)
+                ),
+                debug=False,
+                machine='ruth + T4', # machine z CONFIGU dodelat
+                sms=False) # sms flag dodelat z CONFIGU
+        else:
+            print('EMAIL WARNING: ROM / disabled')
+
+        # LET's give parallel call time to finish and free bus/pin
+        sleep(5)
+
+        # REPEAT OBJECT CALL
+        self.run_single_ds_object(single_ds=single_ds,
+                             delay=delay)
+
+        
+    def csv_data_to_file(self):
+        """backup data to csv"""
+        
+        file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
+                                       t4.config_name)
+    
+        full_path_file_name = path.join(t4.backup_dir, file_name)
+        util.write_file(g=full_path_file_name,
+                        mode='a',
+                        data=self.record_list,
+                        debug=False)
+
+        
+class Ds():
     """
     one_wire MAXIM INTEGRATED / DALLAS temperature sensor
 
@@ -396,233 +625,9 @@ class DS():
 
         print('   + backup_influx')
         system(b_cmd)
-        
+
 
 # GLOBAL
-def t4_header_info(counter=0, delay=10):
-    temperature_str = ''
-    if t4_conf.FLAG_TEMPERATURE:
-        temperature_str = ' / temperature_device: {} Celsius'.format(t4.get_device_temperature())
-        
-    print('{}\ni: {} / cycle_delay: {}s{} {}'.format(
-        50 * '#',
-        counter,
-        delay,
-        temperature_str,
-        datetime.now()))
-        
-
-def csv_data_to_file(data):
-    file_name = '{}_{}.csv'.format(util.today_filename(datetime.now()),
-                                   t4_conf.CONFIG_NAME)
-    
-    full_path_file_name = path.join(t4.backup_dir, file_name)
-    util.write_file(g=full_path_file_name,
-                    mode='a',
-                    data=data,  # record_list
-                    debug=False)
-    
-
-def show_record_list(data):
-    print('\n{}'.format(t4_conf.TEMPLATE_CSV_HEADER))
-    for record in data:
-        print(record)
-
-
-def measure_sensor_temperature(ds_bus,
-                               record_list):
-    """measure and verify roms"""
-    
-    for single_sensor in ds_bus.all_sensors:
-        if single_sensor['rom_hex'] in ds_bus.pin_roms:
-            ds_bus.measure(sensor=single_sensor)  # + INFLUX WRITE
-            ds_bus.repeat_object_call.append(False)
-            record_list.append(ds_bus.record)
-        else:
-            print('ROMS {} error @@@@@ WRONG BUS @@@@@ -> repeat object call'.format(single_sensor['rom_hex']))
-            ds_bus.repeat_object_call.append(True)
-    
-
-def repeat_object_call(ds_bus,
-                       name,
-                       check_roms_msg,
-                       single_ds,
-                       delay,
-                       origin,
-                       record_list):
-    """rom's error so repeat object call"""
-
-    # EMAIL rom WARNING
-    if ds_bus.flag_email_warning_roms:
-        print('EMAIL WARNING: rom WRONG BUS')
-
-        easy_email.send_email(
-            msg_subject=easy_email.templates['rom']['sub'].format(bus_name=name),
-            msg_body=easy_email.templates['rom']['body'].format(
-                datetime=datetime.now(),
-                roms_data='{}\n{}'.format(check_roms_msg,
-                                          ds_bus.all_sensors)
-            ),
-            debug=False,
-            machine='ruth + T4', # machine z CONFIGU dodelat
-            sms=False) # sms flag dodelat z CONFIGU
-    else:
-        print('EMAIL WARNING: ROM / disabled')
-
-    # LET's give parallel call time to finish and free bus/pin
-    sleep(5)
-
-    # REPEAT OBJECT CALL
-    run_single_ds_object(single_ds=single_ds,
-                         delay=delay,
-                         origin=origin,
-                         record_list=record_list)
-    
-            
-def run_single_ds_object(single_ds,
-                         origin,
-                         record_list,
-                         delay=0):
-    """single dallas object"""
-    
-    if single_ds['FLAG'] is True:
-        pin = single_ds['DQ_PIN']
-        name = 'ds_pin_{}'.format(pin)
-                    
-        flag_lock_cycle = True
-        counter_lock_cycle = 0                
-        while flag_lock_cycle:
-            counter_lock_cycle += 1
-
-            if t4.debug_onewire_lock:
-                print('[{}] ONEWIRE_COUNTER'.format(counter_lock_cycle))
-
-            # ONEWIRE_LOCK
-            try:
-                os.open('/tmp/onewire_dict.lock',  os.O_CREAT | os.O_EXCL)
-                
-                # INHIBIT_one_wire_DS
-                inhibit_set()
-
-                if t4.debug_onewire_lock:
-                    print('        LOCK >>> start DS object')
-
-                d = {}
-                d[name] = DS(pin=pin,
-                             handler=t4.handler,
-                             delay=delay,  # future_use
-                             flag_csv=single_ds['FLAG_CSV'],
-                             flag_influx=single_ds['FLAG_INFLUX'],
-                             flag_debug_influx=single_ds['FLAG_DEBUG_INFLUX'],
-                             measurement=single_ds['MEASUREMENT'],
-                             machine_id=single_ds['MACHINE'])
-
-                print('>>> OBJECT: {}\n'.format(name))
-                        
-                # INITIAL SEARCH
-                d[name].search_init()
-                        
-                # SEARCH FOR ROM's via BRANCHES
-                d[name].search(rom_counter=0, last_branch=0)
-
-                # CHECK ROM's
-                d[name].pin_roms = single_ds['ROMS']
-                d[name].found_roms = [s.get('rom_hex') for s in d[name].all_sensors]
-                check_roms_msg = '@@@ config_ROMs: {} found_ROMs: {}\n'.format(
-                    d[name].pin_roms,
-                    d[name].found_roms)
-                
-                print(check_roms_msg)
-                        
-                # MEASURE temperature from ALL_SENSORS and verify ROMS
-                d[name].repeat_object_call = []
-
-                measure_sensor_temperature(ds_bus=d[name],
-                                           record_list=record_list)
-
-                # REPEAT OBJECT CALL
-                if True in d[name].repeat_object_call:
-                    repeat_object_call(ds_bus=d[name],
-                                       name=name,
-                                       check_roms_msg=check_roms_msg,
-                                       single_ds=single_ds,
-                                       delay=delay,
-                                       origin=origin,
-                                       record_list=record_list)
-                        
-                # ONEWIRE free LOCK
-                system('rm {}'.format(t4.onewire_lock_file))  #FILE empty
-                flag_lock_cycle = False
-
-            except FileExistsError:
-                print('ONEWIRE_LOCK >>> block, WAIT {}'.format(datetime.now()))                    
-
-                sleep(t4.delay_onewire_lock)
-
-            except Exception as e:
-                print(e)
-                
-
-def run_all_ds(origin, delay=10):
-    """filter config for active temperature sensors and measure"""
-
-    # CSV_PATH
-    util.create_dir(t4.backup_dir)
-            
-    flag_loop = True
-    i = 0
-    while flag_loop:
-        i += 1
-
-        # T4 HEADER info
-        t4_header_info(counter=i, delay=delay)
-        
-        # OBJECTS
-        record_list = []
-        for single_ds in t4_conf.ALL_DS:
-
-            # SINGLE OBJECT
-            run_single_ds_object(single_ds=single_ds,
-                                 delay=delay,
-                                 origin=origin,
-                                 record_list=record_list)
-
-        # DEBUG records from ALL ds_objects
-        show_record_list(data=record_list)
-        
-        # CSV
-        csv_data_to_file(data=record_list)
-
-        # ONCE or FOREVER
-        origin_result = util.origin_info(origin=origin,
-                                         t4_obj=t4,
-                                         delay=delay)
-        
-        flag_loop = origin_result.get('flag_loop', False)
-    
-        if origin_result.get('break', False) is True:
-            print('break')
-            break
-
-        
-def inhibit_set():
-    """inhibit call's"""
-
-    # DQ_PINS
-    dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4.config.ALL_DS if pin['FLAG'] is True]
-                
-    # DIO_INHIBIT
-    t4.set_dio_inhibit(pins=dq_pin_numbers,
-                       value=1)
-    # DIO_ANALOG_ENABLE
-    t4.set_dio_analog(pins=dq_pin_numbers,  # [0],
-                      value=0)  # dq_pin_numbers / DAT DO CONFIGU
-    # DIO_DIRECTION
-    t4.set_dio_direction(pins=dq_pin_numbers,
-                         value=1)
-    
-        
-
 def create_task_file(pin):
     """ts task file for cron / instead of one_wire lock"""
 
@@ -665,7 +670,6 @@ if __name__ == "__main__":
     
     # LABJACK CONNECTION
     t4 = T4(config=conf_dict['module_name'])
-    
-    # CRON once or TERMINAL/SERVICE loop
-    run_all_ds(delay=t4_conf.DELAY_SECONDS * t4_conf.DELAY_MINUTES,
-               origin=t4.origin)
+
+    # ALL DALLAS SENSORS FROM MULTIPLE BUS/PIN
+    all_ds = All_Ds(t4_conf=t4_conf)

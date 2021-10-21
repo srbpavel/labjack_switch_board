@@ -260,9 +260,9 @@ def run_all_batteries(seconds = 10, minutes = 1, origin = None):
                         debug=False)  # dat do configu
 
         #ONCE or FOREVER
-        origin_result = util.origin_info(origin,
-                                         seconds * minutes,
-                                         t4_obj = t4)
+        origin_result = util.origin_info(origin=origin,
+                                         delay=seconds * minutes,
+                                         t4_obj=t4)
         
         flag_loop = origin_result.get('flag_loop', False)
 
