@@ -72,17 +72,12 @@ class T4():
         
         self.template_csv_header = self.config.TEMPLATE_CSV_HEADER
 
+        if self.config.FLAG_LED is False:
+            self.led_off()
+        
         print('origin: {} \ninfo: {}\nip:{}\n'.format(self.origin,
                                                       self.info,
                                                       self.ip))
-
-        # LED OFF
-        # ljm.eWriteName(self.handler, 'POWER_LED', 0)
-        # ljm.eWriteName(t4.handler, 'POWER_LED', 1)
-        # ljm.eWriteName(t4.handler, 'POWER_LED', 4)
-        #
-        # ljm.eWriteName(t4.handler, 'LED_COMM', 0)
-        # ljm.eWriteName(t4.handler, 'LED_STATUS', 0)
 
         
     def close_handler(self):
@@ -92,6 +87,21 @@ class T4():
         print('handler exit')
 
 
+    def led_off(self):
+        """
+        turn off LED: comm + status
+
+        ljm.eWriteName(handler, 'POWER_LED', 0)
+        ljm.eWriteName(handler, 'POWER_LED', 1)
+        ljm.eWriteName(handler, 'POWER_LED', 4)
+        
+        ljm.eWriteName(handler, 'LED_COMM', 0)
+        ljm.eWriteName(handler, 'LED_STATUS', 0)
+        """
+
+        ljm.eWriteName(self.handler, 'POWER_LED', 0)
+        
+        
     def get_device_temperature(self):
         """read device temperature in celsius"""
 
@@ -319,20 +329,7 @@ class T4():
         ['USER_RAM0_I32', 'USER_RAM1_I32', 'USER_RAM2_I32', 'USER_RAM3_I32']
         """
 
-        # BEFORE
-        """
-        read_info = self.read_ram_n(names = names)
-        print('before[n]: {}'.format(read_info))
-        """
-        
-        # WRITE
         ljm.eWriteNames(self.handler, len(names), names, values)
-    
-        # AFTER
-        """
-        read_info = self.read_ram_n(names = names)
-        print('after[n]: {}'.format(read_info))
-        """
 
 
     def write_ram_a(self,
@@ -347,21 +344,9 @@ class T4():
         size = len(addresses)
         datatypes = [ljm.constants.INT32 for r in range(size)]
             
-        # BEFORE
-        """
-        read_info = self.read_ram_a(addresses = addresses)
-        print('before[a]: {}'.format(read_info))
-        """
-        
-        # WRITE
         ljm.eWriteAddresses(self.handler,
                             size,
                             addresses,
                             datatypes,
                             values)
-    
-        # AFTER
-        """
-        read_info = self.read_ram_a(addresses = addresses)
-        print('after[a]: {}'.format(read_info))
-        """
+
