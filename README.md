@@ -2,7 +2,7 @@
 [ *just notes to remember how i set labjack to measure and publish various data* ]
 
 * analog input: battery voltage --> *do not forget voltage divider !!!*
-* digital input: one_wire dallas temperature sensors --> *watchdog_observer for multiple pins reading (no race conditions)*
+* digital input: one_wire dallas temperature sensors --> *multiple pins reading (no race conditions)*
 * not yet - wheatstone bridge
 
 
