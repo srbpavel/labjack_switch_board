@@ -140,11 +140,11 @@ class All_Ds():
 
                     # REPEAT OBJECT CALL
                     if True in d[name].repeat_object_call:
-                        repeat_object_call(ds_bus=d[name],
-                                           name=name,
-                                           check_roms_msg=check_roms_msg,
-                                           single_ds=single_ds,
-                                           delay=delay)
+                        self.repeat_object_call(ds_bus=d[name],
+                                                name=name,
+                                                check_roms_msg=check_roms_msg,
+                                                single_ds=single_ds,
+                                                delay=delay)
                         
                     # ONEWIRE free LOCK
                     os.system('rm {}'.format(t4.onewire_lock_file))
@@ -204,6 +204,7 @@ class All_Ds():
                            delay):
         """rom's error so repeat object call"""
 
+        #delay_rom_error = 5
         # EMAIL rom WARNING
         if ds_bus.flag_email_warning_roms:
             print('EMAIL WARNING: rom WRONG BUS')
@@ -217,12 +218,12 @@ class All_Ds():
                 ),
                 debug=False,
                 machine=t4.host,
-                sms=self.flag_sms_warning_roms)
+                sms=ds_bus.flag_sms_warning_roms)
         else:
-            print('EMAIL WARNING: ROM / disabled')
+            print('EMAIL WARNING: ROM / disabled\nsleeping: {}sec'.format(t4.delay_onewire_rom_error))
 
         # LET's give parallel call time to finish and free bus/pin
-        sleep(5)
+        sleep(t4.delay_onewire_rom_error)
 
         # REPEAT OBJECT CALL
         self.run_single_ds_object(single_ds=single_ds,

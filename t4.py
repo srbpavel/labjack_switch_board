@@ -57,7 +57,8 @@ class T4():
         
         self.onewire_lock_type = self.config.ONEWIRE_LOCK_TYPE
         self.delay_onewire_lock = self.config.DELAY_ONEWIRE_LOCK
-
+        self.delay_onewire_rom_error = self.config.DELAY_ONEWIRE_ROM_ERROR
+        
         self.delay_seconds = self.config.DELAY_SECONDS
         self.delay_minutes = self.config.DELAY_MINUTES
         

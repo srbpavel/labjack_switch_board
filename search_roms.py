@@ -9,7 +9,15 @@ t4 = T4(config="t4_ds_config_pin_10")
 # DEFINE
 #dqPin = 8 # DS 1
 #dqPin = 14 # DS 2
-dqPin = 10 # DS 3
+#dqPin = 10 # DS 3
+
+all_pins = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] is True]
+
+if all_pins and len(all_pins) == 1:
+    dqPin = all_pins[0]
+else:
+    raise SystemExit("\n\nZERO OR TOO MANY DQPIN'S !!! :\n\n{}".format(t4_conf.ALL_DS))
+
 dpuPin = 0
 options = 0
 
@@ -38,7 +46,7 @@ def search_init():
         ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
         ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
     except:
-        raise SystemExit('no dallas sensor available at dqPin: {}'.format(dqPin))
+        raise SystemExit('\n\nNO DALLAS SENSOR AVAILABLE AT DQPIN: {}'.format(dqPin))
 
     sleep(1)
 
