@@ -259,7 +259,6 @@ class T4():
         bin_str = bin(array_analog_enable)
         bin_ruler = self.show_bin_ruler(bin_str=bin_str,
                                         space_count=25)
-
         print(bin_ruler)
         print(template_array.format(mb_name,
                                     bin_str,
@@ -267,7 +266,7 @@ class T4():
 
         
     def show_bin_ruler(self,
-                       new_line,
+                       new_line=None,
                        bin_str='',
                        space_count=0):
         """
