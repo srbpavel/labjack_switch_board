@@ -3,17 +3,22 @@ from t4 import T4
 from time import sleep
 
 
-t4_conf = __import__("0_t4_ds_config")
-t4 = T4(config="0_t4_ds_config")
-
-# INHIBIT
-ljm.eWriteName(t4.handler, "DIO_INHIBIT", 0xFFEFF)
-ljm.eWriteName(t4.handler, "DIO_ANALOG_ENABLE", 0x00000)
+t4_conf = __import__("t4_ds_config_pin_10")
+t4 = T4(config="t4_ds_config_pin_10")
 
 # DEFINE
-dqPin = 14  # 14 #8 
+#dqPin = 8 # DS 1
+#dqPin = 14 # DS 2
+dqPin = 10 # DS 3
 dpuPin = 0
 options = 0
+
+# INHIBIT
+#hex(0xFFFFF - (1<<dqPin))
+ljm.eWriteName(t4.handler, "DIO_INHIBIT", (0xFFFFF - (1<<dqPin)))
+ljm.eWriteName(t4.handler, "DIO_ANALOG_ENABLE", 0x00000)
+
+# SET pin
 aNames = ["ONEWIRE_DQ_DIONUM", "ONEWIRE_DPU_DIONUM", "ONEWIRE_OPTIONS"]
 aValues = [dqPin, dpuPin, options]
 print('PIN: {}'.format(dqPin))
@@ -29,8 +34,12 @@ def search_init():
     aNames = ["ONEWIRE_FUNCTION", "ONEWIRE_NUM_BYTES_TX", "ONEWIRE_NUM_BYTES_RX"]
     aValues = [function, numTX, numRX]
 
-    ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
-    ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
+    try:
+        ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
+        ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
+    except:
+        raise SystemExit('no dallas sensor available at dqPin: {}'.format(dqPin))
+
     sleep(1)
 
 

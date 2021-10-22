@@ -1,3 +1,4 @@
+#TODO: rewrite as t4_ds / prepare BATTLE_PLAN
 from labjack import ljm
 from t4 import T4
 from time import sleep

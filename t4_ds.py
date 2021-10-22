@@ -17,7 +17,7 @@ class All_Ds():
 
         self.run_all_ds(delay=t4.delay_seconds * t4.delay_minutes)
         
-
+    # muze jit to do T4
     def t4_header_info(self,
                        counter=0,
                        delay=10):
@@ -260,6 +260,10 @@ class Ds():
                  flag_debug_influx=False):
         """create ds instance as per config"""
 
+        #dostavat t4_conf jako parametr
+        #rozmyslet nektery veci individualne, ale tim padem do DICT
+        #jinak do T4 config
+        
         self.pin = pin
         self.handler = handler
         
@@ -270,11 +274,14 @@ class Ds():
         self.flag_csv = flag_csv
         self.flag_influx = flag_influx
         self.flag_debug_influx = flag_debug_influx
+
+        #jestli to nedat individualne nebo primo do T4
         self.flag_email_warning_temperature = t4_conf.FLAG_EMAIL_WARNING_TEMPERATURE
         self.flag_email_warning_roms = t4_conf.FLAG_EMAIL_WARNING_ROMS
 
         self.flag_sms_warning_temperature = t4_conf.FLAG_SMS_WARNING_TEMPERATURE
         self.flag_sms_warning_roms = t4_conf.FLAG_SMS_WARNING_ROMS
+        #_
         
         self.influx_server = t4_conf.INFLUX_SERVER
         self.influx_port = t4_conf.INFLUX_PORT
