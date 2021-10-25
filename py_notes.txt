@@ -163,3 +163,7 @@ bytes: 1 / max_size: 255 / len: 3
 bytes: 2 / max_size: 65535 / len: 5
 bytes: 3 / max_size: 16777215 / len: 8
 bytes: 4 / max_size: 4294967295 / len: 10
+
+
+#
+hex(int((8 * '1'), 2))

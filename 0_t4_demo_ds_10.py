@@ -47,6 +47,7 @@ DELAY_ONEWIRE_DS_CONVERT = 0.5 #sec
 DELAY_ONEWIRE_ROM_ERROR = 5 # sec
 
 #INFLUX
+INFLUX_SECURE = 'https'
 INFLUX_SERVER = ''
 INFLUX_PORT = ''
 INFLUX_BUCKET = '' #'battery'
@@ -79,7 +80,7 @@ TEMPLATE_CSV = '{measurement},{host},{machine},{ds_id},{ds_pin},{ds_carrier},{ds
 #TAG: host / Machine / DsId / DsPin / DsCarrier / DsValid
 #FIELD: DsDecimal
 
-TEMPLATE_CURL = 'curl -k --request POST "https://{server}:{port}/api/v2/write?org={org}&bucket={bucket}&precision={precision}" --header "Authorization: Token {token}" --data-raw "{measurement},host={host},Machine={machine_id},DsId={ds_id},DsCarrier={ds_carrier},DsValid={ds_valid},DsPin={ds_pin} DsDecimal={ds_decimal} {ts}"'
+TEMPLATE_CURL = 'curl -k --request POST "{secure}://{server}:{port}/api/v2/write?org={org}&bucket={bucket}&precision={precision}" --header "Authorization: Token {token}" --data-raw "{measurement},host={host},Machine={machine_id},DsId={ds_id},DsCarrier={ds_carrier},DsValid={ds_valid},DsPin={ds_pin} DsDecimal={ds_decimal} {ts}"'
 
 #LIST OF DICTS
 ALL_DS = [

@@ -56,6 +56,7 @@ class Battery():
         self.flag_influx = flag_influx
         self.flag_debug_influx = flag_debug_influx
 
+        self.influx_secure = t4_conf.INFLUX_SECURE
         self.influx_server = t4_conf.INFLUX_SERVER
         self.influx_port = t4_conf.INFLUX_PORT
 
@@ -74,6 +75,8 @@ class Battery():
         
         self.influx_template_curl = t4_conf.TEMPLATE_CURL
 
+        self.backup_influx = t4_conf.BACKUP_INFLUX
+        
         self.template_csv = t4_conf.TEMPLATE_CSV
         self.template_csv_header = t4_conf.TEMPLATE_CSV_HEADER
 
@@ -135,7 +138,11 @@ class Battery():
         if self.flag_influx:
             self.write_influx()
 
-        
+            if self.backup_influx.get('STATUS', False):
+                print('BACKUP influx: {}\n'.format(self.backup_influx))
+                self.write_backup_influx()
+
+                
     def write_csv(self):
         """csv backup
 
@@ -168,6 +175,7 @@ class Battery():
         """construct influx call and write data"""
 
         cmd = self.influx_template_curl.format(
+            secure = self.influx_secure,
             server = self.influx_server,
             port = self.influx_port,
 
@@ -194,6 +202,39 @@ class Battery():
 
         os.system(cmd) #test via requests
 
+        
+    def write_backup_influx(self):
+        """backup influx machine"""
+
+        b = self.backup_influx
+        
+        b_cmd = self.influx_template_curl.format(
+            secure=b['INFLUX_SECURE'],
+            server=b['INFLUX_SERVER'],
+            port=b['INFLUX_PORT'],
+            org=b['INFLUX_ORG'],
+            bucket=b['INFLUX_BUCKET'],
+            precision=b['INFLUX_PRECISION'],
+            token=b['INFLUX_TOKEN'],
+            measurement=self.influx_measurement,
+            host=self.influx_host,  # TAG: str
+            machine_id=self.influx_machine_id,  # TAG: str
+
+            bat_id = self.influx_bat_id, #TAG
+            bat_carrier = self.influx_bat_carrier, #TAG
+            bat_valid = self.influx_bat_valid, #TAG
+            bat_address = self.address, #TAG
+            bat_decimal = self.final, #FIELD
+
+            ts = self.last_measure_time_ts
+            )
+
+        if self.flag_debug_influx:
+            print('\nbackup_influx{}'.format(b_cmd.replace(self.influx_token, '...')))
+
+        print('   + backup_influx')
+        os.system(b_cmd)
+        
         
 ###GLOBAL
 def run_all_batteries(origin, seconds=10, minutes=1):

@@ -284,6 +284,7 @@ class Ds():
         self.flag_sms_warning_roms = t4_conf.FLAG_SMS_WARNING_ROMS
         #_
         
+        self.influx_secure = t4_conf.INFLUX_SECURE
         self.influx_server = t4_conf.INFLUX_SERVER
         self.influx_port = t4_conf.INFLUX_PORT
 
@@ -586,10 +587,11 @@ class Ds():
         #TAG: host / Machine / DsId / DsPin / DsCarrier / DsValid
         #FIELD: DsDecimal
         
-        TEMPLATE_CURL = 'curl -k --request POST "https://{server}:{port}/api/v2/write?org={org}&bucket={bucket}&precision={precision}" --header "Authorization: Token {token}" --data-raw "{measurement},host={host},Machine={machine_id},DsId={ds_id},DsCarrier={ds_carrier},DsValid={ds_valid},DsAddress={ds_address} DsDecimal={ds_decimal} {ts}"'
+        TEMPLATE_CURL = 'curl -k --request POST "{secure}://{server}:{port}/api/v2/write?org={org}&bucket={bucket}&precision={precision}" --header "Authorization: Token {token}" --data-raw "{measurement},host={host},Machine={machine_id},DsId={ds_id},DsCarrier={ds_carrier},DsValid={ds_valid},DsAddress={ds_address} DsDecimal={ds_decimal} {ts}"'
         """
         
         cmd = self.influx_template_curl.format(
+            secure=self.influx_secure,
             server=self.influx_server,
             port=self.influx_port,
             org=self.influx_org,
@@ -619,6 +621,7 @@ class Ds():
         b = self.backup_influx
         
         b_cmd = self.influx_template_curl.format(
+            secure=b['INFLUX_SECURE'],
             server=b['INFLUX_SERVER'],
             port=b['INFLUX_PORT'],
             org=b['INFLUX_ORG'],
@@ -635,6 +638,9 @@ class Ds():
             ds_decimal=d['temperature_decimal'],  # FIELD: float
             ts=self.last_measure_time_ts)  # timestamp [ms]
 
+        #b_cmd = b_cmd.replace('https', 'http')
+        #print('http', b_cmd)
+        
         if self.flag_debug_influx:
             print('\nbackup_influx{}'.format(b_cmd.replace(self.influx_token, '...')))
 
