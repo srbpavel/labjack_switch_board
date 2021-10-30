@@ -139,7 +139,7 @@ class Battery():
             self.write_influx()
 
             if self.backup_influx.get('STATUS', False):
-                print('BACKUP influx: {}\n'.format(self.backup_influx))
+                #print('BACKUP influx: {}\n'.format(self.backup_influx))
                 self.write_backup_influx()
 
                 

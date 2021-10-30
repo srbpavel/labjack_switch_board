@@ -179,7 +179,7 @@ class All_Ds():
     def measure_sensor_temperature(self,
                                    ds_bus):
         """measure and verify roms"""
-    
+
         for single_sensor in ds_bus.all_sensors:
             if single_sensor['rom_hex'] in ds_bus.pin_roms:
                 ds_bus.measure(sensor=single_sensor)  # + INFLUX WRITE
@@ -364,7 +364,7 @@ class Ds():
              'rom': rom,
              'rom_hex': rom_hex, 
              'pathH': pathH,
-             'pathL': pathH,
+             'pathL': pathL, #H #DO NOT setup_temp/read_bin_temp with PATH L+H !!!
              'path': path,
              'pin': self.pin})
 
@@ -386,21 +386,44 @@ class Ds():
 
         rom_counter += 1
         result_values = self.search_path()
-        branch_found = result_values[3]  # ONEWIRE_ROM_BRANCHS_FOUND_L
-    
+        #branch_found = result_values[3]  # ONEWIRE_ROM_BRANCHS_FOUND_L
+        #H
+        branch_found = (int(result_values[2]) << 8) + int(result_values[3])
+        
         if branch_found not in [0, last_branch]:
             # SET NEW BRANCH
-            self.set_onewire_path_l(branch_found)
-
+            # self.set_onewire_path_l(branch_found)
+            self.set_onewire_path_h(result_values[2]) # PATH_H
+            self.set_onewire_path_l(result_values[3]) # PATH_L
+            
             # and SEARCH AGAIN
             self.search(rom_counter=rom_counter,
                         last_branch=branch_found)
         else:
+            self.set_onewire_path_h(0)
             self.set_onewire_path_l(0)
 
 
+    def set_onewire_path_h(self, value):
+        """
+        PATH_H
+        
+        print('set branch to: {}'.format(value))
+        """
+
+        aNames = ["ONEWIRE_PATH_H"]
+        aValues = [value]
+
+        ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
+        ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
+
+
     def set_onewire_path_l(self, value):
-        """print('set branch to: {}'.format(value))"""
+        """
+        PATH_L
+
+        print('set branch to: {}'.format(value))
+        """
 
         aNames = ["ONEWIRE_PATH_L"]
         aValues = [value]
@@ -421,17 +444,17 @@ class Ds():
                   "ONEWIRE_NUM_BYTES_TX",
                   "ONEWIRE_NUM_BYTES_RX",
                   "ONEWIRE_ROM_MATCH_H",
-                  "ONEWIRE_ROM_MATCH_L",
-                  "ONEWIRE_PATH_H",
-                  "ONEWIRE_PATH_L"]
+                  "ONEWIRE_ROM_MATCH_L"]
+                  #"ONEWIRE_PATH_H",
+                  #"ONEWIRE_PATH_L"]
 
         aValues = [function,
                    numTX,
                    numRX,
                    sensor['romH'],
-                   sensor['romL'],
-                   sensor['pathH'],
-                   sensor['pathL']]
+                   sensor['romL']]
+                   #sensor['pathH'],
+                   #sensor['pathL']]
 
         ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
         ljm.eWriteNameByteArray(t4.handler, "ONEWIRE_DATA_TX", numTX, dataTX)
@@ -453,17 +476,17 @@ class Ds():
                   "ONEWIRE_NUM_BYTES_TX",
                   "ONEWIRE_NUM_BYTES_RX",
                   "ONEWIRE_ROM_MATCH_H",
-                  "ONEWIRE_ROM_MATCH_L",
-                  "ONEWIRE_PATH_H",
-                  "ONEWIRE_PATH_L"]
+                  "ONEWIRE_ROM_MATCH_L"]#,
+                  #"ONEWIRE_PATH_H",
+                  #"ONEWIRE_PATH_L"]
 
         aValues = [function,
                    numTX,
                    sensor['numRX'],
                    sensor['romH'],
-                   sensor['romL'],
-                   sensor['pathH'],
-                   sensor['pathL']]
+                   sensor['romL']]#,
+                   #sensor['pathH'],
+                   #sensor['pathL']]
         
         ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
         ljm.eWriteNameByteArray(t4.handler, "ONEWIRE_DATA_TX", numTX, dataTX)

@@ -3,8 +3,13 @@ from t4 import T4
 from time import sleep
 
 
-t4_conf = __import__("t4_ds_config_pin_10")
-t4 = T4(config="t4_ds_config_pin_10")
+#pin_config = "t4_ds_config_pin_8"
+pin_config = "t4_ds_config_pin_14"
+#pin_config = "t4_ds_config_pin_10"
+
+
+t4_conf = __import__(pin_config)
+t4 = T4(config=pin_config)
 
 # DEFINE
 #dqPin = 8 # DS 1
@@ -90,12 +95,24 @@ def search(i=0, branch=0):
         search(i=i,
                branch=result_values[3])
     else:
+        set_onewire_path_h(0)
         set_onewire_path_l(0)
         print('done')
 
 
 def set_onewire_path_l(value):
     aNames = ["ONEWIRE_PATH_L"]
+    aValues = [value]
+
+    print('set branch to: {}'.format(value))
+    
+    ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
+    ljm.eWriteName(t4.handler, "ONEWIRE_GO", 1)
+    sleep(1)
+
+
+def set_onewire_path_h(value):
+    aNames = ["ONEWIRE_PATH_H"]
     aValues = [value]
 
     print('set branch to: {}'.format(value))
