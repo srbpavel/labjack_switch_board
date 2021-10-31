@@ -687,7 +687,6 @@ if __name__ == "__main__":
         print('TASK_STATUS: {} / we measure'.format(conf_dict['task_status']))
     elif conf_dict['task_status'] == 'False':
         print('TASK_STATUS: {} / create TS file for OBSERVER'.format(conf_dict['task_status']))
-
         # DQ_PINS
         dq_pin_numbers = [pin.get('DQ_PIN') for pin in t4_conf.ALL_DS if pin['FLAG'] is True]
         
