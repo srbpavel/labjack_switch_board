@@ -169,8 +169,8 @@ class All_Ds():
         t4.set_dio_inhibit(pins=dq_pin_numbers,
                            value=1)
         # DIO_ANALOG_ENABLE
-        t4.set_dio_analog(pins=dq_pin_numbers,  # [0],
-                          value=0)  # dq_pin_numbers / DAT DO CONFIGU
+        t4.set_dio_analog(pins=dq_pin_numbers,
+                          value=0)
         # DIO_DIRECTION
         t4.set_dio_direction(pins=dq_pin_numbers,
                              value=1)
@@ -204,7 +204,6 @@ class All_Ds():
                            delay):
         """rom's error so repeat object call"""
 
-        #delay_rom_error = 5
         # EMAIL rom WARNING
         if ds_bus.flag_email_warning_roms:
             print('EMAIL WARNING: rom WRONG BUS')
@@ -222,7 +221,7 @@ class All_Ds():
         else:
             print('EMAIL WARNING: ROM / disabled\nsleeping: {}sec'.format(t4.delay_onewire_rom_error))
 
-        # LET's give parallel call time to finish and free bus/pin
+        # LET's give parallel call time to finish and free one_wire bus
         sleep(t4.delay_onewire_rom_error)
 
         # REPEAT OBJECT CALL
@@ -307,7 +306,7 @@ class Ds():
         self.template_csv = t4_conf.TEMPLATE_CSV
         self.template_csv_header = t4_conf.TEMPLATE_CSV_HEADER
 
-        self.dqPin = pin  # t4_conf.DQ_PIN = ONEWIRE_DQ_DIONUM: EIO0 -> DIO8 -> 8 / EIO6 -> DIO14 -> 14
+        self.dqPin = pin
         self.dpuPin = 0  # Not used
         self.options = 0  # bit 2 = 0 (DPU disabled), bit 3 = 0 (DPU polarity low, ignored)
 
@@ -364,7 +363,7 @@ class Ds():
              'rom': rom,
              'rom_hex': rom_hex, 
              'pathH': pathH,
-             'pathL': pathL, #H #DO NOT setup_temp/read_bin_temp with PATH L+H !!!
+             'pathL': pathL, # DO NOT use PATH L+H in setup_temp/read_bin_temp
              'path': path,
              'pin': self.pin})
 
@@ -386,13 +385,10 @@ class Ds():
 
         rom_counter += 1
         result_values = self.search_path()
-        #branch_found = result_values[3]  # ONEWIRE_ROM_BRANCHS_FOUND_L
-        #H
         branch_found = (int(result_values[2]) << 8) + int(result_values[3])
         
         if branch_found not in [0, last_branch]:
             # SET NEW BRANCH
-            # self.set_onewire_path_l(branch_found)
             self.set_onewire_path_h(result_values[2]) # PATH_H
             self.set_onewire_path_l(result_values[3]) # PATH_L
             
@@ -407,8 +403,6 @@ class Ds():
     def set_onewire_path_h(self, value):
         """
         PATH_H
-        
-        print('set branch to: {}'.format(value))
         """
 
         aNames = ["ONEWIRE_PATH_H"]
@@ -445,16 +439,12 @@ class Ds():
                   "ONEWIRE_NUM_BYTES_RX",
                   "ONEWIRE_ROM_MATCH_H",
                   "ONEWIRE_ROM_MATCH_L"]
-                  #"ONEWIRE_PATH_H",
-                  #"ONEWIRE_PATH_L"]
 
         aValues = [function,
                    numTX,
                    numRX,
                    sensor['romH'],
                    sensor['romL']]
-                   #sensor['pathH'],
-                   #sensor['pathL']]
 
         ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
         ljm.eWriteNameByteArray(t4.handler, "ONEWIRE_DATA_TX", numTX, dataTX)
@@ -476,17 +466,13 @@ class Ds():
                   "ONEWIRE_NUM_BYTES_TX",
                   "ONEWIRE_NUM_BYTES_RX",
                   "ONEWIRE_ROM_MATCH_H",
-                  "ONEWIRE_ROM_MATCH_L"]#,
-                  #"ONEWIRE_PATH_H",
-                  #"ONEWIRE_PATH_L"]
+                  "ONEWIRE_ROM_MATCH_L"]
 
         aValues = [function,
                    numTX,
                    sensor['numRX'],
                    sensor['romH'],
-                   sensor['romL']]#,
-                   #sensor['pathH'],
-                   #sensor['pathL']]
+                   sensor['romL']]
         
         ljm.eWriteNames(t4.handler, len(aNames), aNames, aValues)
         ljm.eWriteNameByteArray(t4.handler, "ONEWIRE_DATA_TX", numTX, dataTX)
@@ -528,6 +514,7 @@ class Ds():
                 # -((0xFFFF ^ 0xFFFF) + 1) * 1/16 ---> -0.0625
                 
         # EMAIL temperature WARNING
+        #
         # DEBUG
         # if sensor['dataRX'] == [255, 255, 255, 255, 255, 255, 255, 255, 255]:
         # if sensor['temperature_decimal'] > 23.0:
@@ -579,7 +566,6 @@ class Ds():
             self.write_influx(d=sensor)
 
             if self.backup_influx.get('STATUS', False):
-                # print('BACKUP influx: {}\n'.format(self.backup_influx))
                 self.write_backup_influx(d=sensor)
 
                 
@@ -661,9 +647,6 @@ class Ds():
             ds_decimal=d['temperature_decimal'],  # FIELD: float
             ts=self.last_measure_time_ts)  # timestamp [ms]
 
-        #b_cmd = b_cmd.replace('https', 'http')
-        #print('http', b_cmd)
-        
         if self.flag_debug_influx:
             print('\nbackup_influx{}'.format(b_cmd.replace(self.influx_token, '...')))
 
@@ -699,7 +682,7 @@ if __name__ == "__main__":
     conf_dict = util.prepare_config()
     t4_conf = __import__(conf_dict['module_name'])
 
-    # TASK for CRON encoder
+    # TASK for CRON observer
     if conf_dict['task_status'] == 'True':
         print('TASK_STATUS: {} / we measure'.format(conf_dict['task_status']))
     elif conf_dict['task_status'] == 'False':
