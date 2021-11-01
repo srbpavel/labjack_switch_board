@@ -7,6 +7,7 @@ from time import sleep
 from datetime import datetime
 import util
 import easy_email
+from pathlib import Path
 
 
 class All_Ds():
@@ -56,8 +57,11 @@ class All_Ds():
         
                 # OBJECTS
                 self.record_list = []
-                for single_ds in self.all_ds:
 
+                #LP
+                self.record_lp_list = []
+
+                for single_ds in self.all_ds:
                     # SINGLE OBJECT
                     self.run_single_ds_object(single_ds=single_ds,
                                               delay=delay)
@@ -185,15 +189,22 @@ class All_Ds():
                 ds_bus.measure(sensor=single_sensor)  # + INFLUX WRITE
                 ds_bus.repeat_object_call.append(False)
                 self.record_list.append(ds_bus.record)
+                #LP
+                self.record_lp_list.append(ds_bus.record_lp)
             else:
                 print('ROMS {} error @@@@@ WRONG BUS @@@@@ -> repeat object call'.format(single_sensor['rom_hex']))
                 ds_bus.repeat_object_call.append(True)
 
 
     def show_record_list(self):
-        print('\n{}'.format(t4.template_csv_header))
+        print('\nCSV:\n{}'.format(t4.template_csv_header))
         for record in self.record_list:
             print(record)
+
+        #LP
+        print('\n{}'.format('LINE_PROTOCOL:'))
+        for record_lp in self.record_lp_list:
+            print(record_lp)
 
 
     def repeat_object_call(self,
@@ -236,12 +247,23 @@ class All_Ds():
                                        t4.config_name)
     
         full_path_file_name = os.path.join(t4.backup_dir, file_name)
+
         util.write_file(g=full_path_file_name,
                         mode='a',
                         data=self.record_list,
                         debug=False)
 
+        #LP
+        lp_path = Path(full_path_file_name.replace('csv', 'lp'))
+        if lp_path.parent.exists() is False:
+            lp_path.parent.mkdir()
         
+        util.write_file(g=lp_path,
+                        mode='a',
+                        data=self.record_lp_list,
+                        debug=False)
+
+
 class Ds():
     """
     one_wire MAXIM INTEGRATED / DALLAS temperature sensor
@@ -306,6 +328,9 @@ class Ds():
         self.template_csv = t4_conf.TEMPLATE_CSV
         self.template_csv_header = t4_conf.TEMPLATE_CSV_HEADER
 
+        #LP
+        self.template_lp = t4_conf.TEMPLATE_LP
+        
         self.dqPin = pin
         self.dpuPin = 0  # Not used
         self.options = 0  # bit 2 = 0 (DPU disabled), bit 3 = 0 (DPU polarity low, ignored)
@@ -590,7 +615,18 @@ class Ds():
             ds_pin=self.dqPin,  # str(int())
             ts=self.last_measure_time_ts)  # timestamp [ms]
 
-
+        #LP
+        self.record_lp = self.template_lp.format(
+            measurement=self.influx_measurement,
+            host=self.influx_host,  # str
+            machine=self.influx_machine_id,  # str
+            ds_id=d['rom'],  # int / not hex
+            ds_carrier=self.influx_ds_carrier,  # str
+            ds_valid=self.influx_ds_valid,  # str
+            ds_decimal=d['temperature_decimal'],  # float
+            ds_pin=self.dqPin,  # str(int())
+            ts=self.last_measure_time_ts)  # timestamp [ms]
+        
     def write_influx(self, d):
         """construct influx call and write data
         #TAG: host / Machine / DsId / DsPin / DsCarrier / DsValid

@@ -21,16 +21,10 @@ class Upload_Backup():
         
         self.influx_bucket = self.config.INFLUX_BUCKET
         self.influx_write = self.config.FLAG_INFLUX_WRITE
-    
-        with open(csv_backup_file, 'r') as f:
-            self.backup_data_file=f.readlines()
 
-        print('{}\n{} records\ninflux_bucket: {}\ninflux_write: {}\n'.format(datetime.now(),
-                                                                             len(self.backup_data_file),
-                                                                             self.influx_bucket,
-                                                                             self.influx_write))
-            
+        self.backup_file = csv_backup_file
 
+        
     def import_data(self):
             """
             #HEADER
@@ -44,8 +38,16 @@ class Upload_Backup():
             ts/timestamp -> ms precision
             """
 
-            for f in self.backup_data_file:
-                measurement, host, machine_id, ds_id, ds_carrier, ds_valid, ds_pin, ds_decimal, ts=f.strip().split(',')     
+            with open(self.backup_file, 'r') as f:
+                self.backup_data=f.readlines()
+
+                print('{}\n{} records\ninflux_bucket: {}\ninflux_write: {}\n'.format(datetime.now(),
+                                                                                     len(self.backup_data),
+                                                                                     self.influx_bucket,
+                                                                                     self.influx_write))
+            
+            for single_record in self.backup_data:
+                measurement, host, machine_id, ds_id, ds_carrier, ds_valid, ds_pin, ds_decimal, ts=single_record.strip().split(',')     
 
                 cmd_run=self.config.TEMPLATE_CURL.format(
                     secure=self.config.INFLUX_SECURE,
@@ -67,7 +69,7 @@ class Upload_Backup():
                     ds_pin=ds_pin,
                     ds_decimal=ds_decimal,
 
-                    ts=ts) # 1234567890123
+                    ts=ts) # 1234567890123 / len() -> 13
 
                 if self.influx_write:
                     ooo=os.system(cmd_run)
@@ -107,15 +109,12 @@ def push_config_csv():
     upload_backup.import_data()
 
 
-def push_files(filenames, work_dir):
+def push_files(filenames):
     """upload more backup files in one go"""
 
     for single_file in filenames:
-        full_path = os.path.join(work_dir,
-                                 single_file)
-
         upload_backup = Upload_Backup(config=upload_backup_data_config,
-                                      csv_backup_file=full_path)
+                                      csv_backup_file=single_file)
 
         upload_backup.import_data()
 
@@ -128,10 +127,9 @@ if __name__ == "__main__":
     push_config_csv()
     #"""
 
-    #FILES ARE IN SAME DIR
+    #FILES ARE IN SAME DIR or full_path later
     """
-    push_files(filenames=['2021_10_26_ds_sensor_14.csv',
-                          '2021_10_27_ds_sensor_14.csv',
-                          '2021_10_28_ds_sensor_14.csv'],
-               work_dir='/home/conan/soft/labjack_switch_board/csv/')
+    push_files(filenames=['/home/conan/soft/labjack_switch_board/csv/2021_10_26_ds_sensor_14.csv',
+                          '/home/conan/soft/labjack_switch_board/csv/2021_10_27_ds_sensor_14.csv',
+                          '/home/conan/soft/labjack_switch_board/csv/2021_10_28_ds_sensor_14.csv'])
     """
