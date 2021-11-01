@@ -32,6 +32,7 @@ MACHINE:
  - [labjack/constants](https://github.com/labjack/labjack-ljm-python/blob/master/labjack/ljm/constants.py)
  - [one_wire](https://github.com/labjack/labjack-ljm-python/blob/master/Examples/More/1-Wire/1_wire.py)
  - *maxim_integrated* [DS18B20](https://www.maximintegrated.com/en/products/sensors/DS18B20.html?intcid=para) --> [pdf](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)
+ - *guide to 1-Wire communication* [guide 1_wire](https://www.maximintegrated.com/en/design/technical-documents/tutorials/1/1796.html)
 
 *two one_wire ds pins --> in through the back door when waitin for db15*
 
