@@ -1,0 +1,17 @@
+#datatype measurement,tag,tag,tag,tag,tag,tag,double,dateTime:number,double
+m,host,Machine,DsId,DsPin,DsCarrier,DsValid,DsDecimal,time
+dallas,ruth,mrazak,96928329000,14,labjack,true,19.25,1635864907924
+dallas,ruth,mrazak,910462155048,14,labjack,true,19.1875,1635864908796
+dallas,ruth,mrazak,1052176647976,14,labjack,true,19.1875,1635864909667
+dallas,ruth,mrazak,96928329000,14,labjack,true,19.375,1635865207671
+dallas,ruth,mrazak,910462155048,14,labjack,true,19.3125,1635865208546
+dallas,ruth,mrazak,1052176647976,14,labjack,true,19.3125,1635865209427
+dallas,ruth,mrazak,96928329000,14,labjack,true,19.4375,1635865507412
+dallas,ruth,mrazak,910462155048,14,labjack,true,19.3125,1635865508281
+dallas,ruth,mrazak,1052176647976,14,labjack,true,19.3125,1635865509151
+dallas,ruth,mrazak,96928329000,14,labjack,true,19.4375,1635865807123
+dallas,ruth,mrazak,910462155048,14,labjack,true,19.3125,1635865807995
+dallas,ruth,mrazak,1052176647976,14,labjack,true,19.375,1635865808866
+dallas,ruth,mrazak,96928329000,14,labjack,true,19.4375,1635866107856
+dallas,ruth,mrazak,910462155048,14,labjack,true,19.3125,1635866108729
+dallas,ruth,mrazak,1052176647976,14,labjack,true,19.375,1635866109600

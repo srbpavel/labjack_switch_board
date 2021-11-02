@@ -1,0 +1,14 @@
+#datatype measurement,tag,tag,tag,tag,tag,tag,double,dateTime:number,double
+m,host,Machine,DsId,DsPin,DsCarrier,DsValid,DsDecimal,time
+dallas,ruth,hrnecek_s_ledem,236134354984,8,labjack,true,19.375,1635865096234
+dallas,ruth,hrnecek_s_ledem,841704586024,8,labjack,true,21.0625,1635865097104
+dallas,ruth,hrnecek_s_ledem,236134354984,8,labjack,true,19.375,1635865106179
+dallas,ruth,hrnecek_s_ledem,841704586024,8,labjack,true,21.0625,1635865107052
+dallas,ruth,hrnecek_s_ledem,236134354984,8,labjack,true,19.375,1635865204611
+dallas,ruth,hrnecek_s_ledem,841704586024,8,labjack,true,21.0625,1635865205482
+dallas,ruth,hrnecek_s_ledem,236134354984,8,labjack,true,19.4375,1635865504352
+dallas,ruth,hrnecek_s_ledem,841704586024,8,labjack,true,21.125,1635865505224
+dallas,ruth,hrnecek_s_ledem,236134354984,8,labjack,true,19.5,1635865804082
+dallas,ruth,hrnecek_s_ledem,841704586024,8,labjack,true,21.1875,1635865804952
+dallas,ruth,hrnecek_s_ledem,236134354984,8,labjack,true,19.5,1635866104797
+dallas,ruth,hrnecek_s_ledem,841704586024,8,labjack,true,21.25,1635866105667
