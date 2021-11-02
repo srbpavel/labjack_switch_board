@@ -420,3 +420,5 @@ dallas,host=ruth,Machine=hrnecek_s_ledem,DsId=236134354984,DsCarrier=labjack,DsV
 dallas,host=ruth,Machine=hrnecek_s_ledem,DsId=841704586024,DsCarrier=labjack,DsValid=true,DsPin=8 DsDecimal=21.1875 1635865804952
 dallas,host=ruth,Machine=hrnecek_s_ledem,DsId=236134354984,DsCarrier=labjack,DsValid=true,DsPin=8 DsDecimal=19.5 1635866104797
 dallas,host=ruth,Machine=hrnecek_s_ledem,DsId=841704586024,DsCarrier=labjack,DsValid=true,DsPin=8 DsDecimal=21.25 1635866105667
+dallas,host=ruth,Machine=hrnecek_s_ledem,DsId=236134354984,DsCarrier=labjack,DsValid=true,DsPin=8 DsDecimal=19.5 1635866404531
+dallas,host=ruth,Machine=hrnecek_s_ledem,DsId=841704586024,DsCarrier=labjack,DsValid=true,DsPin=8 DsDecimal=21.3125 1635866405401

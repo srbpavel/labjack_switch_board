@@ -68,9 +68,20 @@ BACKUP_INFLUX = {
 
 HOST = ''
 
-TEMPLATE_CSV_HEADER = 'measurement,host,Machine,DsId,DsPin,DsCarrier,DsValid,DsDecimal,ts'
+TEMPLATE_CSV_HEADER = '''#datatype measurement,tag,tag,tag,tag,tag,tag,double,dateTime:number,double
+m,host,Machine,DsId,DsPin,DsCarrier,DsValid,DsDecimal,time'''
 TEMPLATE_CSV = '{measurement},{host},{machine},{ds_id},{ds_pin},{ds_carrier},{ds_valid},{ds_decimal},{ts}'
 #dallas,ruth,hrnecek_s_ledem,841704586024,8,labjack,true,21.125,1633248964923
+
+
+TEMPLATE_ANNOTATED_HEADER = '''#datatype measurement,tag,tag,tag,tag,tag,tag,double,dateTime:number,double
+m,host,Machine,DsId,DsPin,DsCarrier,DsValid,DsDecimal,time'''
+TEMPLATE_ANNOTATED = '{measurement},{host},{machine},{ds_id},{ds_pin},{ds_carrier},{ds_valid},{ds_decimal},{ts}'
+#dallas,ruth,hrnecek_s_ledem,236134354984,8,labjack,true,19.5625,1635859730661
+
+
+TEMPLATE_LP = '{measurement},host={host},Machine={machine},DsId={ds_id},DsCarrier={ds_carrier},DsValid={ds_valid},DsPin={ds_pin} DsDecimal={ds_decimal} {ts}'
+#dallas,host=ruth,Machine=hrnecek_s_ledem,DsId=236134354984,DsCarrier=labjack,DsValid=true,DsPin=8 DsDecimal=19.8125 1635785704041
 
 #TAG: host / Machine / DsId / DsPin / DsCarrier / DsValid
 #FIELD: DsDecimal
