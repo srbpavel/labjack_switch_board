@@ -18,7 +18,7 @@ class All_Ds():
 
         self.run_all_ds(delay=t4.delay_seconds * t4.delay_minutes)
         
-    # muze jit to do T4
+    # muze jit do T4
     def t4_header_info(self,
                        counter=0,
                        delay=10):
@@ -58,9 +58,15 @@ class All_Ds():
                 # OBJECTS
                 self.record_list = []
 
-                #LP
+                # HOTFIX: v tejdnu jak bude cas umravnit at mam configem rizeny jestli chci LP nebo ANNOTATED_CSV zalohu
+                # ted 3x verze -> plain CSV + --header / LP / ANNOTATED_CSV
+                # vsechno jde uz importovat ze zalohy bez uprav, jen CLI WRITE --format lp/csv --header 
+                # LP 
                 self.record_lp_list = []
-
+                # ANO
+                self.record_annotated_list = []
+                #_
+                
                 for single_ds in self.all_ds:
                     # SINGLE OBJECT
                     self.run_single_ds_object(single_ds=single_ds,
@@ -129,6 +135,9 @@ class All_Ds():
                     d[name].search(rom_counter=0, last_branch=0)
 
                     # CHECK ROM's
+                    #
+                    # porovnat esp32 vs labjack ROM hex id
+                    #
                     d[name].pin_roms = single_ds['ROMS']
                     d[name].found_roms = [s.get('rom_hex') for s in d[name].all_sensors]
                     check_roms_msg = '@@@ config_ROMs: {} found_ROMs: {}\n'.format(
@@ -191,13 +200,15 @@ class All_Ds():
                 self.record_list.append(ds_bus.record)
                 #LP
                 self.record_lp_list.append(ds_bus.record_lp)
+                #ANO
+                self.record_annotated_list.append(ds_bus.record_annotated)
             else:
                 print('ROMS {} error @@@@@ WRONG BUS @@@@@ -> repeat object call'.format(single_sensor['rom_hex']))
                 ds_bus.repeat_object_call.append(True)
 
 
     def show_record_list(self):
-        print('\nCSV:\n{}'.format(t4.template_csv_header))
+        print('\nCSV:'.format())
         for record in self.record_list:
             print(record)
 
@@ -205,6 +216,11 @@ class All_Ds():
         print('\n{}'.format('LINE_PROTOCOL:'))
         for record_lp in self.record_lp_list:
             print(record_lp)
+
+        #ANO
+        print('\nANNOTATED:\n{}'.format(t4.template_csv_header))
+        for record_annotated in self.record_annotated_list:
+            print(record_annotated)
 
 
     def repeat_object_call(self,
@@ -261,6 +277,22 @@ class All_Ds():
         util.write_file(g=lp_path,
                         mode='a',
                         data=self.record_lp_list,
+                        debug=False)
+
+        #ANO
+        ano_path = Path(full_path_file_name.replace('csv', 'annotated'))
+        if ano_path.parent.exists() is False:
+            ano_path.parent.mkdir()
+
+        if ano_path.exists():
+            record_plus_header = self.record_annotated_list
+        else:
+            record_plus_header = [t4.template_csv_header]
+            [record_plus_header.append(r) for r in self.record_annotated_list]
+
+        util.write_file(g=ano_path,
+                        mode='a',
+                        data=record_plus_header,
                         debug=False)
 
 
@@ -325,11 +357,16 @@ class Ds():
 
         self.backup_influx = t4_conf.BACKUP_INFLUX
         
+        #pri LP+ANO uprave t4 -> t4_ds
         self.template_csv = t4_conf.TEMPLATE_CSV
         self.template_csv_header = t4_conf.TEMPLATE_CSV_HEADER
 
         #LP
         self.template_lp = t4_conf.TEMPLATE_LP
+
+        #AN
+        self.template_annotated_header = t4_conf.TEMPLATE_ANNOTATED_HEADER
+        self.template_annotated = t4_conf.TEMPLATE_ANNOTATED
         
         self.dqPin = pin
         self.dpuPin = 0  # Not used
@@ -408,6 +445,9 @@ class Ds():
     def search(self, rom_counter=0, last_branch=0):
         """rom search loop for 0xFO"""
 
+        #DORESIT cim je ze labjack najde jen max 3x ROM oproti ESP32 kde jich mam +5 na pin
+        #MOZNA NAPETI
+        
         rom_counter += 1
         result_values = self.search_path()
         branch_found = (int(result_values[2]) << 8) + int(result_values[3])
@@ -626,6 +666,18 @@ class Ds():
             ds_decimal=d['temperature_decimal'],  # float
             ds_pin=self.dqPin,  # str(int())
             ts=self.last_measure_time_ts)  # timestamp [ms]
+
+        #ANO
+        self.record_annotated = self.template_annotated.format(
+            measurement=self.influx_measurement,
+            host=self.influx_host,  # str
+            machine=self.influx_machine_id,  # str
+            ds_id=d['rom'],  # int / not hex
+            ds_carrier=self.influx_ds_carrier,  # str
+            ds_valid=self.influx_ds_valid,  # str
+            ds_decimal=d['temperature_decimal'],  # float
+            ds_pin=self.dqPin,  # str(int())
+            ts=self.last_measure_time_ts)  # timestamp [ms]
         
     def write_influx(self, d):
         """construct influx call and write data
@@ -646,7 +698,7 @@ class Ds():
             measurement=self.influx_measurement,
             host=self.influx_host,  # TAG: str
             machine_id=self.influx_machine_id,  # TAG: str
-            ds_id=d['rom'],  # TAG: str(int()) !!! not hex as for ESP32
+            ds_id=d['rom'],  # TAG: str(int()) !!! not hex as for ESP32 
             ds_carrier=self.influx_ds_carrier,  # TAG: str
             ds_valid=self.influx_ds_valid,  # TAG: str [true/false]
             ds_pin=self.dqPin,  # TAG: str(int())

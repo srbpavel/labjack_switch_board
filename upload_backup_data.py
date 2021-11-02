@@ -5,11 +5,14 @@ import upload_backup_data_config
 
 class Upload_Backup():
     """
-    upload backup data via api -> https://docs.influxdata.com/influxdb/cloud/write-data/developer-tools/api/
+    upload backup data via api 
 
+    -> https://docs.influxdata.com/influxdb/cloud/write-data/developer-tools/api/
+    
     slow as record per command, but handy
 
-    for big data use cli_lp+csv
+
+    -> for big data use cli_lp+csv
     """
 
     def __init__(self,
