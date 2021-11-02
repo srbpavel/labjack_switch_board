@@ -284,15 +284,12 @@ class All_Ds():
         if ano_path.parent.exists() is False:
             ano_path.parent.mkdir()
 
-        if ano_path.exists():
-            record_plus_header = self.record_annotated_list
-        else:
-            record_plus_header = [t4.template_csv_header]
-            [record_plus_header.append(r) for r in self.record_annotated_list]
+        if not ano_path.exists():
+            self.record_annotated_list.insert(0, t4.template_csv_header)
 
         util.write_file(g=ano_path,
                         mode='a',
-                        data=record_plus_header,
+                        data=self.record_annotated_list,
                         debug=False)
 
 
