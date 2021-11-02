@@ -5,9 +5,11 @@ import upload_backup_data_config
 
 class Upload_Backup():
     """
-    upload backup data
+    upload backup data via api -> https://docs.influxdata.com/influxdb/cloud/write-data/developer-tools/api/
 
     slow as record per command, but handy
+
+    for big data use cli_lp+csv
     """
 
     def __init__(self,
@@ -72,7 +74,7 @@ class Upload_Backup():
                     ts=ts) # 1234567890123 / len() -> 13
 
                 if self.influx_write:
-                    ooo=os.system(cmd_run)
+                    ooo=os.system(cmd_run) # CURL
         
                 if self.debug_cmd:
                     print('{}\n'.format(cmd_run.replace(self.config.INFLUX_TOKEN,
